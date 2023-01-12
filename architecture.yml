@@ -1,0 +1,4 @@
+owner: ucphhpc
+architecture:
+  base-image:
+    latest:
