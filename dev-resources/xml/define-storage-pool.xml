@@ -1,0 +1,8 @@
+<pool type='dir'>
+  <name>virtual_machines</name>
+  <source>
+  </source>
+  <target>
+    <path>/var/sev-vm/virtual_machines</path>
+  </target>
+</pool>
