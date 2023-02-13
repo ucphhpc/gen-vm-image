@@ -1,4 +1,4 @@
 owner: ucphhpc
 architecture:
-  base-image:
-    latest:
+  sif-compute-base:
+    config: config/ks.cfg
