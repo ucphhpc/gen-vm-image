@@ -2,7 +2,7 @@ import argparse
 import os
 import yaml
 from jinja2 import Template
-from setup.io import load, write, copy
+from setup.io import load, write
 
 current_dir = os.path.abspath(os.path.dirname(__file__))
 parent_dir = os.path.dirname(current_dir)
@@ -10,6 +10,7 @@ parent_dir = os.path.dirname(current_dir)
 PACKAGE_NAME = "generate-gocd-config"
 REPO_NAME = "sif-vm-images"
 gocd_format_version = 10
+GO_REVISION_COMMIT_VAR = "GO_REVISION_SIF_VM_IMAGES"
 
 
 def get_pipelines(architectures):
@@ -148,14 +149,20 @@ if __name__ == "__main__":
             exit(-2)
 
         if "credentials" not in build_data:
-            print("Missing required parent attribute 'credentials': {}".format(build_data))
+            print(
+                "Missing required parent attribute 'credentials': {}".format(build_data)
+            )
             exit(-2)
 
         # Load and configure the kickstart template file
         kickstart_template_file = build_data.get("kickstart_file")
         kickstart_content = load(kickstart_template_file)
         if not kickstart_content:
-            print("Could not find the kickstart template file: {}".format(kickstart_template_file))
+            print(
+                "Could not find the kickstart template file: {}".format(
+                    kickstart_template_file
+                )
+            )
             exit(-3)
         kickstart_template = Template(kickstart_content)
 
@@ -190,7 +197,7 @@ if __name__ == "__main__":
                 "SRC_DIRECTORY": REPO_NAME,
                 "TEST_DIRECTORY": REPO_NAME,
                 "PUSH_DIRECTORY": "publish-docker-scripts",
-                "COMMIT_TAG": "GO_REVISION_UCPHHPC_IMAGES",
+                "COMMIT_TAG": GO_REVISION_COMMIT_VAR,
                 "ARGS": "",
             },
         }
