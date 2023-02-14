@@ -3,7 +3,5 @@ architecture:
   sif-compute-base:
     name: Rocky
     version: 9.1
-    kickstart_file: templates/ks.cfg.j2
-    iso: https://download.rockylinux.org/pub/rocky/9/isos/x86_64/Rocky-9.1-x86_64-minimal.iso
-    credentials:
-      username: rocky
+    cloud_img: https://download.rockylinux.org/pub/rocky/9/images/x86_64/Rocky-9-GenericCloud-Base.latest.x86_64.qcow2
+    size: 60G

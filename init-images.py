@@ -1,8 +1,11 @@
 import argparse
 import os
 import yaml
+import wget
 from jinja2 import Template
-from setup.io import load, write
+from setup.io import load, write, exists
+from setup.job import run
+
 
 current_dir = os.path.abspath(os.path.dirname(__file__))
 parent_dir = os.path.dirname(current_dir)
@@ -131,31 +134,35 @@ if __name__ == "__main__":
         "pipelines": {},
     }
 
+    required_attributes = [
+        "name", "version", "cloud_img", "size"
+    ]
+
     # Generate the image configuration
     for build, build_data in architecture.items():
-        if "name" not in build_data:
-            print("Missing required attribute 'name': {}".format(build_data))
-            exit(-2)
+        for attr in required_attributes:
+            if attr not in build_data:
+                print("Missing required attribute '{}': in {}".format(attr, build_data))
+                exit(-2)
 
-        if "version" not in build_data:
-            print("Missing required attribute 'version': {}".format(build_data))
-            exit(-2)
+        # Download the cloud_img
+        cloud_img_url = build_data.get("cloud_img", None)
+        cloud_img_filename = wget.detect_filename(cloud_img_url)
+        cloud_img_path = os.path.join("image", cloud_img_filename)
+        if not exists(cloud_img_path):
+            cloud_img_path = wget.download(cloud_img_url, cloud_img_path)
 
-        if "kickstart_file" not in build_data:
-            print("Missing required attribute 'kickstart_file': {}".format(build_data))
-            exit(-2)
+        # Resize the cloud image
+        img_size = build_data.get("size", None)
+        command = ["qemu-img", "resize", cloud_img_path, img_size]
+        result = run(command)
+        if result["returncode"] != 0:
+            print("Failed to resize the downloaded image: {}".format(result["stderr"]))
 
-        if "iso" not in build_data:
-            print("Missing required parent attribute 'iso': {}".format(build_data))
-            exit(-2)
+        # Setup the cloud init configuration
+        
 
-        if "credentials" not in build_data:
-            print(
-                "Missing required parent attribute 'credentials': {}".format(build_data)
-            )
-            exit(-2)
-
-        # Load and configure the kickstart template file
+        # Load and configure the cloud_img template file
         kickstart_template_file = build_data.get("kickstart_file")
         kickstart_content = load(kickstart_template_file)
         if not kickstart_content:
