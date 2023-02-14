@@ -130,3 +130,6 @@ dmypy.json
 
 # Ignore the downloaded images
 image/*
+
+# Ignore the generated seed files
+*seed.img

@@ -15,6 +15,8 @@ REPO_NAME = "sif-vm-images"
 GOCD_TEMPLATE = "bare_metal_vm_image"
 GOCD_FORMAT_VERSION = 10
 GO_REVISION_COMMIT_VAR = "GO_REVISION_SIF_VM_IMAGES"
+CLOUD_CONFIG_DIR = "cloud-init-config"
+IMAGE_DIR = "image"
 
 
 def get_pipelines(architectures):
@@ -134,9 +136,7 @@ if __name__ == "__main__":
         "pipelines": {},
     }
 
-    required_attributes = [
-        "name", "version", "cloud_img", "size"
-    ]
+    required_attributes = ["name", "version", "cloud_img", "size"]
 
     # Generate the image configuration
     for build, build_data in architecture.items():
@@ -148,74 +148,75 @@ if __name__ == "__main__":
         # Download the cloud_img
         cloud_img_url = build_data.get("cloud_img", None)
         cloud_img_filename = wget.detect_filename(cloud_img_url)
-        cloud_img_path = os.path.join("image", cloud_img_filename)
+        cloud_img_path = os.path.join(IMAGE_DIR, cloud_img_filename)
         if not exists(cloud_img_path):
             cloud_img_path = wget.download(cloud_img_url, cloud_img_path)
 
         # Resize the cloud image
         img_size = build_data.get("size", None)
-        command = ["qemu-img", "resize", cloud_img_path, img_size]
-        result = run(command)
-        if result["returncode"] != 0:
-            print("Failed to resize the downloaded image: {}".format(result["stderr"]))
-
-        # Setup the cloud init configuration
-        
-
-        # Load and configure the cloud_img template file
-        kickstart_template_file = build_data.get("kickstart_file")
-        kickstart_content = load(kickstart_template_file)
-        if not kickstart_content:
+        resize_command = ["qemu-img", "resize", cloud_img_path, img_size]
+        resize_result = run(resize_command)
+        if resize_result["returncode"] != 0:
             print(
-                "Could not find the kickstart template file: {}".format(
-                    kickstart_template_file
+                "Failed to resize the downloaded image: {}".format(
+                    resize_result["stderr"]
                 )
             )
-            exit(-3)
-        kickstart_template = Template(kickstart_content)
 
-        # Kickstart template paramaters
-        template_parameters = {}
-        build_parameters = build_data.get("parameters", None)
-        if build_parameters:
-            template_parameters.update(**build_parameters)
+        # Setup the cloud init configuration
+        # Generate a disk with user-supplied data
+        user_data_path = os.path.join(CLOUD_CONFIG_DIR, "user-data")
+        if not exists(user_data_path):
+            print(
+                "Failed to find a cloud-init user-data file at: {}".format(
+                    user_data_path
+                )
+            )
+        seed_img_path = os.path.join(CLOUD_CONFIG_DIR, "seed.img")
+        localds_command = ["cloud-localds", seed_img_path, user_data_path]
+        localds_result = run(localds_command)
+        if localds_result["returncode"] != 0:
+            print("Failed to generate cloud-localds")
 
-        # Output the formatted and paramaterized kickstart file
-        kickstart_output_content = kickstart_template.render(**template_parameters)
-        kickstart_output_file = os.path.join("config", "ks.cfg")
+        # # Load and configure the cloud_img template file
+        # kickstart_template_file = build_data.get("kickstart_file")
+        # kickstart_content = load(kickstart_template_file)
+        # if not kickstart_content:
+        #     print(
+        #         "Could not find the kickstart template file: {}".format(
+        #             kickstart_template_file
+        #         )
+        #     )
+        #     exit(-3)
 
-        # Save rendered template to a file
-        write(kickstart_output_file, kickstart_output_content)
-        print("Generated kickstart file: {}".format(kickstart_output_file))
+    # # Generate the GOCD build config
+    # for build, build_data in architecture.items():
+    #     name = build_data.get("name", None)
+    #     version = build_data.get("version", None)
+    #     materials = get_materials(name)
 
-    # Generate the GOCD build config
-    for build, build_data in architecture.items():
-        name = build_data.get("name", None)
-        version = build_data.get("version", None)
-        materials = get_materials(name)
+    #     build_version_name = "{}-{}".format(name, version)
+    #     build_pipeline = {
+    #         **common_pipeline_attributes,
+    #         "materials": materials,
+    #         "parameters": {
+    #             "IMAGE": name,
+    #             "IMAGE_PIPELINE": build_version_name,
+    #             "DEFAULT_TAG": version,
+    #             "SRC_DIRECTORY": REPO_NAME,
+    #             "TEST_DIRECTORY": REPO_NAME,
+    #             "PUSH_DIRECTORY": "publish-docker-scripts",
+    #             "COMMIT_TAG": GO_REVISION_COMMIT_VAR,
+    #             "ARGS": "",
+    #         },
+    #     }
+    #     generated_config["pipelines"][build_version_name] = build_pipeline
 
-        build_version_name = "{}-{}".format(name, version)
-        build_pipeline = {
-            **common_pipeline_attributes,
-            "materials": materials,
-            "parameters": {
-                "IMAGE": name,
-                "IMAGE_PIPELINE": build_version_name,
-                "DEFAULT_TAG": version,
-                "SRC_DIRECTORY": REPO_NAME,
-                "TEST_DIRECTORY": REPO_NAME,
-                "PUSH_DIRECTORY": "publish-docker-scripts",
-                "COMMIT_TAG": GO_REVISION_COMMIT_VAR,
-                "ARGS": "",
-            },
-        }
-        generated_config["pipelines"][build_version_name] = build_pipeline
-
-    path = os.path.join(current_dir, config_name)
-    if not write(path, generated_config, handler=yaml):
-        print("Failed to save config")
-        exit(-1)
-    print("Generated a new GOCD config in: {}".format(path))
+    # path = os.path.join(current_dir, config_name)
+    # if not write(path, generated_config, handler=yaml):
+    #     print("Failed to save config")
+    #     exit(-1)
+    # print("Generated a new GOCD config in: {}".format(path))
 
     # Update the Makefile such that it contains every image
     # image
