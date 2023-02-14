@@ -12,12 +12,10 @@ REPO_NAME = "sif-vm-images"
 gocd_format_version = 10
 
 
-def get_pipelines(images):
+def get_pipelines(architectures):
     pipelines = []
-    for image, versions in images.items():
-        for version, build_data in versions.items():
-            version_name = "{}-{}".format(image, version)
-            pipelines.append(version_name)
+    for build in architectures:
+        pipelines.append(build)
     return pipelines
 
 
@@ -64,16 +62,15 @@ def get_upstream_materials(name, pipeline, stage):
             "stage": stage,
         }
     }
-
     return upstream_materials
 
 
-def get_materials(image, upstream_pipeline=None, stage=None):
+def get_materials(name, upstream_pipeline=None, stage=None):
     materials = {}
     common_materials = get_common_materials()
     materials.update(common_materials)
     if upstream_pipeline and stage:
-        upstream_materials = get_upstream_materials(image, upstream_pipeline, stage)
+        upstream_materials = get_upstream_materials(name, upstream_pipeline, stage)
         materials.update(upstream_materials)
     return materials
 
@@ -109,17 +106,16 @@ if __name__ == "__main__":
         print("Failed to find architecture the owner in: {}".format(architecture_path))
         exit(-1)
 
-    images = architecture.get("architecture", None)
-    if not images:
+    architecture = architecture.get("architecture", None)
+    if not architecture:
         print("Failed to find the architecture in: {}".format(architecture_path))
         exit(-1)
 
-    list_images = list(images.keys())
-    num_images = len(list_images) - 1
+    list_architectures = list(architecture.keys())
+    num_builds = len(list_architectures) - 1
 
-    print()
     # Get all pipelines
-    pipelines = get_pipelines(images)
+    pipelines = get_pipelines(list_architectures)
 
     # GOCD environment
     common_environments = get_common_environment(pipelines)
@@ -134,104 +130,71 @@ if __name__ == "__main__":
     }
 
     # Generate the image configuration
-    for image, versions in images.items():
-        for version, build_data in versions.items():
-            
-            
-            parent = build_data.get("parent", None)
+    for build, build_data in architecture.items():
+        if "name" not in build_data:
+            print("Missing required attribute 'name': {}".format(build_data))
+            exit(-2)
 
-            if not parent:
-                print("Missing required parent for image: {}".format(image))
-                exit(-2)
+        if "version" not in build_data:
+            print("Missing required attribute 'version': {}".format(build_data))
+            exit(-2)
 
-            if "owner" not in parent:
-                print("Missing required parent attribute 'owner': {}".format(image))
-                exit(-2)
+        if "kickstart_file" not in build_data:
+            print("Missing required attribute 'kickstart_file': {}".format(build_data))
+            exit(-2)
 
-            if "image" not in parent:
-                print("Missing required parent attribute 'image': {}".format(image))
-                exit(-2)
+        if "iso" not in build_data:
+            print("Missing required parent attribute 'iso': {}".format(build_data))
+            exit(-2)
 
-            if "tag" not in parent:
-                print("Missing required parent attribute 'tag': {}".format(image))
-                exit(-2)
+        if "credentials" not in build_data:
+            print("Missing required parent attribute 'credentials': {}".format(build_data))
+            exit(-2)
 
-            parent_image = "{}/{}:{}".format(
-                parent["owner"], parent["image"], parent["tag"]
-            )
+        # Load and configure the kickstart template file
+        kickstart_template_file = build_data.get("kickstart_file")
+        kickstart_content = load(kickstart_template_file)
+        if not kickstart_content:
+            print("Could not find the kickstart template file: {}".format(kickstart_template_file))
+            exit(-3)
+        kickstart_template = Template(kickstart_content)
 
-            template_file = build_data.get("file", "{}/Dockerfile.j2".format(image))
-            output_file = "{}/Dockerfile.{}".format(image, version)
-            template_content = load(template_file)
-            if not template_content:
-                print("Could not find the template file: {}".format(template_file))
-                exit(-3)
+        # Kickstart template paramaters
+        template_parameters = {}
+        build_parameters = build_data.get("parameters", None)
+        if build_parameters:
+            template_parameters.update(**build_parameters)
 
-            template = Template(template_content)
-            output_content = None
-            template_parameters = {"parent": parent_image}
+        # Output the formatted and paramaterized kickstart file
+        kickstart_output_content = kickstart_template.render(**template_parameters)
+        kickstart_output_file = os.path.join("config", "ks.cfg")
 
-            extra_template_file = build_data.get("extra_template", None)
-            if extra_template_file:
-                extra_template = load(extra_template_file)
-                template_parameters["extra_template"] = extra_template
-
-                # Check for additional template files that should
-                # be copied over.
-                extra_template_files = build_data.get("extra_template_files", [])
-                target_dir = os.path.join(current_dir, image)
-                for extra_file_path in extra_template_files:
-                    extra_file_name = extra_file_path.split("/")[-1]
-                    success, msg = copy(
-                        extra_file_path, os.path.join(target_dir, extra_file_name)
-                    )
-                    if not success:
-                        print(msg)
-                        exit(-4)
-
-            build_parameters = build_data.get("parameters", None)
-            if build_parameters:
-                template_parameters.update(**build_parameters)
-
-            # Format the jinja2 template
-            output_content = template.render(**template_parameters)
-
-            # Save rendered template to a file
-            write(output_file, output_content)
-            print("Generated the file: {}".format(output_file))
+        # Save rendered template to a file
+        write(kickstart_output_file, kickstart_output_content)
+        print("Generated kickstart file: {}".format(kickstart_output_file))
 
     # Generate the GOCD build config
-    for image, versions in images.items():
-        for version, build_data in versions.items():
-            parent = build_data.get("parent", None)
-            if (
-                parent
-                and "pipeline_dependent" in parent
-                and parent["pipeline_dependent"]
-            ):
-                parent_pipeline = "{}-{}".format(parent["image"], parent["tag"])
-                materials = get_materials(
-                    image, upstream_pipeline=parent_pipeline, stage="push"
-                )
-            else:
-                materials = get_materials(image)
+    for build, build_data in architecture.items():
+        name = build_data.get("name", None)
+        version = build_data.get("version", None)
+        materials = get_materials(name)
 
-            image_version_name = "{}-{}".format(image, version)
-            image_pipeline = {
-                **common_pipeline_attributes,
-                "materials": materials,
-                "parameters": {
-                    "IMAGE": image,
-                    "IMAGE_PIPELINE": image_version_name,
-                    "DEFAULT_TAG": version,
-                    "SRC_DIRECTORY": REPO_NAME,
-                    "TEST_DIRECTORY": REPO_NAME,
-                    "PUSH_DIRECTORY": "publish-docker-scripts",
-                    "COMMIT_TAG": "GO_REVISION_UCPHHPC_IMAGES",
-                    "ARGS": "",
-                },
-            }
-            generated_config["pipelines"][image_version_name] = image_pipeline
+        build_version_name = "{}-{}".format(name, version)
+        build_pipeline = {
+            **common_pipeline_attributes,
+            "materials": materials,
+            "parameters": {
+                "IMAGE": name,
+                "IMAGE_PIPELINE": build_version_name,
+                "DEFAULT_TAG": version,
+                "SRC_DIRECTORY": REPO_NAME,
+                "TEST_DIRECTORY": REPO_NAME,
+                "PUSH_DIRECTORY": "publish-docker-scripts",
+                "COMMIT_TAG": "GO_REVISION_UCPHHPC_IMAGES",
+                "ARGS": "",
+            },
+        }
+        generated_config["pipelines"][build_version_name] = build_pipeline
 
     path = os.path.join(current_dir, config_name)
     if not write(path, generated_config, handler=yaml):

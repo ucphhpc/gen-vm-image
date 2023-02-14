@@ -1,0 +1,27 @@
+environments:
+  vm_image:
+    environment_variables: {}
+    pipelines:
+    - sif-compute-base
+format_version: 10
+pipelines:
+  Rocky-9.1:
+    display_order: -1
+    group: vm_image
+    label_template: ${COUNT}
+    lock_behaviour: none
+    materials:
+      ucphhpc_images:
+        branch: main
+        destination: sif-vm-images
+        git: https://github.com/ucphhpc/sif-vm-images.git
+    parameters:
+      ARGS: ''
+      COMMIT_TAG: GO_REVISION_UCPHHPC_IMAGES
+      DEFAULT_TAG: 9.1
+      IMAGE: Rocky
+      IMAGE_PIPELINE: Rocky-9.1
+      PUSH_DIRECTORY: publish-docker-scripts
+      SRC_DIRECTORY: sif-vm-images
+      TEST_DIRECTORY: sif-vm-images
+    template: vm_image
