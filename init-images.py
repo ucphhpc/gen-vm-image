@@ -9,7 +9,8 @@ parent_dir = os.path.dirname(current_dir)
 
 PACKAGE_NAME = "generate-gocd-config"
 REPO_NAME = "sif-vm-images"
-gocd_format_version = 10
+GOCD_TEMPLATE = "bare_metal_vm_image"
+GOCD_FORMAT_VERSION = 10
 GO_REVISION_COMMIT_VAR = "GO_REVISION_SIF_VM_IMAGES"
 
 
@@ -38,7 +39,7 @@ def get_common_pipeline():
         "label_template": "${COUNT}",
         "lock_behaviour": "none",
         "display_order": -1,
-        "template": "vm_image",
+        "template": GOCD_TEMPLATE,
     }
     return common_pipeline
 
@@ -125,7 +126,7 @@ if __name__ == "__main__":
     common_pipeline_attributes = get_common_pipeline()
 
     generated_config = {
-        "format_version": gocd_format_version,
+        "format_version": GOCD_FORMAT_VERSION,
         **common_environments,
         "pipelines": {},
     }
