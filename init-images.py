@@ -136,7 +136,10 @@ if __name__ == "__main__":
     # Generate the image configuration
     for image, versions in images.items():
         for version, build_data in versions.items():
+            
+            
             parent = build_data.get("parent", None)
+
             if not parent:
                 print("Missing required parent for image: {}".format(image))
                 exit(-2)

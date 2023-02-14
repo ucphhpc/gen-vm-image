@@ -2,3 +2,7 @@ owner: ucphhpc
 architecture:
   sif-compute-base:
     config: config/ks.cfg
+    iso: https://download.rockylinux.org/pub/rocky/9/isos/x86_64/Rocky-9.1-x86_64-minimal.iso
+    name: rocky9
+    credentials:
+      username: rocky
