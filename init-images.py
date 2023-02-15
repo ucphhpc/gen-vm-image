@@ -1,9 +1,10 @@
 import argparse
 import os
 import yaml
-import wget
-from jinja2 import Template
-from setup.io import load, write, exists
+import requests
+import shutil
+from tqdm.auto import tqdm
+from setup.io import load, exists, makedirs
 from setup.job import run
 
 
@@ -135,7 +136,6 @@ if __name__ == "__main__":
         **common_environments,
         "pipelines": {},
     }
-
     required_attributes = ["name", "version", "cloud_img", "size"]
 
     # Generate the image configuration
@@ -146,11 +146,27 @@ if __name__ == "__main__":
                 exit(-2)
 
         # Download the cloud_img
+        if not exists(IMAGE_DIR):
+            created, msg = makedirs(IMAGE_DIR)
+            if not created:
+                print(
+                    "Failed to create image directory: {} - {}".format(IMAGE_DIR, msg)
+                )
+
         cloud_img_url = build_data.get("cloud_img", None)
-        cloud_img_filename = wget.detect_filename(cloud_img_url)
+        cloud_img_filename = cloud_img_url.split("/")[-1]
         cloud_img_path = os.path.join(IMAGE_DIR, cloud_img_filename)
+        cloud_image = None
         if not exists(cloud_img_path):
-            cloud_img_path = wget.download(cloud_img_url, cloud_img_path)
+            print("Downloading image from: {}".format(cloud_img_url))
+            with requests.get(cloud_img_url, stream=True) as r:
+                # check header to get content length, in bytes
+                total_length = int(r.headers.get("Content-Length"))
+                # implement progress bar via tqdm
+                with tqdm.wrapattr(r.raw, "read", total=total_length, desc="") as raw:
+                    # Save the output
+                    with open(cloud_img_path, "wb") as output:
+                        shutil.copyfileobj(raw, output)
 
         # Resize the cloud image
         img_size = build_data.get("size", None)
