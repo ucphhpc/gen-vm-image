@@ -177,13 +177,30 @@ if __name__ == "__main__":
         if not exists(VM_DISK_DIR):
             created, msg = makedirs(VM_DISK_DIR)
             if not created:
-                print("Failed to create disk directory: {} - {}".format(VM_DISK_DIR, msg))
+                print(
+                    "Failed to create disk directory: {} - {}".format(VM_DISK_DIR, msg)
+                )
 
         vm_disk_path = os.path.join(VM_DISK_DIR, vm_name + "-disk.qcow2")
-        create_disk_command = ["qemu-img", "convert", "-f", "qcow2", "-O", "qcow2", cloud_img_path, vm_disk_path]
+        create_disk_command = [
+            "qemu-img",
+            "convert",
+            "-f",
+            "qcow2",
+            "-O",
+            "qcow2",
+            cloud_img_path,
+            vm_disk_path,
+        ]
         create_disk_result = run(create_disk_command)
         if create_disk_result["returncode"] != 0:
             print("Failed to create a VM disk: {}".format(create_disk_result["stderr"]))
+
+        # Amend to qcow2 version 3 which is required in RHEL 9
+        amend_command = ["qemu-img", "amend", "-o", "compat=v3", vm_disk_path]
+        amended_result = run(amend_command)
+        if amended_result["returncode"] != 0:
+            print("Failed to amend a VM disk: {}".format(amended_result["stderr"]))
 
         # Resize the vm disk image
         resize_command = ["qemu-img", "resize", vm_disk_path, vm_size]
@@ -195,6 +212,11 @@ if __name__ == "__main__":
                 )
             )
 
+        # Check that the vm disk is consistent
+        check_command = ["qemu-img", "check", "-f", "qcow2", vm_disk_path]
+        check_result = run(check_command)
+        if check_result["returncode"] != 0:
+            print("The check of the vm disk failed: {}".format(check_result["stderr"]))
 
         # Setup the cloud init configuration
         # Generate a disk with user-supplied data
