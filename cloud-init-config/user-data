@@ -1,3 +1,8 @@
 #cloud-config
-ssh_pwauth: True
-ssh_authorized_keys:
+system_info:
+  default_user:
+    name: rocky
+    home: /home/rocky
+    sudo: ALL=(ALL) NOPASSWD:ALL
+hostname: sif-compute-base
+ssh_pwauth: False
