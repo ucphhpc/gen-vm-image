@@ -18,6 +18,7 @@ GOCD_FORMAT_VERSION = 10
 GO_REVISION_COMMIT_VAR = "GO_REVISION_SIF_VM_IMAGES"
 CLOUD_CONFIG_DIR = "cloud-init-config"
 IMAGE_DIR = "image"
+VM_DISK_DIR = "vmdisks"
 
 
 def get_pipelines(architectures):
@@ -144,6 +145,10 @@ if __name__ == "__main__":
             if attr not in build_data:
                 print("Missing required attribute '{}': in {}".format(attr, build_data))
                 exit(-2)
+        vm_name = build_data["name"]
+        vm_version = build_data["version"]
+        vm_image = build_data["cloud_img"]
+        vm_size = build_data["size"]
 
         # Download the cloud_img
         if not exists(IMAGE_DIR):
@@ -153,7 +158,7 @@ if __name__ == "__main__":
                     "Failed to create image directory: {} - {}".format(IMAGE_DIR, msg)
                 )
 
-        cloud_img_url = build_data.get("cloud_img", None)
+        cloud_img_url = vm_image
         cloud_img_filename = cloud_img_url.split("/")[-1]
         cloud_img_path = os.path.join(IMAGE_DIR, cloud_img_filename)
         cloud_image = None
@@ -168,9 +173,20 @@ if __name__ == "__main__":
                     with open(cloud_img_path, "wb") as output:
                         shutil.copyfileobj(raw, output)
 
-        # Resize the cloud image
-        img_size = build_data.get("size", None)
-        resize_command = ["qemu-img", "resize", cloud_img_path, img_size]
+        # Create a disk for the VM
+        if not exists(VM_DISK_DIR):
+            created, msg = makedirs(VM_DISK_DIR)
+            if not created:
+                print("Failed to create disk directory: {} - {}".format(VM_DISK_DIR, msg))
+
+        vm_disk_path = os.path.join(VM_DISK_DIR, vm_name + "-disk.qcow2")
+        create_disk_command = ["qemu-img", "convert", "-f", "qcow2", "-O", "qcow2", cloud_img_path, vm_disk_path]
+        create_disk_result = run(create_disk_command)
+        if create_disk_result["returncode"] != 0:
+            print("Failed to create a VM disk: {}".format(create_disk_result["stderr"]))
+
+        # Resize the vm disk image
+        resize_command = ["qemu-img", "resize", vm_disk_path, vm_size]
         resize_result = run(resize_command)
         if resize_result["returncode"] != 0:
             print(
@@ -178,6 +194,7 @@ if __name__ == "__main__":
                     resize_result["stderr"]
                 )
             )
+
 
         # Setup the cloud init configuration
         # Generate a disk with user-supplied data

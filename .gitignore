@@ -128,8 +128,14 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
+# Ignore the vscode files
+.vscode/
+
 # Ignore the downloaded images
 image/*
+
+# Ignore the create vmdisks
+vmdisks/*
 
 # Ignore the generated seed files
 *seed.img
