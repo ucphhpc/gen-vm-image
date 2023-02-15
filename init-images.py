@@ -150,7 +150,7 @@ if __name__ == "__main__":
         vm_image = build_data["cloud_img"]
         vm_size = build_data["size"]
 
-        # Download the cloud_img
+        # Setup the image
         if not exists(IMAGE_DIR):
             created, msg = makedirs(IMAGE_DIR)
             if not created:
@@ -227,7 +227,9 @@ if __name__ == "__main__":
                     user_data_path
                 )
             )
-        seed_img_path = os.path.join(CLOUD_CONFIG_DIR, "seed.img")
+
+        # Generated the configuration image
+        seed_img_path = os.path.join(VM_DISK_DIR, "seed.img")
         localds_command = ["cloud-localds", seed_img_path, user_data_path]
         localds_result = run(localds_command)
         if localds_result["returncode"] != 0:
