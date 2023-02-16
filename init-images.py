@@ -33,7 +33,9 @@ def get_common_environment(pipelines):
     common_environment = {
         "environments": {
             GOCD_GROUP: {
-                "environment_variables": {},
+                "environment_variables": {
+                    "GIT_USER": "{{SECRET:[github][username]}}",
+                },
                 "pipelines": pipelines,
             }
         }
@@ -58,6 +60,8 @@ def get_common_materials():
             "git": "https://github.com/ucphhpc/{}.git".format(REPO_NAME),
             "branch": branch,
             "destination": REPO_NAME,
+            "username": "${GIT_USER}",
+            "password": "{{SECRET:[github][access_token]}}"
         },
         # this is the name of material
         # says about type of material and url at once

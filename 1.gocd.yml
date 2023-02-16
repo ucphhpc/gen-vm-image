@@ -1,6 +1,7 @@
 environments:
   bare_metal_vm_image:
-    environment_variables: {}
+    environment_variables:
+      GIT_USER: '{{SECRET:[github][username]}}'
     pipelines:
     - sif-compute-base
 format_version: 10
@@ -15,6 +16,8 @@ pipelines:
         branch: main
         destination: sif-vm-images
         git: https://github.com/ucphhpc/sif-vm-images.git
+        password: '{{SECRET:[github][access_token]}}'
+        username: ${GIT_USER}
     parameters:
       ARGS: ''
       COMMIT_TAG: GO_REVISION_SIF_VM_IMAGES
