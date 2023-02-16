@@ -4,7 +4,7 @@ import yaml
 import requests
 import shutil
 from tqdm.auto import tqdm
-from setup.io import load, exists, makedirs
+from setup.io import load, exists, makedirs, write
 from setup.job import run
 
 
@@ -246,34 +246,34 @@ if __name__ == "__main__":
         #     )
         #     exit(-3)
 
-    # # Generate the GOCD build config
-    # for build, build_data in architecture.items():
-    #     name = build_data.get("name", None)
-    #     version = build_data.get("version", None)
-    #     materials = get_materials(name)
+    # Generate the GOCD build config
+    for build, build_data in architecture.items():
+        name = build_data.get("name", None)
+        version = build_data.get("version", None)
+        materials = get_materials(name)
 
-    #     build_version_name = "{}-{}".format(name, version)
-    #     build_pipeline = {
-    #         **common_pipeline_attributes,
-    #         "materials": materials,
-    #         "parameters": {
-    #             "IMAGE": name,
-    #             "IMAGE_PIPELINE": build_version_name,
-    #             "DEFAULT_TAG": version,
-    #             "SRC_DIRECTORY": REPO_NAME,
-    #             "TEST_DIRECTORY": REPO_NAME,
-    #             "PUSH_DIRECTORY": "publish-docker-scripts",
-    #             "COMMIT_TAG": GO_REVISION_COMMIT_VAR,
-    #             "ARGS": "",
-    #         },
-    #     }
-    #     generated_config["pipelines"][build_version_name] = build_pipeline
+        build_version_name = "{}-{}".format(name, version)
+        build_pipeline = {
+            **common_pipeline_attributes,
+            "materials": materials,
+            "parameters": {
+                "IMAGE": name,
+                "IMAGE_PIPELINE": build_version_name,
+                "DEFAULT_TAG": version,
+                "SRC_DIRECTORY": REPO_NAME,
+                "TEST_DIRECTORY": REPO_NAME,
+                "PUSH_DIRECTORY": "publish-docker-scripts",
+                "COMMIT_TAG": GO_REVISION_COMMIT_VAR,
+                "ARGS": "",
+            },
+        }
+        generated_config["pipelines"][build_version_name] = build_pipeline
 
-    # path = os.path.join(current_dir, config_name)
-    # if not write(path, generated_config, handler=yaml):
-    #     print("Failed to save config")
-    #     exit(-1)
-    # print("Generated a new GOCD config in: {}".format(path))
+    path = os.path.join(current_dir, config_name)
+    if not write(path, generated_config, handler=yaml):
+        print("Failed to save config")
+        exit(-1)
+    print("Generated a new GOCD config in: {}".format(path))
 
     # Update the Makefile such that it contains every image
     # image
