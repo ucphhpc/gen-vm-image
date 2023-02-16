@@ -1,5 +1,5 @@
 environments:
-  vm_image:
+  bare_metal_vm_image:
     environment_variables: {}
     pipelines:
     - sif-compute-base
@@ -7,7 +7,7 @@ format_version: 10
 pipelines:
   sif-compute-base:
     display_order: -1
-    group: vm_image
+    group: bare_metal_vm_image
     label_template: ${COUNT}
     lock_behaviour: none
     materials:
