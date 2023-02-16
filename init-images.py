@@ -120,23 +120,6 @@ if __name__ == "__main__":
         print("Failed to find the architecture in: {}".format(architecture_path))
         exit(-1)
 
-    list_architectures = list(architecture.keys())
-    num_builds = len(list_architectures) - 1
-
-    # Get all pipelines
-    pipelines = get_pipelines(list_architectures)
-
-    # GOCD environment
-    common_environments = get_common_environment(pipelines)
-
-    # Common GOCD pipeline params
-    common_pipeline_attributes = get_common_pipeline()
-
-    generated_config = {
-        "format_version": GOCD_FORMAT_VERSION,
-        **common_environments,
-        "pipelines": {},
-    }
     required_attributes = ["name", "version", "cloud_img", "size"]
 
     # Generate the image configuration
@@ -246,13 +229,30 @@ if __name__ == "__main__":
         #     )
         #     exit(-3)
 
+    # GOCD file
+    list_architectures = list(architecture.keys())
+
+    # Get all pipelines
+    pipelines = get_pipelines(list_architectures)
+
+    # GOCD environment
+    common_environments = get_common_environment(pipelines)
+
+    # Common GOCD pipeline params
+    common_pipeline_attributes = get_common_pipeline()
+
+    generated_config = {
+        "format_version": GOCD_FORMAT_VERSION,
+        **common_environments,
+        "pipelines": {},
+    }
     # Generate the GOCD build config
     for build, build_data in architecture.items():
         name = build_data.get("name", None)
         version = build_data.get("version", None)
         materials = get_materials(name)
 
-        build_version_name = "{}-{}".format(name, version)
+        build_version_name = build
         build_pipeline = {
             **common_pipeline_attributes,
             "materials": materials,

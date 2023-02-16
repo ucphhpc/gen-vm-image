@@ -5,7 +5,7 @@ environments:
     - sif-compute-base
 format_version: 10
 pipelines:
-  Rocky-9.1:
+  sif-compute-base:
     display_order: -1
     group: vm_image
     label_template: ${COUNT}
@@ -20,7 +20,7 @@ pipelines:
       COMMIT_TAG: GO_REVISION_SIF_VM_IMAGES
       DEFAULT_TAG: 9.1
       IMAGE: Rocky
-      IMAGE_PIPELINE: Rocky-9.1
+      IMAGE_PIPELINE: sif-compute-base
       PUSH_DIRECTORY: publish-docker-scripts
       SRC_DIRECTORY: sif-vm-images
       TEST_DIRECTORY: sif-vm-images
