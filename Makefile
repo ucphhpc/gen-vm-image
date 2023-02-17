@@ -34,4 +34,12 @@ install-dep:
 uninstall-dep:
 	$(VENV)/pip uninstall -r requirements.txt
 
+uninstallcheck:
+	$(VENV)/pip uninstall -y -r tests/requirements.txt
+
+installcheck:
+	$(VENV)/pip install -r tests/requirements.txt
+
+check:
+
 include Makefile.venv
