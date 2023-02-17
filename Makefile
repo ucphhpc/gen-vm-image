@@ -6,10 +6,9 @@ TAG:=edge
 PACKAGE_TIMEOUT:=60
 IMAGE=sif-compute-base
 
-all: venv install-dep init
+all: venv install-dep init build
 
 init:
-	. $(VENV)/activate; python3 init-images.py
 
 clean:
 	rm -fr .env
@@ -17,7 +16,7 @@ clean:
 	rm -fr tests/__pycache__
 
 build:
-	
+	. $(VENV)/activate; python3 build-images.py
 
 maintainer-clean:
 	@echo 'This command is intended for maintainers to use; it'

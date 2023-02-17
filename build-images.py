@@ -184,7 +184,7 @@ if __name__ == "__main__":
         if create_disk_result["returncode"] != 0:
             print("Failed to create a VM disk: {}".format(create_disk_result["stderr"]))
         else:
-            print("Created VM disk image at: {}".format(vm_disk_path))
+            print("Created VM disk image at: {}".format(os.path.abspath(vm_disk_path)))
 
         # Amend to qcow2 version 3 which is required in RHEL 9
         amend_command = ["qemu-img", "amend", "-o", "compat=v3", vm_disk_path]
