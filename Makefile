@@ -9,6 +9,7 @@ IMAGE=sif-compute-base
 all: venv install-dep init build
 
 init:
+	./init/install-dependencies.sh
 
 clean:
 	rm -fr .env

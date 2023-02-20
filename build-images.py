@@ -4,8 +4,8 @@ import yaml
 import requests
 import shutil
 from tqdm.auto import tqdm
-from setup.io import load, exists, makedirs, write
-from setup.job import run
+from src.utils.io import load, exists, makedirs, write
+from src.utils.job import run
 
 
 current_dir = os.path.abspath(os.path.dirname(__file__))
@@ -208,22 +208,6 @@ if __name__ == "__main__":
         if check_result["returncode"] != 0:
             print("The check of the vm disk failed: {}".format(check_result["stderr"]))
 
-        # Setup the cloud init configuration
-        # Generate a disk with user-supplied data
-        user_data_path = os.path.join(CLOUD_CONFIG_DIR, "user-data")
-        if not exists(user_data_path):
-            print(
-                "Failed to find a cloud-init user-data file at: {}".format(
-                    user_data_path
-                )
-            )
-
-        # Generated the configuration image
-        seed_img_path = os.path.join(VM_DISK_DIR, "seed.img")
-        localds_command = ["cloud-localds", seed_img_path, user_data_path]
-        localds_result = run(localds_command)
-        if localds_result["returncode"] != 0:
-            print("Failed to generate cloud-localds")
 
         # # Load and configure the cloud_img template file
         # kickstart_template_file = build_data.get("kickstart_file")
