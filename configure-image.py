@@ -46,7 +46,7 @@ def generate_image_configuration(
     return True
 
 
-def configure_image(image, image_configuration):
+def configure_image(image, cloud_init_config_path):
     """Configures the image by booting the image with qemu to allow
     for cloud init to apply the configuration"""
 
@@ -62,7 +62,7 @@ def configure_image(image, image_configuration):
         "-hda",
         image,
         "-hdb",
-        image_configuration,
+        cloud_init_config_path,
     ]
     configure_result = run(configure_command)
     if configure_result["returncode"] != 0:
@@ -139,7 +139,7 @@ if __name__ == "__main__":
         print("Failed to generate the image configuration")
         exit(2)
 
-    configured = configure_image(image_path)
+    configured = configure_image(image_path, seed_output_path)
     if not configured:
         print("Failed to configure image: {}".format(image_path))
         exit(3)
