@@ -6,10 +6,7 @@ TAG:=edge
 PACKAGE_TIMEOUT:=60
 IMAGE=sif-compute-base
 
-all: venv install-dep init build
-
-init:
-	./init/install-dependencies.sh
+all: venv install-dep build
 
 clean:
 	rm -fr .env
@@ -31,6 +28,7 @@ install-dev:
 
 install-dep:
 	$(VENV)/pip install -r requirements.txt
+	./init/install-dependencies.sh
 
 uninstall-dep:
 	$(VENV)/pip uninstall -r requirements.txt
@@ -43,7 +41,10 @@ installcheck:
 
 check:
 
-dockercheck:
+dockercheck-clean:
+	docker rmi -f ucphhpc/sif-vm-images-tests
+
+dockercheck-build:
 # Use the docker image to test the installation
 	docker build -f tests/Dockerfile -t ucphhpc/sif-vm-images-tests .
 

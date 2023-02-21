@@ -41,7 +41,7 @@ def generate_image_configuration(
     ]
     localds_result = run(localds_command)
     if localds_result["returncode"] != 0:
-        print("Failed to generate cloud-localds")
+        print("Failed to generate cloud-localds: {}".format(localds_result))
         return False
     return True
 
@@ -66,7 +66,7 @@ def configure_image(image, cloud_init_config_path):
     ]
     configure_result = run(configure_command)
     if configure_result["returncode"] != 0:
-        print("Failed to configure image: {}".format(image))
+        print("Failed to configure image: {}".format(configure_result))
         return False
     return True
 
@@ -80,7 +80,7 @@ def reset_image(image):
     reset_command = ["virt-sysprep", "-a", image]
     reset_result = run(reset_command)
     if reset_result["returncode"] != 0:
-        print("Failed to reset image: {}".format(image))
+        print("Failed to reset image: {}".format(reset_result))
         return False
     return True
 
@@ -130,10 +130,7 @@ if __name__ == "__main__":
             exit(1)
 
     generated = generate_image_configuration(
-        user_data_path,
-        meta_data_path,
-        vendor_data_path,
-        seed_output_path
+        user_data_path, meta_data_path, vendor_data_path, seed_output_path
     )
     if not generated:
         print("Failed to generate the image configuration")
