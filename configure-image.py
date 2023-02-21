@@ -114,13 +114,13 @@ if __name__ == "__main__":
         based on the data defined in the user-data, meta-data, and vendor-data configs""",
     )
 
-    parser.parse_args()
+    args = parser.parse_args()
 
-    image_path = parser.image_path
-    user_data_path = parser.config_user_data_path
-    meta_data_path = parser.config_meta_data_path
-    vendor_data_path = parser.config_vendor_data_path
-    seed_image_path = parser.cloud_init_seed_path
+    image_path = args.image_path
+    user_data_path = args.config_user_data_path
+    meta_data_path = args.config_meta_data_path
+    vendor_data_path = args.config_vendor_data_path
+    seed_image_path = args.cloud_init_seed_path
 
     # Ensure that the cloud init seed directory exists
     if not exists(os.path.dirname(seed_image_path)):
