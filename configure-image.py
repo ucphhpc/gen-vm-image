@@ -120,17 +120,17 @@ if __name__ == "__main__":
     user_data_path = args.config_user_data_path
     meta_data_path = args.config_meta_data_path
     vendor_data_path = args.config_vendor_data_path
-    seed_image_path = args.cloud_init_seed_path
+    seed_output_path = args.config_seed_output_path
 
     # Ensure that the cloud init seed directory exists
-    if not exists(os.path.dirname(seed_image_path)):
-        created, msg = makedirs(os.path.dirname(seed_image_path))
+    if not exists(os.path.dirname(seed_output_path)):
+        created, msg = makedirs(os.path.dirname(seed_output_path))
         if not created:
             print(msg)
             exit(1)
 
     generated = generate_image_configuration(
-        image_path, user_data_path, seed_image_path
+        image_path, user_data_path, seed_output_path
     )
     if not generated:
         print("Failed to generate the image configuration")
