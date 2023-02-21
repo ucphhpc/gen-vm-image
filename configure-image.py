@@ -99,17 +99,17 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--config-meta-data-path",
-        defaults=os.path.join(CLOUD_CONFIG_DIR, "meta-data"),
+        default=os.path.join(CLOUD_CONFIG_DIR, "meta-data"),
         help="The path to the cloud-init meta-data configuration file",
     )
     parser.add_argument(
         "--config-vendor-data-path",
-        defaults=os.path.join(CLOUD_CONFIG_DIR, "vendor-data"),
+        default=os.path.join(CLOUD_CONFIG_DIR, "vendor-data"),
         help="The path to the cloud-init vendor-data configuration file",
     )
     parser.add_argument(
         "--config-seed-output-path",
-        defaults=os.path.join(IMAGE_CONFIG_DIR, "seed.img"),
+        default=os.path.join(IMAGE_CONFIG_DIR, "seed.img"),
         help="""The path to the cloud-init output seed image file that is generated
         based on the data defined in the user-data, meta-data, and vendor-data configs""",
     )
