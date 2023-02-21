@@ -43,4 +43,8 @@ installcheck:
 
 check:
 
+dockercheck:
+# Use the docker image to test the installation
+	docker build -f tests/Dockerfile -t ucphhpc/sif-vm-images-tests .
+
 include Makefile.venv
