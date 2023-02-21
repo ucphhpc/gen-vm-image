@@ -130,7 +130,10 @@ if __name__ == "__main__":
             exit(1)
 
     generated = generate_image_configuration(
-        image_path, user_data_path, seed_output_path
+        user_data_path,
+        meta_data_path,
+        vendor_data_path,
+        seed_output_path
     )
     if not generated:
         print("Failed to generate the image configuration")
