@@ -18,6 +18,7 @@ clean:
 
 build:
 	. $(VENV)/activate; python3 build-images.py
+	. $(VENV)/activate; python3 configure-image.py
 
 maintainer-clean:
 	@echo 'This command is intended for maintainers to use; it'

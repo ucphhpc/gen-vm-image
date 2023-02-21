@@ -4,22 +4,22 @@ import yaml
 import requests
 import shutil
 from tqdm.auto import tqdm
+from src.common.defaults import (
+    GOCD_GROUP,
+    GOCD_TEMPLATE,
+    REPO_NAME,
+    PACKAGE_NAME,
+    IMAGE_DIR,
+    VM_DISK_DIR,
+    GOCD_FORMAT_VERSION,
+    GO_REVISION_COMMIT_VAR,
+)
 from src.utils.io import load, exists, makedirs, write
 from src.utils.job import run
 
 
 current_dir = os.path.abspath(os.path.dirname(__file__))
 parent_dir = os.path.dirname(current_dir)
-
-PACKAGE_NAME = "generate-gocd-config"
-REPO_NAME = "sif-vm-images"
-GOCD_GROUP = "bare_metal_vm_image"
-GOCD_TEMPLATE = "bare_metal_vm_image"
-GOCD_FORMAT_VERSION = 10
-GO_REVISION_COMMIT_VAR = "GO_REVISION_SIF_VM_IMAGES"
-CLOUD_CONFIG_DIR = "cloud-init-config"
-IMAGE_DIR = "image"
-VM_DISK_DIR = "vmdisks"
 
 
 def get_pipelines(architectures):
@@ -61,7 +61,7 @@ def get_common_materials():
             "branch": branch,
             "destination": REPO_NAME,
             "username": "${GIT_USER}",
-            "password": "{{SECRET:[github][access_token]}}"
+            "password": "{{SECRET:[github][access_token]}}",
         },
         # this is the name of material
         # says about type of material and url at once
@@ -207,7 +207,6 @@ if __name__ == "__main__":
         check_result = run(check_command)
         if check_result["returncode"] != 0:
             print("The check of the vm disk failed: {}".format(check_result["stderr"]))
-
 
         # # Load and configure the cloud_img template file
         # kickstart_template_file = build_data.get("kickstart_file")
