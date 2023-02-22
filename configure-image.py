@@ -1,6 +1,6 @@
 import argparse
 import os
-from src.common.defaults import CLOUD_CONFIG_DIR, IMAGE_CONFIG_DIR
+from src.common.defaults import CLOUD_CONFIG_DIR, IMAGE_CONFIG_DIR, IMAGE_DIR
 from src.utils.job import run
 from src.utils.io import exists, makedirs
 
@@ -46,7 +46,7 @@ def generate_image_configuration(
     return True
 
 
-def configure_image(image, cloud_init_config_path):
+def configure_image(image, configuration_path):
     """Configures the image by booting the image with qemu to allow
     for cloud init to apply the configuration"""
 
@@ -62,7 +62,7 @@ def configure_image(image, cloud_init_config_path):
         "-hda",
         image,
         "-hdb",
-        cloud_init_config_path,
+        configuration_path,
     ]
     configure_result = run(configure_command)
     if configure_result["returncode"] != 0:
@@ -88,8 +88,8 @@ def reset_image(image):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(prog=SCRIPT_NAME)
     parser.add_argument(
-        "--image-path",
-        default="vmdisks/image.qcow2",
+        "--image-input-path",
+        default=os.path.join(IMAGE_DIR, "image.qcow2"),
         help="The path to the image that is to be configured",
     )
     parser.add_argument(
@@ -116,18 +116,22 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    image_path = args.image_path
+    image_path = args.image_input_path
     user_data_path = args.config_user_data_path
     meta_data_path = args.config_meta_data_path
     vendor_data_path = args.config_vendor_data_path
     seed_output_path = args.config_seed_output_path
 
-    # Ensure that the cloud init seed directory exists
-    if not exists(os.path.dirname(seed_output_path)):
-        created, msg = makedirs(os.path.dirname(seed_output_path))
-        if not created:
-            print(msg)
-            exit(1)
+    # Ensure that the required output directories exists
+    image_output_dir = os.path.dirname(image_path)
+    image_config_dir = os.path.dirname(seed_output_path)
+
+    for d in [image_output_dir, image_config_dir]:
+        if not exists(IMAGE_CONFIG_DIR):
+            created, msg = makedirs(IMAGE_CONFIG_DIR)
+            if not created:
+                print(msg)
+                exit(1)
 
     generated = generate_image_configuration(
         user_data_path, meta_data_path, vendor_data_path, seed_output_path

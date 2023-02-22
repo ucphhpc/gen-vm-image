@@ -137,5 +137,8 @@ image/*
 # Ignore the create vmdisks
 vmdisks/*
 
+# Ignore the tmp directory
+tmp/*
+
 # Ignore the generated seed files
 *seed.img

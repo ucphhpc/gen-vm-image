@@ -5,8 +5,9 @@ OWNER:=ucphhpc
 TAG:=edge
 PACKAGE_TIMEOUT:=60
 IMAGE=sif-compute-base
+IMAGE_PATH=image/$(IMAGE).qcow2
 
-all: venv install-dep build
+all: venv install-dep build configure
 
 clean:
 	rm -fr .env
@@ -14,8 +15,10 @@ clean:
 	rm -fr tests/__pycache__
 
 build:
-	. $(VENV)/activate; python3 build-images.py
-	. $(VENV)/activate; python3 configure-image.py
+	. $(VENV)/activate; python3 build-images.py --image-output-path $(IMAGE_PATH)
+
+configure:
+	. $(VENV)/activate; python3 configure-image.py --image-input-path $(IMAGE_PATH)
 
 maintainer-clean:
 	@echo 'This command is intended for maintainers to use; it'

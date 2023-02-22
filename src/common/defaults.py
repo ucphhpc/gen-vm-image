@@ -6,5 +6,6 @@ GOCD_FORMAT_VERSION = 10
 GO_REVISION_COMMIT_VAR = "GO_REVISION_SIF_VM_IMAGES"
 CLOUD_CONFIG_DIR = "cloud-init-config"
 IMAGE_CONFIG_DIR = "image-config"
-IMAGE_DIR = "image"
+IMAGE_DIR = "images"
 VM_DISK_DIR = "vmdisks"
+TMP_DIR = "tmp"

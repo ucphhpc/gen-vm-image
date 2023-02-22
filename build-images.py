@@ -10,7 +10,7 @@ from src.common.defaults import (
     REPO_NAME,
     PACKAGE_NAME,
     IMAGE_DIR,
-    VM_DISK_DIR,
+    TMP_DIR,
     GOCD_FORMAT_VERSION,
     GO_REVISION_COMMIT_VAR,
 )
@@ -105,12 +105,21 @@ if __name__ == "__main__":
     parser.add_argument(
         "--makefile", default="Makefile", help="The makefile that defines the images"
     )
+    parser.add_argument(
+        "--image-output-path",
+        default=os.path.join(IMAGE_DIR, "image.qcow2"),
+        help="The output path of the built image",
+    )
     args = parser.parse_args()
 
     architecture_name = args.architecture_name
     config_name = args.config_name
     branch = args.branch
     makefile = args.makefile
+    image_output_path = args.image_output_path
+
+    image_output_dir = os.path.dirname(image_output_path)
+    temporary_image_dir = TMP_DIR
 
     # Load the architecture file
     architecture_path = os.path.join(current_dir, architecture_name)
@@ -138,17 +147,22 @@ if __name__ == "__main__":
         vm_image = build_data["cloud_img"]
         vm_size = build_data["size"]
 
-        # Setup the image
-        if not exists(IMAGE_DIR):
-            created, msg = makedirs(IMAGE_DIR)
+        # Prepare the temporary directory
+        # where the image will be prepared
+        if not exists(temporary_image_dir):
+            created, msg = makedirs(temporary_image_dir)
             if not created:
                 print(
-                    "Failed to create image directory: {} - {}".format(IMAGE_DIR, msg)
+                    "Failed to create temporary image directory: {} - {}".format(
+                        temporary_image_dir, msg
+                    )
                 )
 
+        # Download the image and save it into
+        # a tmp directory
         cloud_img_url = vm_image
         cloud_img_filename = cloud_img_url.split("/")[-1]
-        cloud_img_path = os.path.join(IMAGE_DIR, cloud_img_filename)
+        cloud_img_path = os.path.join(temporary_image_dir, cloud_img_filename)
         cloud_image = None
         if not exists(cloud_img_path):
             print("Downloading image from: {}".format(cloud_img_url))
@@ -161,15 +175,16 @@ if __name__ == "__main__":
                     with open(cloud_img_path, "wb") as output:
                         shutil.copyfileobj(raw, output)
 
-        # Create a disk for the VM
-        if not exists(VM_DISK_DIR):
-            created, msg = makedirs(VM_DISK_DIR)
+        # Create an image based on the downloaded image
+        if not exists(image_output_dir):
+            created, msg = makedirs(image_output_dir)
             if not created:
                 print(
-                    "Failed to create disk directory: {} - {}".format(VM_DISK_DIR, msg)
+                    "Failed to create disk directory: {} - {}".format(
+                        image_output_dir, msg
+                    )
                 )
 
-        vm_disk_path = os.path.join(VM_DISK_DIR, vm_name + "-disk.qcow2")
         create_disk_command = [
             "qemu-img",
             "convert",
@@ -178,22 +193,26 @@ if __name__ == "__main__":
             "-O",
             "qcow2",
             cloud_img_path,
-            vm_disk_path,
+            image_output_path,
         ]
         create_disk_result = run(create_disk_command)
         if create_disk_result["returncode"] != 0:
             print("Failed to create a VM disk: {}".format(create_disk_result["stderr"]))
         else:
-            print("Created VM disk image at: {}".format(os.path.abspath(vm_disk_path)))
+            print(
+                "Created VM disk image at: {}".format(
+                    os.path.abspath(image_output_path)
+                )
+            )
 
         # Amend to qcow2 version 3 which is required in RHEL 9
-        amend_command = ["qemu-img", "amend", "-o", "compat=v3", vm_disk_path]
+        amend_command = ["qemu-img", "amend", "-o", "compat=v3", image_output_path]
         amended_result = run(amend_command)
         if amended_result["returncode"] != 0:
             print("Failed to amend a VM disk: {}".format(amended_result["stderr"]))
 
         # Resize the vm disk image
-        resize_command = ["qemu-img", "resize", vm_disk_path, vm_size]
+        resize_command = ["qemu-img", "resize", image_output_path, vm_size]
         resize_result = run(resize_command)
         if resize_result["returncode"] != 0:
             print(
@@ -203,7 +222,7 @@ if __name__ == "__main__":
             )
 
         # Check that the vm disk is consistent
-        check_command = ["qemu-img", "check", "-f", "qcow2", vm_disk_path]
+        check_command = ["qemu-img", "check", "-f", "qcow2", image_output_path]
         check_result = run(check_command)
         if check_result["returncode"] != 0:
             print("The check of the vm disk failed: {}".format(check_result["stderr"]))
