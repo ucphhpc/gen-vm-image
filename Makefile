@@ -7,7 +7,7 @@ PACKAGE_TIMEOUT:=60
 IMAGE=sif-compute-base
 IMAGE_PATH=image/$(IMAGE).qcow2
 
-all: venv install-dep build configure
+all: venv build configure
 
 clean:
 	rm -fr .env
@@ -31,7 +31,6 @@ install-dev:
 
 install-dep:
 	$(VENV)/pip install -r requirements.txt
-	./init/install-dependencies.sh
 
 uninstall-dep:
 	$(VENV)/pip uninstall -r requirements.txt

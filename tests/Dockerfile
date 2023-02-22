@@ -7,6 +7,9 @@ WORKDIR /app
 RUN dnf install -y \
     make
 
+# Install the dependencies
+RUN tests/install-dependencies.sh
+
 ## Prepare the build
 # Refresh the venv inside the directory
 # to ensure that the venv links to python
