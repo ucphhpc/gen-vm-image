@@ -59,6 +59,10 @@ def configure_image(image, configuration_path, cpu_model="host"):
         "-m",
         "2048",
         "-nographic",
+# https://unix.stackexchange.com/questions/426652/connect-to-running-qemu-instance-with-qemu-monitor
+# Allow the qemu instance to be shutdown via a a ``
+        "-monitor",
+        "unix:qemu-monitor-socket,server,nowait",
         "-hda",
         image,
         "-hdb",
