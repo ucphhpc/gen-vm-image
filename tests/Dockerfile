@@ -15,9 +15,8 @@ RUN tests/install-dependencies.sh
 # to ensure that the venv links to python
 # reflect the inside of the container and not the host
 RUN make maintainer-clean
-
 RUN make
-# Install the check
 RUN make installcheck
+
 # Run the tests
-RUN make check
+CMD ["make", "check"]

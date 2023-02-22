@@ -46,7 +46,7 @@ def generate_image_configuration(
     return True
 
 
-def configure_image(image, configuration_path):
+def configure_image(image, configuration_path, cpu_model="host"):
     """Configures the image by booting the image with qemu to allow
     for cloud init to apply the configuration"""
 
@@ -55,7 +55,7 @@ def configure_image(image, configuration_path):
         "-name",
         "vm",
         "-cpu",
-        "IvyBridge",
+        cpu_model,
         "-m",
         "2048",
         "-nographic",
@@ -113,6 +113,11 @@ if __name__ == "__main__":
         help="""The path to the cloud-init output seed image file that is generated
         based on the data defined in the user-data, meta-data, and vendor-data configs""",
     )
+    parser.add_argument(
+        "--qemu-cpu-model",
+        default="host",
+        help="The default cpu model for configuring the image"
+    )
 
     args = parser.parse_args()
 
@@ -121,6 +126,7 @@ if __name__ == "__main__":
     meta_data_path = args.config_meta_data_path
     vendor_data_path = args.config_vendor_data_path
     seed_output_path = args.config_seed_output_path
+    qemu_cpu_model = args.qemu_cpu_model
 
     # Ensure that the required output directories exists
     image_output_dir = os.path.dirname(image_path)
@@ -140,7 +146,7 @@ if __name__ == "__main__":
         print("Failed to generate the image configuration")
         exit(2)
 
-    configured = configure_image(image_path, seed_output_path)
+    configured = configure_image(image_path, seed_output_path, cpu_model=qemu_cpu_model)
     if not configured:
         print("Failed to configure image: {}".format(image_path))
         exit(3)
