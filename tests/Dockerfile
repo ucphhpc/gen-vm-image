@@ -21,6 +21,7 @@ WORKDIR /app
 ADD Makefile /app/
 ADD Makefile.venv /app/
 ADD src /app/src
+ADD cloud-init-config /app/cloud-init-config
 ADD requirements.txt /app/
 ADD architecture.yml /app/
 ADD build-images.py /app/
