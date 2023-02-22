@@ -6,6 +6,7 @@ TAG:=edge
 PACKAGE_TIMEOUT:=60
 IMAGE=sif-compute-base
 IMAGE_PATH=image/$(IMAGE).qcow2
+QEMU_CPU_MODEL=kvm64
 
 all: venv install-dep build configure
 
@@ -18,7 +19,7 @@ build:
 	. $(VENV)/activate; python3 build-images.py --image-output-path $(IMAGE_PATH)
 
 configure:
-	. $(VENV)/activate; python3 configure-image.py --image-input-path $(IMAGE_PATH)
+	. $(VENV)/activate; python3 configure-image.py --image-input-path $(IMAGE_PATH) --qemu-cpu-model $(QEMU_CPU_MODEL)
 
 maintainer-clean:
 	@echo 'This command is intended for maintainers to use; it'

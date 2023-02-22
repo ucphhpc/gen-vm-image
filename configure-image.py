@@ -116,7 +116,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--qemu-cpu-model",
         default="host",
-        help="The default cpu model for configuring the image"
+        help="The default cpu model for configuring the image",
     )
 
     args = parser.parse_args()
