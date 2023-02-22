@@ -6,7 +6,8 @@ TAG:=edge
 PACKAGE_TIMEOUT:=60
 IMAGE=sif-compute-base
 IMAGE_PATH=image/$(IMAGE).qcow2
-QEMU_CPU_MODEL=kvm64
+# https://qemu-project.gitlab.io/qemu/system/qemu-cpu-models.html
+QEMU_CPU_MODEL=IvyBridge
 
 all: venv install-dep build configure
 
