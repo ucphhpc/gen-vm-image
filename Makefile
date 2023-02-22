@@ -7,7 +7,7 @@ PACKAGE_TIMEOUT:=60
 IMAGE=sif-compute-base
 IMAGE_PATH=image/$(IMAGE).qcow2
 
-all: venv build configure
+all: venv install-dep build configure
 
 clean:
 	rm -fr .env
