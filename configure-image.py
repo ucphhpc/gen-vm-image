@@ -50,6 +50,10 @@ def configure_image(image, configuration_path, cpu_model="host"):
     """Configures the image by booting the image with qemu to allow
     for cloud init to apply the configuration"""
 
+    # TODO, use multiprocessing to launch this configure the image
+    # TODO, setup a script that echos a message that the configuration is
+    # completed that another process will pickup to connect to the
+    # qemu-monitor-socket to shutdonw the emulated machine.
     configure_command = [
         "qemu-kvm",
         "-name",
