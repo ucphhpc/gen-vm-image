@@ -1,7 +1,9 @@
 import argparse
 import os
+import subprocess
+import multiprocessing as mp
 from src.common.defaults import CLOUD_CONFIG_DIR, IMAGE_CONFIG_DIR, IMAGE_DIR
-from src.utils.job import run
+from src.utils.job import run, run_popen
 from src.utils.io import exists, makedirs
 
 SCRIPT_NAME = __file__
@@ -46,14 +48,8 @@ def generate_image_configuration(
     return True
 
 
-def configure_image(image, configuration_path, cpu_model="host"):
-    """Configures the image by booting the image with qemu to allow
-    for cloud init to apply the configuration"""
-
-    # TODO, use multiprocessing to launch this configure the image
-    # TODO, setup a script that echos a message that the configuration is
-    # completed that another process will pickup to connect to the
-    # qemu-monitor-socket to shutdonw the emulated machine.
+def configure_vm(image, configuration_path, cpu_model, output_queue):
+    """This launches a subprocess that configures the VM image on boot."""
     configure_command = [
         "qemu-kvm",
         "-name",
@@ -63,8 +59,8 @@ def configure_image(image, configuration_path, cpu_model="host"):
         "-m",
         "2048",
         "-nographic",
-# https://unix.stackexchange.com/questions/426652/connect-to-running-qemu-instance-with-qemu-monitor
-# Allow the qemu instance to be shutdown via a a ``
+        # https://unix.stackexchange.com/questions/426652/connect-to-running-qemu-instance-with-qemu-monitor
+        # Allow the qemu instance to be shutdown via a socket signal
         "-monitor",
         "unix:qemu-monitor-socket,server,nowait",
         "-hda",
@@ -72,10 +68,62 @@ def configure_image(image, configuration_path, cpu_model="host"):
         "-hdb",
         configuration_path,
     ]
-    configure_result = run(configure_command)
-    if configure_result["returncode"] != 0:
-        print("Failed to configure image: {}".format(configure_result))
-        return False
+    configuring_results = (
+        run_popen(configure_command, stdout=subprocess.PIPE, universal_newlines=True),
+    )
+    for line in iter(configuring_results.stdout.readline, ""):
+        output_queue.put(line)
+    configuring_results.stdout.close()
+    return_code = configuring_results.wait()
+    if return_code:
+        raise subprocess.CalledProcessError(return_code, configure_command)
+    return True
+
+
+def shutdown_vm(q):
+    value = q.get()
+    # [  518.433552] cloud-init[1188]: Cloud-init v. 22.1-5.el9.0.1 finished at Fri, 10 Mar 2023 06:55:05 +0000. Datasource DataSourceNoCloud [seed=/dev/sdb][dsmode=net].  Up 517.94 seconds
+    if "Cloud-init" in value and "finished at" in value:
+        print("Found finish message: {}".format(value))
+        shutdown_cmd = [
+            "echo",
+            "system_powerdown",
+            "|",
+            "socat",
+            "-",
+            "unix-connect:/var/lib/go-agent/pipelines/sif-compute-base/sif-vm-images/qemu-monitor-socket",
+        ]
+        shutdown_result = run(shutdown_cmd)
+    if shutdown_result["returncode"] != 0:
+        raise subprocess.CalledProcessError(
+            "Failed to shutdown the configured VM: {}".format(shutdown_result),
+            shutdown_cmd,
+        )
+
+
+def configure_image(image, configuration_path, cpu_model="host"):
+    """Configures the image by booting the image with qemu to allow
+    for cloud init to apply the configuration"""
+
+    queue = mp.Queue()
+    configuring_vm = mp.Process(
+        target=configure_vm,
+        args=(
+            image,
+            configuration_path,
+            cpu_model,
+            queue,
+        ),
+    )
+    shutdowing_vm = mp.Process(target=shutdown_vm, args=(queue,))
+
+    # Start the sub processes
+    configuring_vm.start()
+    shutdowing_vm.start()
+
+    # Wait for them to finish
+    shutdowing_vm.join()
+    configuring_vm.join()
     return True
 
 
