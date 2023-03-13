@@ -68,8 +68,8 @@ def configure_vm(image, configuration_path, cpu_model, output_queue):
         "-hdb",
         configuration_path,
     ]
-    configuring_results = (
-        run_popen(configure_command, stdout=subprocess.PIPE, universal_newlines=True),
+    configuring_results = run_popen(
+        configure_command, stdout=subprocess.PIPE, universal_newlines=True
     )
     for line in iter(configuring_results["stdout"].readline, ""):
         output_queue.put(line)
