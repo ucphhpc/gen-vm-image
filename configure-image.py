@@ -80,10 +80,10 @@ def configure_vm(image, configuration_path, cpu_model, output_queue):
     return True
 
 
-def shutdown_vm(q):
+def shutdown_vm(input_queue):
     stopped = False
     while not stopped:
-        value = q.get()
+        value = input_queue.get()
         # [  518.433552] cloud-init[1188]: Cloud-init v. 22.1-5.el9.0.1 finished at Fri, 10 Mar 2023 06:55:05 +0000. Datasource DataSourceNoCloud [seed=/dev/sdb][dsmode=net].  Up 517.94 seconds
         if "Cloud-init" in value and "finished at" in value:
             print("Found finish message: {}".format(value))
