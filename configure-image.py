@@ -48,7 +48,7 @@ def generate_image_configuration(
     return True
 
 
-def configure_vm(image, configuration_path, cpu_model, output_queue):
+def configure_vm(image, configuration_path, qemu_socket_path, cpu_model, output_queue):
     """This launches a subprocess that configures the VM image on boot."""
     configure_command = [
         "qemu-kvm",
@@ -62,7 +62,7 @@ def configure_vm(image, configuration_path, cpu_model, output_queue):
         # https://unix.stackexchange.com/questions/426652/connect-to-running-qemu-instance-with-qemu-monitor
         # Allow the qemu instance to be shutdown via a socket signal
         "-monitor",
-        "unix:qemu-monitor-socket,server,nowait",
+        "unix:{},server,nowait".format(qemu_socket_path),
         "-hda",
         image,
         "-hdb",
@@ -80,12 +80,11 @@ def configure_vm(image, configuration_path, cpu_model, output_queue):
     return True
 
 
-def shutdown_vm(input_queue):
+def shutdown_vm(input_queue, qemu_socket_path):
     stopped = False
     while not stopped:
         value = input_queue.get()
         print("Read configuring output: {}".format(value))
-        # [  518.433552] cloud-init[1188]: Cloud-init v. 22.1-5.el9.0.1 finished at Fri, 10 Mar 2023 06:55:05 +0000. Datasource DataSourceNoCloud [seed=/dev/sdb][dsmode=net].  Up 517.94 seconds
         if "Cloud-init" in value and "finished at" in value:
             print("Found finished configuration message: {}".format(value))
             shutdown_cmd = [
@@ -94,7 +93,7 @@ def shutdown_vm(input_queue):
                 "|",
                 "socat",
                 "-",
-                "unix-connect:/var/lib/go-agent/pipelines/sif-compute-base/sif-vm-images/qemu-monitor-socket",
+                "unix-connect:{}".format(qemu_socket_path),
             ]
             shutdown_result = run(shutdown_cmd)
             print("Result of shutdown: {}".format(shutdown_result))
@@ -107,7 +106,7 @@ def shutdown_vm(input_queue):
                 stopped = True
 
 
-def configure_image(image, configuration_path, cpu_model="host"):
+def configure_image(image, configuration_path, qemu_socket_path, cpu_model="host"):
     """Configures the image by booting the image with qemu to allow
     for cloud init to apply the configuration"""
 
@@ -117,11 +116,12 @@ def configure_image(image, configuration_path, cpu_model="host"):
         args=(
             image,
             configuration_path,
+            qemu_socket_path,
             cpu_model,
             queue,
         ),
     )
-    shutdowing_vm = mp.Process(target=shutdown_vm, args=(queue,))
+    shutdowing_vm = mp.Process(target=shutdown_vm, args=(queue, qemu_socket_path))
 
     # Start the sub processes
     configuring_vm.start()
@@ -155,6 +155,11 @@ if __name__ == "__main__":
         help="The path to the image that is to be configured",
     )
     parser.add_argument(
+        "---image-qemu-socket-path",
+        default=os.path.join(IMAGE_DIR, "qemu-monitor-socket"),
+        help="The path to where the QEMU monitor socket should be placed which is used to send commands to the running image while it is being configured.",
+    )
+    parser.add_argument(
         "--config-user-data-path",
         default=os.path.join(CLOUD_CONFIG_DIR, "user-data"),
         help="The path to the cloud-init user-data configuration file",
@@ -184,6 +189,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     image_path = args.image_input_path
+    image_qemu_socket_path = args.image_qemu_socket_path
     user_data_path = args.config_user_data_path
     meta_data_path = args.config_meta_data_path
     vendor_data_path = args.config_vendor_data_path
@@ -208,7 +214,9 @@ if __name__ == "__main__":
         print("Failed to generate the image configuration")
         exit(2)
 
-    configured = configure_image(image_path, seed_output_path, cpu_model=qemu_cpu_model)
+    configured = configure_image(
+        image_path, seed_output_path, image_qemu_socket_path, cpu_model=qemu_cpu_model
+    )
     if not configured:
         print("Failed to configure image: {}".format(image_path))
         exit(3)
