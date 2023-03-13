@@ -84,9 +84,10 @@ def shutdown_vm(input_queue):
     stopped = False
     while not stopped:
         value = input_queue.get()
+        print("Read configuring output: {}".format(value))
         # [  518.433552] cloud-init[1188]: Cloud-init v. 22.1-5.el9.0.1 finished at Fri, 10 Mar 2023 06:55:05 +0000. Datasource DataSourceNoCloud [seed=/dev/sdb][dsmode=net].  Up 517.94 seconds
         if "Cloud-init" in value and "finished at" in value:
-            print("Found finish message: {}".format(value))
+            print("Found finished configuration message: {}".format(value))
             shutdown_cmd = [
                 "echo",
                 "system_powerdown",
@@ -96,6 +97,7 @@ def shutdown_vm(input_queue):
                 "unix-connect:/var/lib/go-agent/pipelines/sif-compute-base/sif-vm-images/qemu-monitor-socket",
             ]
             shutdown_result = run(shutdown_cmd)
+            print("Result of shutdown: {}".format(shutdown_result))
             if shutdown_result["returncode"] != 0:
                 raise subprocess.CalledProcessError(
                     "Failed to shutdown the configured VM: {}".format(shutdown_result),
@@ -103,8 +105,6 @@ def shutdown_vm(input_queue):
                 )
             else:
                 stopped = True
-        else:
-            print("No finish message found in: {}".format(value))
 
 
 def configure_image(image, configuration_path, cpu_model="host"):
