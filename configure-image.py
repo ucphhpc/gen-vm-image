@@ -71,10 +71,10 @@ def configure_vm(image, configuration_path, cpu_model, output_queue):
     configuring_results = (
         run_popen(configure_command, stdout=subprocess.PIPE, universal_newlines=True),
     )
-    for line in iter(configuring_results.stdout.readline, ""):
+    for line in iter(configuring_results["stdout"].readline, ""):
         output_queue.put(line)
-    configuring_results.stdout.close()
-    return_code = configuring_results.wait()
+    configuring_results["stdout"].close()
+    return_code = configuring_results["self"].wait()
     if return_code:
         raise subprocess.CalledProcessError(return_code, configure_command)
     return True

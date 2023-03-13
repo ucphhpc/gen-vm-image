@@ -12,6 +12,8 @@ def run_popen(cmd, format_output_str=False, **run_kwargs):
         command_results.update({"error": getattr(result, "stderr")})
     if hasattr(result, "stdout"):
         command_results.update({"output": getattr(result, "stdout")})
+    if hasattr(result, "self"):
+        command_results.update({"self": result})
 
     if format_output_str:
         for key, value in command_results.items():
