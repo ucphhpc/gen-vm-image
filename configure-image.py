@@ -74,7 +74,7 @@ def configure_vm(image, configuration_path, cpu_model, output_queue):
     for line in iter(configuring_results["stdout"].readline, ""):
         output_queue.put(line)
     configuring_results["stdout"].close()
-    return_code = configuring_results["self"].wait()
+    return_code = configuring_results["wait"]()
     if return_code:
         raise subprocess.CalledProcessError(return_code, configure_command)
     return True

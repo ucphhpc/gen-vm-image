@@ -12,12 +12,13 @@ def run_popen(cmd, format_output_str=False, **run_kwargs):
         command_results.update({"error": getattr(result, "stderr")})
     if hasattr(result, "stdout"):
         command_results.update({"output": getattr(result, "stdout")})
-    if hasattr(result, "self"):
-        command_results.update({"self": result})
+    if hasattr(result, "wait"):
+        command_results.update({"wait": getattr(result, "wait")})
 
     if format_output_str:
         for key, value in command_results.items():
-            command_results[key] = str(value)
+            if key == "returncode" or key == "error" or key == "output":
+                command_results[key] = str(value)
     return command_results
 
 
@@ -35,5 +36,6 @@ def run(cmd, format_output_str=False, **run_kwargs):
 
     if format_output_str:
         for key, value in command_results.items():
-            command_results[key] = str(value)
+            if key == "returncode" or key == "stderr" or key == "stdout":
+                command_results[key] = str(value)
     return command_results
