@@ -94,11 +94,13 @@ def shutdown_vm(q):
             "unix-connect:/var/lib/go-agent/pipelines/sif-compute-base/sif-vm-images/qemu-monitor-socket",
         ]
         shutdown_result = run(shutdown_cmd)
-    if shutdown_result["returncode"] != 0:
-        raise subprocess.CalledProcessError(
-            "Failed to shutdown the configured VM: {}".format(shutdown_result),
-            shutdown_cmd,
-        )
+        if shutdown_result["returncode"] != 0:
+            raise subprocess.CalledProcessError(
+                "Failed to shutdown the configured VM: {}".format(shutdown_result),
+                shutdown_cmd,
+            )
+    else:
+        print("No finish message found in: {}".format(value))
 
 
 def configure_image(image, configuration_path, cpu_model="host"):
