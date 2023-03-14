@@ -6,6 +6,7 @@ TAG:=edge
 PACKAGE_TIMEOUT:=60
 IMAGE=sif-compute-base
 IMAGE_PATH=image/$(IMAGE).qcow2
+QEMU_SOCKET_PATH=/tmp/qemu-monitor-socket
 # https://qemu-project.gitlab.io/qemu/system/qemu-cpu-models.html
 QEMU_CPU_MODEL=IvyBridge
 
@@ -20,7 +21,7 @@ build:
 	. $(VENV)/activate; python3 build-images.py --image-output-path $(IMAGE_PATH)
 
 configure:
-	. $(VENV)/activate; python3 configure-image.py --image-input-path $(IMAGE_PATH) --qemu-cpu-model $(QEMU_CPU_MODEL)
+	. $(VENV)/activate; python3 configure-image.py --image-input-path $(IMAGE_PATH) ---image-qemu-socket-path $(QEMU_SOCKET_PATH) --qemu-cpu-model $(QEMU_CPU_MODEL)
 
 maintainer-clean:
 	@echo 'This command is intended for maintainers to use; it'
