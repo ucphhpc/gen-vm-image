@@ -69,7 +69,7 @@ def configure_vm(image, configuration_path, qemu_socket_path, cpu_model, output_
         configuration_path,
     ]
     configuring_results = run_popen(
-        configure_command, stdout=subprocess.PIPE, universal_newlines=True
+        configure_command, stdout=subprocess.PIPE, universal_newlines=True, bufsize=1
     )
     for line in iter(configuring_results["output"].readline, ""):
         output_queue.put(line)
