@@ -77,6 +77,7 @@ def configure_vm(image, configuration_path, qemu_socket_path, cpu_model, output_
     return_code = configuring_results["wait"]()
     if return_code:
         raise subprocess.CalledProcessError(return_code, configure_command)
+    print("Finished the configure VM process")
     return True
 
 
@@ -104,6 +105,7 @@ def shutdown_vm(input_queue, qemu_socket_path):
                 )
             else:
                 stopped = True
+    print("Finished the shutdown VM process")
 
 
 def configure_image(image, configuration_path, qemu_socket_path, cpu_model="host"):
@@ -124,6 +126,7 @@ def configure_image(image, configuration_path, qemu_socket_path, cpu_model="host
     shutdowing_vm = mp.Process(target=shutdown_vm, args=(queue, qemu_socket_path))
 
     # Start the sub processes
+    print("Launching the configuration of: {}".format(image))
     configuring_vm.start()
     shutdowing_vm.start()
 
