@@ -3,7 +3,7 @@ import os
 import subprocess
 import multiprocessing as mp
 from src.common.defaults import CLOUD_CONFIG_DIR, IMAGE_CONFIG_DIR, IMAGE_DIR
-from src.utils.job import run, run_popen
+from src.utils.job import run, run_popen, check_call
 from src.utils.io import exists, makedirs
 
 SCRIPT_NAME = __file__
@@ -68,13 +68,14 @@ def configure_vm(image, configuration_path, qemu_socket_path, cpu_model, output_
         "-hdb",
         configuration_path,
     ]
+
     configuring_results = run_popen(
         configure_command, stdout=subprocess.PIPE, universal_newlines=True, bufsize=1
     )
     for line in iter(configuring_results["output"].readline, ""):
         output_queue.put(line)
     configuring_results["output"].close()
-    return_code = configuring_results["wait"]()
+    return_code = configuring_results["communicate"]()
     if return_code:
         raise subprocess.CalledProcessError(return_code, configure_command)
     print("Finished the configure VM process")
