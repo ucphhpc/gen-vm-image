@@ -77,10 +77,12 @@ def configure_vm(image, configuration_path, qemu_socket_path, cpu_model, output_
             break
         output_queue.put(line)
     configuring_results["output"].close()
-    return_code = configuring_results["communicate"]()
-    if return_code:
-        raise subprocess.CalledProcessError(return_code, configure_command)
-    print("Finished the configure VM process")
+    try:
+        communicate_output = configuring_results["communicate"](timeout=10)
+    except TimeoutExpired:
+        configuring_results["kill"]()
+        communicate_output = configuring_results["communicate"]()
+    print("Finished the configure VM process: {}".format(communicate_output))
     return True
 
 

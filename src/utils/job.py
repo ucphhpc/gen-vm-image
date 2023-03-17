@@ -15,6 +15,8 @@ def __format_output__(result, format_output_str=False):
         command_results.update({"wait": getattr(result, "wait")})
     if hasattr(result, "communicate"):
         command_results.update({"communicate": getattr(result, "communicate")})
+    if hasattr(result, "kill"):
+        command_results.update({"kill": getattr(result, "kill")})
 
     if format_output_str:
         for key, value in command_results.items():
