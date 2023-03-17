@@ -72,7 +72,9 @@ def configure_vm(image, configuration_path, qemu_socket_path, cpu_model, output_
     configuring_results = run_popen(
         configure_command, stdout=subprocess.PIPE, universal_newlines=True, bufsize=1
     )
-    for line in iter(configuring_results["output"].readline, ""):
+    for line in iter(configuring_results["output"].readline, b''):
+        if line == '':
+            break
         output_queue.put(line)
     configuring_results["output"].close()
     return_code = configuring_results["communicate"]()
