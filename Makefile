@@ -4,7 +4,7 @@
 OWNER:=ucphhpc
 TAG:=edge
 PACKAGE_TIMEOUT:=60
-IMAGE=sif-compute-base
+IMAGE=saga-base
 IMAGE_PATH=image/$(IMAGE).qcow2
 QEMU_SOCKET_PATH=/tmp/qemu-monitor-socket
 # https://qemu-project.gitlab.io/qemu/system/qemu-cpu-models.html

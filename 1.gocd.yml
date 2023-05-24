@@ -3,10 +3,10 @@ environments:
     environment_variables:
       GIT_USER: '{{SECRET:[github][username]}}'
     pipelines:
-    - sif-compute-base
+    - saga-base
 format_version: 10
 pipelines:
-  sif-compute-base:
+  saga-base:
     display_order: -1
     group: bare_metal_vm_image
     label_template: ${COUNT}
@@ -23,7 +23,7 @@ pipelines:
       COMMIT_TAG: GO_REVISION_SIF_VM_IMAGES
       DEFAULT_TAG: 9.1
       IMAGE: Rocky
-      IMAGE_PIPELINE: sif-compute-base
+      IMAGE_PIPELINE: saga-base
       PUSH_DIRECTORY: publish-docker-scripts
       SRC_DIRECTORY: sif-vm-images
       TEST_DIRECTORY: sif-vm-images
