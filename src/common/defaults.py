@@ -1,5 +1,5 @@
-PACKAGE_NAME = "sif-vm-images"
-REPO_NAME = "sif-vm-images"
+PACKAGE_NAME = "saga-vm-images"
+REPO_NAME = "saga-vm-images"
 GOCD_GROUP = "bare_metal_vm_image"
 GOCD_TEMPLATE = "bare_metal_vm_image"
 GOCD_FORMAT_VERSION = 10

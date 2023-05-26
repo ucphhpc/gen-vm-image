@@ -14,8 +14,8 @@ pipelines:
     materials:
       ucphhpc_images:
         branch: main
-        destination: sif-vm-images
-        git: https://github.com/ucphhpc/sif-vm-images.git
+        destination: saga-vm-images
+        git: https://github.com/ucphhpc/saga-vm-images.git
         password: '{{SECRET:[github][access_token]}}'
         username: ${GIT_USER}
     parameters:
@@ -25,6 +25,6 @@ pipelines:
       IMAGE: Rocky
       IMAGE_PIPELINE: saga-base
       PUSH_DIRECTORY: publish-docker-scripts
-      SRC_DIRECTORY: sif-vm-images
-      TEST_DIRECTORY: sif-vm-images
+      SRC_DIRECTORY: saga-vm-images
+      TEST_DIRECTORY: saga-vm-images
     template: bare_metal_vm_image
