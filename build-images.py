@@ -227,17 +227,6 @@ if __name__ == "__main__":
         if check_result["returncode"] != 0:
             print("The check of the vm disk failed: {}".format(check_result["error"]))
 
-        # # Load and configure the cloud_img template file
-        # kickstart_template_file = build_data.get("kickstart_file")
-        # kickstart_content = load(kickstart_template_file)
-        # if not kickstart_content:
-        #     print(
-        #         "Could not find the kickstart template file: {}".format(
-        #             kickstart_template_file
-        #         )
-        #     )
-        #     exit(-3)
-
     # GOCD file
     list_architectures = list(architecture.keys())
 
