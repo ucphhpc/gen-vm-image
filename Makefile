@@ -8,7 +8,7 @@ IMAGE=saga-base
 IMAGE_PATH=image/$(IMAGE).qcow2
 QEMU_SOCKET_PATH=/tmp/qemu-monitor-socket
 # https://qemu-project.gitlab.io/qemu/system/qemu-cpu-models.html
-QEMU_CPU_MODEL=IvyBridge
+QEMU_CPU_MODEL=AuthenticAMD
 
 all: venv install-dep build configure
 
