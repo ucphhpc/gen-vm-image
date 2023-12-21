@@ -197,7 +197,7 @@ if __name__ == "__main__":
         ]
         create_disk_result = run(create_disk_command)
         if create_disk_result["returncode"] != 0:
-            print("Failed to create a VM disk: {}".format(create_disk_result["stderr"]))
+            print("Failed to create a VM disk: {} - {}".format(create_disk_result["error"], create_disk_result["returncode"]))
         else:
             print(
                 "Created VM disk image at: {}".format(
@@ -209,7 +209,7 @@ if __name__ == "__main__":
         amend_command = ["qemu-img", "amend", "-o", "compat=v3", image_output_path]
         amended_result = run(amend_command)
         if amended_result["returncode"] != 0:
-            print("Failed to amend a VM disk: {}".format(amended_result["stderr"]))
+            print("Failed to amend a VM disk: {}".format(amended_result["error"]))
 
         # Resize the vm disk image
         resize_command = ["qemu-img", "resize", image_output_path, vm_size]
@@ -217,7 +217,7 @@ if __name__ == "__main__":
         if resize_result["returncode"] != 0:
             print(
                 "Failed to resize the downloaded image: {}".format(
-                    resize_result["stderr"]
+                    resize_result["error"]
                 )
             )
 
@@ -225,18 +225,7 @@ if __name__ == "__main__":
         check_command = ["qemu-img", "check", "-f", "qcow2", image_output_path]
         check_result = run(check_command)
         if check_result["returncode"] != 0:
-            print("The check of the vm disk failed: {}".format(check_result["stderr"]))
-
-        # # Load and configure the cloud_img template file
-        # kickstart_template_file = build_data.get("kickstart_file")
-        # kickstart_content = load(kickstart_template_file)
-        # if not kickstart_content:
-        #     print(
-        #         "Could not find the kickstart template file: {}".format(
-        #             kickstart_template_file
-        #         )
-        #     )
-        #     exit(-3)
+            print("The check of the vm disk failed: {}".format(check_result["error"]))
 
     # GOCD file
     list_architectures = list(architecture.keys())

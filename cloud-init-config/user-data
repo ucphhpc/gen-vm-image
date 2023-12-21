@@ -4,5 +4,8 @@ system_info:
     name: rocky
     home: /home/rocky
     sudo: ALL=(ALL) NOPASSWD:ALL
-hostname: sif-compute-base
+    passwd: ""
+    lock_passwd: false
+    shell: /bin/bash
+hostname: saga-base
 ssh_pwauth: False

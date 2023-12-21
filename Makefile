@@ -4,11 +4,11 @@
 OWNER:=ucphhpc
 TAG:=edge
 PACKAGE_TIMEOUT:=60
-IMAGE=sif-compute-base
+IMAGE=saga-base
 IMAGE_PATH=image/$(IMAGE).qcow2
 QEMU_SOCKET_PATH=/tmp/qemu-monitor-socket
 # https://qemu-project.gitlab.io/qemu/system/qemu-cpu-models.html
-QEMU_CPU_MODEL=IvyBridge
+QEMU_CPU_MODEL=AuthenticAMD
 
 all: venv install-dep build configure
 
@@ -47,14 +47,14 @@ installcheck:
 check:
 
 dockercheck-clean:
-	docker rmi -f ucphhpc/sif-vm-images-tests
+	docker rmi -f ucphhpc/saga-vm-images-tests
 
 dockercheck-build:
 # Use the docker image to test the installation
-	docker build -f tests/Dockerfile -t ucphhpc/sif-vm-images-tests .
+	docker build -f tests/Dockerfile -t ucphhpc/saga-vm-images-tests .
 
 dockercheck-run:
-	docker run -it ucphhpc/sif-vm-images-tests
+	docker run -it ucphhpc/saga-vm-images-tests
 
 
 include Makefile.venv

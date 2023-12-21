@@ -48,16 +48,16 @@ def generate_image_configuration(
     return True
 
 
-def configure_vm(image, configuration_path, qemu_socket_path, cpu_model, output_queue):
+def configure_vm(image, configuration_path, qemu_socket_path, cpu_model, output_queue, configure_vm_name="vm", memory="2048"):
     """This launches a subprocess that configures the VM image on boot."""
     configure_command = [
         "qemu-kvm",
         "-name",
-        "vm",
+        configure_vm_name,
         "-cpu",
         cpu_model,
         "-m",
-        "2048",
+        memory,
         "-nographic",
         # https://unix.stackexchange.com/questions/426652/connect-to-running-qemu-instance-with-qemu-monitor
         # Allow the qemu instance to be shutdown via a socket signal

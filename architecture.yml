@@ -1,6 +1,6 @@
 owner: ucphhpc
 architecture:
-  sif-compute-base:
+  saga-base:
     name: Rocky
     version: 9.1
     cloud_img: https://download.rockylinux.org/pub/rocky/9/images/x86_64/Rocky-9-GenericCloud-Base.latest.x86_64.qcow2
