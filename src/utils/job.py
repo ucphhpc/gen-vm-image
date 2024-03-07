@@ -24,13 +24,16 @@ def __format_output__(result, format_output_str=False):
                 command_results[key] = str(value)
     return command_results
 
+
 def run_popen(cmd, format_output_str=False, **run_kwargs):
     result = subprocess.Popen(cmd, **run_kwargs)
     return __format_output__(result, format_output_str=format_output_str)
 
+
 def check_call(cmd, format_output_str=False, **kwargs):
     result = subprocess.check_call(cmd, **kwargs)
     return __format_output__(result, format_output_str=format_output_str)
+
 
 def run(cmd, format_output_str=False, **run_kwargs):
     result = subprocess.run(cmd, **run_kwargs)

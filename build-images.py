@@ -197,7 +197,11 @@ if __name__ == "__main__":
         ]
         create_disk_result = run(create_disk_command)
         if create_disk_result["returncode"] != 0:
-            print("Failed to create a VM disk: {} - {}".format(create_disk_result["error"], create_disk_result["returncode"]))
+            print(
+                "Failed to create a VM disk: {} - {}".format(
+                    create_disk_result["error"], create_disk_result["returncode"]
+                )
+            )
         else:
             print(
                 "Created VM disk image at: {}".format(

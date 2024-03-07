@@ -48,7 +48,15 @@ def generate_image_configuration(
     return True
 
 
-def configure_vm(image, configuration_path, qemu_socket_path, cpu_model, output_queue, configure_vm_name="vm", memory="2048"):
+def configure_vm(
+    image,
+    configuration_path,
+    qemu_socket_path,
+    cpu_model,
+    output_queue,
+    configure_vm_name="vm",
+    memory="2048",
+):
     """This launches a subprocess that configures the VM image on boot."""
     configure_command = [
         "qemu-kvm",
@@ -72,8 +80,8 @@ def configure_vm(image, configuration_path, qemu_socket_path, cpu_model, output_
     configuring_results = run_popen(
         configure_command, stdout=subprocess.PIPE, universal_newlines=True, bufsize=1
     )
-    for line in iter(configuring_results["output"].readline, b''):
-        if line == '':
+    for line in iter(configuring_results["output"].readline, b""):
+        if line == "":
             break
         output_queue.put(line)
     configuring_results["output"].close()
