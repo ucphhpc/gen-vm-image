@@ -87,7 +87,7 @@ def configure_vm(
     configuring_results["output"].close()
     try:
         communicate_output = configuring_results["communicate"](timeout=10)
-    except TimeoutExpired:
+    except subprocess.TimeoutExpired:
         configuring_results["kill"]()
         communicate_output = configuring_results["communicate"]()
     print("Finished the configure VM process: {}".format(communicate_output))

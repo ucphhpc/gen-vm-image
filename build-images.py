@@ -14,7 +14,8 @@ from src.common.defaults import (
     GOCD_FORMAT_VERSION,
     GO_REVISION_COMMIT_VAR,
 )
-from src.utils.io import load, exists, makedirs, write
+from src.utils.io import load, exists, makedirs, write, chown
+from src.utils.user import lookup_uid, lookup_gid
 from src.utils.job import run
 
 
@@ -110,6 +111,11 @@ if __name__ == "__main__":
         default=os.path.join(IMAGE_DIR, "image.qcow2"),
         help="The output path of the built image",
     )
+    parser.add_argument(
+        "--image-owner",
+        default="qemu",
+        help="Set the owner of the configured image to this user",
+    )
     args = parser.parse_args()
 
     architecture_name = args.architecture_name
@@ -117,6 +123,7 @@ if __name__ == "__main__":
     branch = args.branch
     makefile = args.makefile
     image_output_path = args.image_output_path
+    image_owner = args.image_owner
 
     image_output_dir = os.path.dirname(image_output_path)
     temporary_image_dir = TMP_DIR
@@ -135,7 +142,6 @@ if __name__ == "__main__":
         exit(-1)
 
     required_attributes = ["name", "version", "cloud_img", "size"]
-
     # Generate the image configuration
     for build, build_data in architecture.items():
         for attr in required_attributes:
@@ -230,6 +236,16 @@ if __name__ == "__main__":
         check_result = run(check_command)
         if check_result["returncode"] != 0:
             print("The check of the vm disk failed: {}".format(check_result["error"]))
+
+        # Set the owner of the image
+        user_uid = lookup_uid(image_owner)
+        user_gid = lookup_gid(image_owner)
+        if user_uid and user_gid:
+            chown_result = chown(image_output_path, user_uid, user_gid)
+            if not chown_result[0]:
+                print(
+                    "Failed to set the owner of the image: {}".format(chown_result[1])
+                )
 
     # GOCD file
     list_architectures = list(architecture.keys())

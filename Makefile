@@ -6,6 +6,7 @@ TAG:=edge
 PACKAGE_TIMEOUT:=60
 IMAGE=saga-base
 IMAGE_PATH=image/$(IMAGE).qcow2
+IMAGE_OWNER=qemu
 QEMU_SOCKET_PATH=/tmp/qemu-monitor-socket
 # https://qemu-project.gitlab.io/qemu/system/qemu-cpu-models.html
 QEMU_CPU_MODEL=AuthenticAMD
@@ -18,7 +19,7 @@ clean:
 	rm -fr tests/__pycache__
 
 build:
-	. $(VENV)/activate; python3 build-images.py --image-output-path $(IMAGE_PATH)
+	. $(VENV)/activate; python3 build-images.py --image-output-path $(IMAGE_PATH) --image-owner $(IMAGE_OWNER)
 
 configure:
 	. $(VENV)/activate; python3 configure-image.py --image-input-path $(IMAGE_PATH) ---image-qemu-socket-path $(QEMU_SOCKET_PATH)

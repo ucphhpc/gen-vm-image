@@ -80,6 +80,14 @@ def chmod(path, mode, **kwargs):
     return True, "Set the path: {} with permissions: {}".format(path, mode)
 
 
+def chown(path, uid, gid):
+    try:
+        os.chown(os.path.expanduser(path), uid, gid)
+    except Exception as err:
+        return False, "Failed to set owner: {} on: {} - {}".format(uid, path, err)
+    return True, "Set the owner: {} on: {}".format(uid, path)
+
+
 def copy(original, target):
     # Copy path to target
     try:
