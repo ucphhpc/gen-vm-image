@@ -137,7 +137,8 @@ def configure_image(image, configuration_path, qemu_socket_path, cpu_model="host
 
     # Wait for them to finish
     shutdowing_vm.join()
-    configuring_vm.join()
+    # The configuring_vm is stopped by the shutdown_vm process
+    # and therefore should operate as a detached process that should not be joined/waited for.
     return True
 
 
