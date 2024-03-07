@@ -21,7 +21,7 @@ build:
 	. $(VENV)/activate; python3 build-images.py --image-output-path $(IMAGE_PATH)
 
 configure:
-	. $(VENV)/activate; python3 configure-image.py --image-input-path $(IMAGE_PATH) ---image-qemu-socket-path $(QEMU_SOCKET_PATH) --qemu-cpu-model $(QEMU_CPU_MODEL)
+	. $(VENV)/activate; python3 configure-image.py --image-input-path $(IMAGE_PATH) ---image-qemu-socket-path $(QEMU_SOCKET_PATH)
 
 maintainer-clean:
 	@echo 'This command is intended for maintainers to use; it'
