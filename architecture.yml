@@ -2,6 +2,6 @@ owner: ucphhpc
 architecture:
   saga-base:
     name: Rocky
-    version: 9.1
+    version: 9.3
     cloud_img: https://download.rockylinux.org/pub/rocky/9/images/x86_64/Rocky-9-GenericCloud-Base.latest.x86_64.qcow2
     size: 60G
