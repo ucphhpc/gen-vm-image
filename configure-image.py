@@ -130,8 +130,8 @@ def shutdown_vm(input_queue, qemu_socket_path):
             _socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
             try:
                 _socket.connect(qemu_socket_path)
-                sent = _socket.sendall("system_powerdown\n".encode("utf-8"))
-                print("Sent shutdown message: {}".format(sent))
+                _socket.sendall("system_powerdown\n".encode("utf-8"))
+                print("Sent shutdown message")
                 msg = read_socket_until_empty(_socket)
                 print("Received shutdown message: {}".format(msg))
             except Exception as err:
