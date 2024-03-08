@@ -1,6 +1,7 @@
 import argparse
 import os
 import subprocess
+import socket
 import multiprocessing as mp
 from src.common.defaults import CLOUD_CONFIG_DIR, IMAGE_CONFIG_DIR, IMAGE_DIR
 from src.utils.job import run, run_popen
@@ -62,6 +63,15 @@ def discover_kvm_command():
     return kvm_command
 
 
+def read_socket_until_empty(socket, buffer_size=1024):
+    msg = ""
+    response = socket.recv(buffer_size).decode("utf-8")
+    while response != "":
+        msg += response
+        response = socket.recv(buffer_size).decode("utf-8")
+    return msg
+
+
 def configure_vm(
     image,
     configuration_path,
@@ -114,23 +124,20 @@ def shutdown_vm(input_queue, qemu_socket_path):
     while not stopped:
         value = input_queue.get()
         print("Read configuring output: {}".format(value))
-        if "Cloud-init" in value and "finished at" in value:
+        if "Activate the web console with:" in value:
             print("Found finished configuration message: {}".format(value))
-            shutdown_cmd = [
-                "echo",
-                "system_powerdown",
-                "|",
-                "socat",
-                "-",
-                "unix-connect:{}".format(qemu_socket_path),
-            ]
-            shutdown_result = run(shutdown_cmd)
-            print("Result of shutdown: {}".format(shutdown_result))
-            if shutdown_result["returncode"] != 0:
-                raise subprocess.CalledProcessError(
-                    "Failed to shutdown the configured VM: {}".format(shutdown_result),
-                    shutdown_cmd,
-                )
+            # Connect to the qemu monitor socket and send the shutdown command
+            _socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+            try:
+                _socket.connect(qemu_socket_path)
+                sent = _socket.sendall("system_powerdown\n".encode("utf-8"))
+                print("Sent shutdown message: {}".format(sent))
+                msg = read_socket_until_empty(_socket)
+                print("Received shutdown message: {}".format(msg))
+            except Exception as err:
+                print("Failed to connect to qemu monitor socket: {}".format(err))
+            finally:
+                _socket.close()
         if "Power down" in value:
             stopped = True
     print("Finished the shutdown VM process")
@@ -139,7 +146,6 @@ def shutdown_vm(input_queue, qemu_socket_path):
 def configure_image(image, configuration_path, qemu_socket_path, cpu_model="host"):
     """Configures the image by booting the image with qemu to allow
     for cloud init to apply the configuration"""
-
     queue = mp.Queue()
     configuring_vm = mp.Process(
         target=configure_vm,
