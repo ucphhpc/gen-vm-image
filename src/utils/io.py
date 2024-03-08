@@ -69,6 +69,10 @@ def exists(path):
     return os.path.exists(os.path.expanduser(path))
 
 
+def which(command):
+    return shutil.which(command)
+
+
 def chmod(path, mode, **kwargs):
     try:
         os.chmod(os.path.expanduser(path), mode, **kwargs)

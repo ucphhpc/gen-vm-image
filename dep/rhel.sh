@@ -9,6 +9,7 @@ dnf install -y genisoimage
 
 # The emulator used to start and configure the image
 dnf install -y qemu-kvm
+# On Debian just use kvm
 
 # If the link is missing
 ln -s /usr/libexec/qemu-kvm /usr/bin/qemu-kvm

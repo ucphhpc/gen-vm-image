@@ -3,8 +3,8 @@ import os
 import subprocess
 import multiprocessing as mp
 from src.common.defaults import CLOUD_CONFIG_DIR, IMAGE_CONFIG_DIR, IMAGE_DIR
-from src.utils.job import run, run_popen, check_call
-from src.utils.io import exists, makedirs
+from src.utils.job import run, run_popen
+from src.utils.io import exists, makedirs, which
 
 SCRIPT_NAME = __file__
 
@@ -48,6 +48,20 @@ def generate_image_configuration(
     return True
 
 
+def discover_kvm_command():
+    """Discovers the kvm command on the system"""
+    kvm_command = "kvm"
+    if not which(kvm_command):
+        kvm_command = "qemu-kvm"
+    if not which(kvm_command):
+        kvm_command = "qemu-system-x86_64"
+    if not which(kvm_command):
+        raise FileNotFoundError(
+            "Failed to find the kvm command on the system. Please ensure that it is installed"
+        )
+    return kvm_command
+
+
 def configure_vm(
     image,
     configuration_path,
@@ -58,8 +72,9 @@ def configure_vm(
     memory="2048",
 ):
     """This launches a subprocess that configures the VM image on boot."""
+    kvm_command = discover_kvm_command()
     configure_command = [
-        "qemu-kvm",
+        kvm_command,
         "-name",
         configure_vm_name,
         "-cpu",
@@ -116,8 +131,8 @@ def shutdown_vm(input_queue, qemu_socket_path):
                     "Failed to shutdown the configured VM: {}".format(shutdown_result),
                     shutdown_cmd,
                 )
-            else:
-                stopped = True
+        if "Power down" in value:
+            stopped = True
     print("Finished the shutdown VM process")
 
 
@@ -147,6 +162,7 @@ def configure_image(image, configuration_path, qemu_socket_path, cpu_model="host
     shutdowing_vm.join()
     # The configuring_vm is stopped by the shutdown_vm process
     # and therefore should operate as a detached process that should not be joined/waited for.
+    configuring_vm.join()
     return True
 
 

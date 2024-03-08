@@ -21,7 +21,7 @@ pipelines:
     parameters:
       ARGS: ''
       COMMIT_TAG: GO_REVISION_SIF_VM_IMAGES
-      DEFAULT_TAG: 9.1
+      DEFAULT_TAG: 9.3
       IMAGE: Rocky
       IMAGE_PIPELINE: saga-base
       PUSH_DIRECTORY: publish-docker-scripts
