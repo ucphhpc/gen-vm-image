@@ -48,14 +48,14 @@ installcheck:
 check:
 
 dockercheck-clean:
-	docker rmi -f ucphhpc/saga-vm-images-tests
+	docker rmi -f ucphhpc/gen-vm-image-tests
 
 dockercheck-build:
 # Use the docker image to test the installation
-	docker build -f tests/Dockerfile -t ucphhpc/saga-vm-images-tests .
+	docker build -f tests/Dockerfile -t ucphhpc/gen-vm-image-tests .
 
 dockercheck-run:
-	docker run -it ucphhpc/saga-vm-images-tests
+	docker run -it ucphhpc/gen-vm-image-tests
 
 
 include Makefile.venv

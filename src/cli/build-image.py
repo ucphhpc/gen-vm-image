@@ -55,7 +55,7 @@ def get_common_pipeline():
     return common_pipeline
 
 
-def get_common_materials():
+def get_common_materials(branch="main"):
     common_materials = {
         "ucphhpc_images": {
             "git": "https://github.com/ucphhpc/{}.git".format(REPO_NAME),
@@ -80,9 +80,9 @@ def get_upstream_materials(name, pipeline, stage):
     return upstream_materials
 
 
-def get_materials(name, upstream_pipeline=None, stage=None):
+def get_materials(name, upstream_pipeline=None, stage=None, branch="main"):
     materials = {}
-    common_materials = get_common_materials()
+    common_materials = get_common_materials(branch=branch)
     materials.update(common_materials)
     if upstream_pipeline and stage:
         upstream_materials = get_upstream_materials(name, upstream_pipeline, stage)
@@ -90,7 +90,7 @@ def get_materials(name, upstream_pipeline=None, stage=None):
     return materials
 
 
-if __name__ == "__main__":
+def run_build_image():
     parser = argparse.ArgumentParser(prog=PACKAGE_NAME)
     parser.add_argument(
         "--architecture-name",
@@ -268,7 +268,7 @@ if __name__ == "__main__":
     for build, build_data in architecture.items():
         name = build_data.get("name", None)
         version = build_data.get("version", None)
-        materials = get_materials(name)
+        materials = get_materials(name, branch=branch)
 
         build_version_name = build
         build_pipeline = {
@@ -312,3 +312,7 @@ if __name__ == "__main__":
     # Write the new makefile content to the Makefile
     # write(makefile_path, new_makefile_content)
     # print("Generated a new Makefile in: {}".format(makefile_path))
+
+
+if __name__ == "__main__":
+    run_build_image()

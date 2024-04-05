@@ -186,7 +186,7 @@ def reset_image(image):
     return True
 
 
-if __name__ == "__main__":
+def run_configure_image():
     parser = argparse.ArgumentParser(prog=SCRIPT_NAME)
     parser.add_argument(
         "--image-input-path",
@@ -264,3 +264,7 @@ if __name__ == "__main__":
     if not reset:
         print("Failed to reset image: {}".format(image_path))
         exit(4)
+
+
+if __name__ == "__main__":
+    run_configure_image()

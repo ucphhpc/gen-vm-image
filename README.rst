@@ -1,8 +1,8 @@
-=============
-gen-vm-images
-=============
+============
+gen-vm-image
+============
 
-This repository holds the configurations for generating virtual machine images.
+This repository can be used for generating and configuring virtual machine images.
 
 # Rocky 9 Linux cloud images can be found here: https://download.rockylinux.org/pub/rocky/9/images/x86_64/
 
