@@ -1,10 +1,8 @@
 =============
-saga-vm-images
+gen-vm-images
 =============
 
-This repository holds the configurations for the SAGA virtual machine images
-that is used for the VMs that hosts the users Jupyter Notebook Containers.
-
+This repository holds the configurations for generating virtual machine images.
 # Rocky 9 Linux cloud images can be found here: https://download.rockylinux.org/pub/rocky/9/images/x86_64/
 
 
