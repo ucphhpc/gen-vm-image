@@ -10,8 +10,9 @@ IMAGE_OWNER=qemu
 QEMU_SOCKET_PATH=/tmp/qemu-monitor-socket
 # https://qemu-project.gitlab.io/qemu/system/qemu-cpu-models.html
 QEMU_CPU_MODEL=AuthenticAMD
+ARGS=
 
-all: venv install-dep build configure
+all: venv install-dep install build configure
 
 clean:
 	rm -fr .env
@@ -19,16 +20,22 @@ clean:
 	rm -fr tests/__pycache__
 
 build:
-	. $(VENV)/activate; python3 build-images.py --image-output-path $(IMAGE_PATH) --image-owner $(IMAGE_OWNER)
+	. $(VENV)/activate; gen-vm-image --image-output-path $(IMAGE_PATH) --image-owner $(IMAGE_OWNER) $(ARGS)
 
 configure:
-	. $(VENV)/activate; python3 configure-image.py --image-input-path $(IMAGE_PATH) ---image-qemu-socket-path $(QEMU_SOCKET_PATH)
+	. $(VENV)/activate; configure-vm-image --image-input-path $(IMAGE_PATH) ---image-qemu-socket-path $(QEMU_SOCKET_PATH) $(ARGS)
 
 maintainer-clean:
 	@echo 'This command is intended for maintainers to use; it'
 	@echo 'deletes files that may need special tools to rebuild.'
 	$(MAKE) venv-clean
 	$(MAKE) clean
+
+install:
+	$(VENV)/pip install .
+
+uninstall:
+	$(VENV)/pip uninstall -y gen-vm-image
 
 install-dev:
 	$(VENV)/pip install -r requirements-dev.txt

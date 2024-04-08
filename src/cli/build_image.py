@@ -93,9 +93,9 @@ def get_materials(name, upstream_pipeline=None, stage=None, branch="main"):
 def run_build_image():
     parser = argparse.ArgumentParser(prog=PACKAGE_NAME)
     parser.add_argument(
-        "--architecture-name",
+        "--architecture-path",
         default="architecture.yml",
-        help="The name of the architecture file that is used to configure the images to be built",
+        help="The path to the architecture file that is used to configure the images to be built",
     )
     parser.add_argument(
         "--config-name", default="1.gocd.yml", help="Name of the output gocd config"
@@ -118,7 +118,7 @@ def run_build_image():
     )
     args = parser.parse_args()
 
-    architecture_name = args.architecture_name
+    architecture_path = args.architecture_path
     config_name = args.config_name
     branch = args.branch
     makefile = args.makefile
@@ -129,8 +129,11 @@ def run_build_image():
     temporary_image_dir = TMP_DIR
 
     # Load the architecture file
-    architecture_path = os.path.join(current_dir, architecture_name)
     architecture = load(architecture_path, handler=yaml, Loader=yaml.FullLoader)
+    if not architecture:
+        print("Failed to load architecture file: {}".format(architecture_path))
+        exit(-1)
+
     owner = architecture.get("owner", None)
     if not owner:
         print("Failed to find architecture the owner in: {}".format(architecture_path))
