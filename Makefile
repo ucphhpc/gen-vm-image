@@ -4,6 +4,8 @@
 OWNER:=ucphhpc
 TAG:=edge
 PACKAGE_TIMEOUT:=60
+PACKAGE_NAME=gen-vm-image
+PACKAGE_NAME_FORMATTED=$(subst -,_,$(PACKAGE_NAME))
 IMAGE=saga-base
 IMAGE_PATH=image/$(IMAGE).qcow2
 IMAGE_OWNER=qemu
@@ -15,6 +17,8 @@ ARGS=
 all: venv install-dep install build configure
 
 clean:
+	$(MAKE) distclean
+	$(MAKE) venv-clean
 	rm -fr .env
 	rm -fr .pytest_cache
 	rm -fr tests/__pycache__
@@ -24,6 +28,12 @@ build:
 
 configure:
 	. $(VENV)/activate; configure-vm-image --image-input-path $(IMAGE_PATH) ---image-qemu-socket-path $(QEMU_SOCKET_PATH) $(ARGS)
+
+dist:
+	$(VENV)/python setup.py sdist bdist_wheel
+
+distclean:
+	rm -fr dist build $(PACKAGE_NAME).egg-info $(PACKAGE_NAME_FORMATTED).egg-info
 
 maintainer-clean:
 	@echo 'This command is intended for maintainers to use; it'
