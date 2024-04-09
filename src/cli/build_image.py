@@ -116,6 +116,11 @@ def run_build_image():
         default="qemu",
         help="Set the owner of the configured image to this user",
     )
+    parser.add_argument(
+        "--generate-gocd-config",
+        action="store_true",
+        help="Generate a GOCD config based on the architecture file",
+    )
     args = parser.parse_args()
 
     architecture_path = args.architecture_path
@@ -124,6 +129,7 @@ def run_build_image():
     makefile = args.makefile
     image_output_path = args.image_output_path
     image_owner = args.image_owner
+    generate_gocd_config = args.generate_gocd_config
 
     image_output_dir = os.path.dirname(image_output_path)
     temporary_image_dir = TMP_DIR
@@ -250,71 +256,52 @@ def run_build_image():
                     "Failed to set the owner of the image: {}".format(chown_result[1])
                 )
 
-    # GOCD file
-    list_architectures = list(architecture.keys())
+    if generate_gocd_config:
+        # GOCD file
+        list_architectures = list(architecture.keys())
 
-    # Get all pipelines
-    pipelines = get_pipelines(list_architectures)
+        # Get all pipelines
+        pipelines = get_pipelines(list_architectures)
 
-    # GOCD environment
-    common_environments = get_common_environment(pipelines)
+        # GOCD environment
+        common_environments = get_common_environment(pipelines)
 
-    # Common GOCD pipeline params
-    common_pipeline_attributes = get_common_pipeline()
+        # Common GOCD pipeline params
+        common_pipeline_attributes = get_common_pipeline()
 
-    generated_config = {
-        "format_version": GOCD_FORMAT_VERSION,
-        **common_environments,
-        "pipelines": {},
-    }
-    # Generate the GOCD build config
-    for build, build_data in architecture.items():
-        name = build_data.get("name", None)
-        version = build_data.get("version", None)
-        materials = get_materials(name, branch=branch)
-
-        build_version_name = build
-        build_pipeline = {
-            **common_pipeline_attributes,
-            "materials": materials,
-            "parameters": {
-                "IMAGE": name,
-                "IMAGE_PIPELINE": build_version_name,
-                "DEFAULT_TAG": version,
-                "SRC_DIRECTORY": REPO_NAME,
-                "TEST_DIRECTORY": REPO_NAME,
-                "PUSH_DIRECTORY": "publish-docker-scripts",
-                "COMMIT_TAG": GO_REVISION_COMMIT_VAR,
-                "ARGS": "",
-            },
+        generated_config = {
+            "format_version": GOCD_FORMAT_VERSION,
+            **common_environments,
+            "pipelines": {},
         }
-        generated_config["pipelines"][build_version_name] = build_pipeline
+        # Generate the GOCD build config
+        for build, build_data in architecture.items():
+            name = build_data.get("name", None)
+            version = build_data.get("version", None)
+            materials = get_materials(name, branch=branch)
 
-    path = os.path.join(current_dir, config_name)
-    if not write(path, generated_config, handler=yaml):
-        print("Failed to save config")
-        exit(-1)
-    print("Generated a new GOCD config in: {}".format(path))
+            build_version_name = build
+            build_pipeline = {
+                **common_pipeline_attributes,
+                "materials": materials,
+                "parameters": {
+                    "IMAGE": name,
+                    "IMAGE_PIPELINE": build_version_name,
+                    "DEFAULT_TAG": version,
+                    "SRC_DIRECTORY": REPO_NAME,
+                    "TEST_DIRECTORY": REPO_NAME,
+                    "PUSH_DIRECTORY": "publish-docker-scripts",
+                    "COMMIT_TAG": GO_REVISION_COMMIT_VAR,
+                    "ARGS": "",
+                },
+            }
+            generated_config["pipelines"][build_version_name] = build_pipeline
 
-    # Update the Makefile such that it contains every image
-    # image
-    # makefile_path = os.path.join(current_dir, makefile)
-    # makefile_content = load(makefile_path, readlines=True)
-    # new_makefile_content = []
-
-    # for line in makefile_content:
-    #     if "ALL_IMAGES:=" in line:
-    #         images_declaration = "ALL_IMAGES:="
-    #         for image in images:
-    #             images_declaration += "{} ".format(image)
-    #         new_makefile_content.append(images_declaration)
-    #         new_makefile_content.append("\n")
-    #     else:
-    #         new_makefile_content.append(line)
-
-    # Write the new makefile content to the Makefile
-    # write(makefile_path, new_makefile_content)
-    # print("Generated a new Makefile in: {}".format(makefile_path))
+        path = os.path.join(current_dir, config_name)
+        if not write(path, generated_config, handler=yaml):
+            print("Failed to save config")
+            exit(-1)
+        print("Generated a new GOCD config in: {}".format(path))
 
 
 if __name__ == "__main__":
