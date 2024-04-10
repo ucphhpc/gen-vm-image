@@ -58,6 +58,7 @@ installcheck:
 	$(VENV)/pip install -r tests/requirements.txt
 
 check:
+# TODO, add checks
 
 dockercheck-clean:
 	docker rmi -f ucphhpc/gen-vm-image-tests
