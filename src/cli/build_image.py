@@ -100,17 +100,14 @@ def run_build_image():
         help="The path to the architecture file that is used to configure the images to be built",
     )
     parser.add_argument(
-        "--branch", default="main", help="The branch that should be built"
-    )
-    parser.add_argument(
         "--image-output-path",
         default=os.path.join(GENERATED_IMAGE_DIR, "image.qcow2"),
         help="The output path of the built image",
     )
     parser.add_argument(
-        "--image-owner",
+        "--generated-image-owner",
         default="qemu",
-        help="Set the owner of the configured image to this user",
+        help="Set the uid owner of the configured image",
     )
     parser.add_argument(
         "--generate-gocd-config",
@@ -122,14 +119,19 @@ def run_build_image():
         default="1.gocd.yml",
         help="Name of the generated gocd config file",
     )
+    parser.add_argument(
+        "--gocd-build-branch",
+        default="main",
+        help="The branch that GoCD should use to build images",
+    )
     args = parser.parse_args()
 
     architecture_path = args.architecture_path
-    branch = args.branch
     image_output_path = args.image_output_path
-    image_owner = args.image_owner
+    generated_image_owner = args.generated_image_owner
     generate_gocd_config = args.generate_gocd_config
     gocd_config_name = args.gocd_config_name
+    gocd_build_branch = args.gocd_build_branch
 
     image_output_dir = os.path.dirname(image_output_path)
     temporary_image_dir = TMP_DIR
@@ -278,8 +280,8 @@ def run_build_image():
             print("The check of the vm disk failed: {}".format(check_result["error"]))
 
         # Set the owner of the image
-        user_uid = lookup_uid(image_owner)
-        user_gid = lookup_gid(image_owner)
+        user_uid = lookup_uid(generated_image_owner)
+        user_gid = lookup_gid(generated_image_owner)
         if user_uid and user_gid:
             chown_result = chown(image_output_path, user_uid, user_gid)
             if not chown_result[0]:
@@ -309,7 +311,7 @@ def run_build_image():
         for build, build_data in images.items():
             name = build_data.get("name", None)
             version = build_data.get("version", None)
-            materials = get_materials(name, branch=branch)
+            materials = get_materials(name, branch=gocd_build_branch)
 
             build_version_name = build
             build_pipeline = {

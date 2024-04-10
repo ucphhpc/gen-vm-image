@@ -52,23 +52,27 @@ An example of such a file can be found in the `examples` directory.
 Upon creating such a file, the `gen-vm-image` command can be used to generate the virtual machine image.
 The totality of the command can be seen below::
 
-        usage: gen-vm-image [-h] [--architecture-path ARCHITECTURE_PATH] [--config-name CONFIG_NAME] [--branch BRANCH] [--makefile MAKEFILE] [--image-output-path IMAGE_OUTPUT_PATH]
-                            [--image-owner IMAGE_OWNER] [--generate-gocd-config]
+        usage: gen-vm-image [-h] [--architecture-path ARCHITECTURE_PATH]
+                                 [--image-output-path IMAGE_OUTPUT_PATH]
+                                 [--generated-image-owner GENERATED_IMAGE_OWNER]
+                                 [--generate-gocd-config]
+                                 [--gocd-config-name GOCD_CONFIG_NAME]
+                                 [--gocd-build-branch GOCD_BUILD_BRANCH]
 
         optional arguments:
         -h, --help            show this help message and exit
         --architecture-path ARCHITECTURE_PATH
                                 The path to the architecture file that is used to configure the images to be built (default: architecture.yml)
-        --config-name CONFIG_NAME
-                                Name of the output gocd config (default: 1.gocd.yml)
-        --branch BRANCH       The branch that should be built (default: main)
-        --makefile MAKEFILE   The makefile that defines the images (default: Makefile)
         --image-output-path IMAGE_OUTPUT_PATH
-                                The output path of the built image (default: images/image.qcow2)
-        --image-owner IMAGE_OWNER
-                                Set the owner of the configured image to this user (default: qemu)
+                                The output path of the built image (default: generated-images/image.qcow2)
+        --generated-image-owner GENERATED_IMAGE_OWNER
+                                Set the uid owner of the configured image (default: qemu)
         --generate-gocd-config
                                 Generate a GoCD config based on the architecture file (default: False)
+        --gocd-config-name GOCD_CONFIG_NAME
+                                Name of the generated gocd config file (default: 1.gocd.yml)
+        --gocd-build-branch GOCD_BUILD_BRANCH
+                                The branch that GoCD should use to build images (default: main)
 
 When the ``gen-vm-image`` command is executed, the generated VM disk image will be placed in the ``--image-output-path`` directory.
 
