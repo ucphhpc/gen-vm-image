@@ -135,3 +135,7 @@ To build and configure a VM image disk with the default values, `make` can be ru
 
     make
 
+The build and configure steps can be specialized via each of the respected Makefile parameters `BUILD_ARGS` and `CONFIGURE_ARGS`.
+An example of this can be seen below::
+
+    make BUILD_ARGS="--architecture-path examples/architecture.yml" CONFIGURE_ARGS="--image-input-path output-images/image.qcow2"
