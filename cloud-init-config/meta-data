@@ -1,2 +1,2 @@
 instance-id: userid/rocky9
-local-hostname: base-image
+local-hostname: vm-image
