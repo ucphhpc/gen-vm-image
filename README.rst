@@ -87,7 +87,7 @@ To configure a built VM image disk, the `configure-vm-image` command can be used
 This tool uses cloud-init to configure the image, and the configuration files for cloud-init should be defined beforehand.
 Therefore, the tool requires that the to be configured image supports cloud-init, a list of various distributions cloud-init images can be found below.
 
-- `Rocky 9 <https://download.rockylinux.org/pub/rocky/9/images>`_
+- `Rocky <https://download.rockylinux.org/pub/rocky/>`_
 - `Debian <https://cloud.debian.org/images/cloud/>`_
 - `Ubuntu <https://cloud-images.ubuntu.com/>`_
 - `Fedora <https://mirrors.dotsrc.org/fedora-enchilada/linux/releases/39/Cloud/>`_
