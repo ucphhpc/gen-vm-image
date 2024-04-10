@@ -102,3 +102,18 @@ def copy(original, target):
             "Failed to copy file: {} to: {} - {}".format(original, target, err),
         )
     return True, "Copied file: {} to: {}".format(original, target)
+
+
+# Read chunks of a file, default to 64KB
+def hashsum(path, algorithm="sha1", buffer_size=65536):
+    try:
+        import hashlib
+
+        hash_algorithm = hashlib.new(algorithm)
+        with open(path, "rb") as fh:
+            for chunk in iter(lambda: fh.read(buffer_size), b""):
+                hash_algorithm.update(chunk)
+        return hash_algorithm.hexdigest()
+    except Exception as err:
+        print("Failed to calculate hashsum: {} - {}".format(path, err))
+    return False

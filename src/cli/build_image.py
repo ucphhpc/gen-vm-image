@@ -9,12 +9,12 @@ from src.common.defaults import (
     GOCD_TEMPLATE,
     REPO_NAME,
     PACKAGE_NAME,
-    IMAGE_DIR,
+    GENERATED_IMAGE_DIR,
     TMP_DIR,
     GOCD_FORMAT_VERSION,
     GO_REVISION_COMMIT_VAR,
 )
-from src.utils.io import load, exists, makedirs, write, chown
+from src.utils.io import load, exists, makedirs, write, chown, hashsum
 from src.utils.user import lookup_uid, lookup_gid
 from src.utils.job import run
 
@@ -23,9 +23,9 @@ current_dir = os.path.abspath(os.path.dirname(__file__))
 parent_dir = os.path.dirname(current_dir)
 
 
-def get_pipelines(architectures):
+def get_pipelines(images):
     pipelines = []
-    for build in architectures:
+    for build in images:
         pipelines.append(build)
     return pipelines
 
@@ -91,24 +91,20 @@ def get_materials(name, upstream_pipeline=None, stage=None, branch="main"):
 
 
 def run_build_image():
-    parser = argparse.ArgumentParser(prog=PACKAGE_NAME)
+    parser = argparse.ArgumentParser(
+        prog=PACKAGE_NAME, formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
     parser.add_argument(
         "--architecture-path",
         default="architecture.yml",
         help="The path to the architecture file that is used to configure the images to be built",
     )
     parser.add_argument(
-        "--config-name", default="1.gocd.yml", help="Name of the output gocd config"
-    )
-    parser.add_argument(
         "--branch", default="main", help="The branch that should be built"
     )
     parser.add_argument(
-        "--makefile", default="Makefile", help="The makefile that defines the images"
-    )
-    parser.add_argument(
         "--image-output-path",
-        default=os.path.join(IMAGE_DIR, "image.qcow2"),
+        default=os.path.join(GENERATED_IMAGE_DIR, "image.qcow2"),
         help="The output path of the built image",
     )
     parser.add_argument(
@@ -119,17 +115,21 @@ def run_build_image():
     parser.add_argument(
         "--generate-gocd-config",
         action="store_true",
-        help="Generate a GOCD config based on the architecture file",
+        help="Generate a GoCD config based on the architecture file",
+    )
+    parser.add_argument(
+        "--gocd-config-name",
+        default="1.gocd.yml",
+        help="Name of the generated gocd config file",
     )
     args = parser.parse_args()
 
     architecture_path = args.architecture_path
-    config_name = args.config_name
     branch = args.branch
-    makefile = args.makefile
     image_output_path = args.image_output_path
     image_owner = args.image_owner
     generate_gocd_config = args.generate_gocd_config
+    gocd_config_name = args.gocd_config_name
 
     image_output_dir = os.path.dirname(image_output_path)
     temporary_image_dir = TMP_DIR
@@ -145,22 +145,34 @@ def run_build_image():
         print("Failed to find architecture the owner in: {}".format(architecture_path))
         exit(-1)
 
-    architecture = architecture.get("architecture", None)
-    if not architecture:
-        print("Failed to find the architecture in: {}".format(architecture_path))
+    images = architecture.get("images", None)
+    if not images:
+        print("Failed to find 'images' in: {}".format(architecture_path))
         exit(-1)
 
-    required_attributes = ["name", "version", "cloud_img", "size"]
+    required_attributes = ["name", "version", "get_url", "checksum", "size"]
+    required_checksum_attributes = ["type", "value"]
     # Generate the image configuration
-    for build, build_data in architecture.items():
+    for build, build_data in images.items():
         for attr in required_attributes:
             if attr not in build_data:
                 print("Missing required attribute '{}': in {}".format(attr, build_data))
                 exit(-2)
         vm_name = build_data["name"]
         vm_version = build_data["version"]
-        vm_image = build_data["cloud_img"]
+        vm_image_url = build_data["get_url"]
         vm_size = build_data["size"]
+
+        vm_checksum = build_data["checksum"]
+        if not isinstance(vm_checksum, dict):
+            print("Invalid checksum format: {}".format(vm_checksum))
+            exit(-3)
+        for attr in required_checksum_attributes:
+            if attr not in vm_checksum:
+                print(
+                    "Missing required attribute '{}': in {}".format(attr, vm_checksum)
+                )
+                exit(-4)
 
         # Prepare the temporary directory
         # where the image will be prepared
@@ -175,20 +187,39 @@ def run_build_image():
 
         # Download the image and save it into
         # a tmp directory
-        cloud_img_url = vm_image
-        cloud_img_filename = cloud_img_url.split("/")[-1]
-        cloud_img_path = os.path.join(temporary_image_dir, cloud_img_filename)
+        get_url_filename = vm_image_url.split("/")[-1]
+        get_url_path = os.path.join(temporary_image_dir, get_url_filename)
         cloud_image = None
-        if not exists(cloud_img_path):
-            print("Downloading image from: {}".format(cloud_img_url))
-            with requests.get(cloud_img_url, stream=True) as r:
+        if not exists(get_url_path):
+            print("Downloading image from: {}".format(vm_image_url))
+            with requests.get(vm_image_url, stream=True) as r:
                 # check header to get content length, in bytes
                 total_length = int(r.headers.get("Content-Length"))
                 # implement progress bar via tqdm
                 with tqdm.wrapattr(r.raw, "read", total=total_length, desc="") as raw:
                     # Save the output
-                    with open(cloud_img_path, "wb") as output:
+                    with open(get_url_path, "wb") as output:
                         shutil.copyfileobj(raw, output)
+
+        checksum_type = vm_checksum["type"]
+        checksum_value = vm_checksum["value"]
+        calculated_checksum = hashsum(get_url_path, algorithm=checksum_type)
+        if not calculated_checksum:
+            print("Failed to calculate the checksum of the downloaded image")
+            exit(-5)
+
+        if calculated_checksum != checksum_value:
+            print(
+                "The checksum of the downloaded image does not match the expected checksum: {} != {}".format(
+                    calculated_checksum, checksum_value
+                )
+            )
+            exit(-6)
+        print(
+            "The calculated checksum: {} matches the defined checksum: {}".format(
+                calculated_checksum, checksum_value
+            )
+        )
 
         # Create an image based on the downloaded image
         if not exists(image_output_dir):
@@ -207,7 +238,7 @@ def run_build_image():
             "qcow2",
             "-O",
             "qcow2",
-            cloud_img_path,
+            get_url_path,
             image_output_path,
         ]
         create_disk_result = run(create_disk_command)
@@ -258,10 +289,10 @@ def run_build_image():
 
     if generate_gocd_config:
         # GOCD file
-        list_architectures = list(architecture.keys())
+        list_images = list(images.keys())
 
         # Get all pipelines
-        pipelines = get_pipelines(list_architectures)
+        pipelines = get_pipelines(list_images)
 
         # GOCD environment
         common_environments = get_common_environment(pipelines)
@@ -275,7 +306,7 @@ def run_build_image():
             "pipelines": {},
         }
         # Generate the GOCD build config
-        for build, build_data in architecture.items():
+        for build, build_data in images.items():
             name = build_data.get("name", None)
             version = build_data.get("version", None)
             materials = get_materials(name, branch=branch)
@@ -297,11 +328,11 @@ def run_build_image():
             }
             generated_config["pipelines"][build_version_name] = build_pipeline
 
-        path = os.path.join(current_dir, config_name)
-        if not write(path, generated_config, handler=yaml):
+        gocd_config_path = os.path.join(current_dir, gocd_config_name)
+        if not write(gocd_config_path, generated_config, handler=yaml):
             print("Failed to save config")
             exit(-1)
-        print("Generated a new GOCD config in: {}".format(path))
+        print("Generated a new GOCD config in: {}".format(gocd_config_path))
 
 
 if __name__ == "__main__":

@@ -3,7 +3,7 @@ import os
 import subprocess
 import socket
 import multiprocessing as mp
-from src.common.defaults import CLOUD_CONFIG_DIR, IMAGE_CONFIG_DIR, IMAGE_DIR
+from src.common.defaults import CLOUD_CONFIG_DIR, IMAGE_CONFIG_DIR, GENERATED_IMAGE_DIR
 from src.utils.job import run, run_popen
 from src.utils.io import exists, makedirs, which
 
@@ -187,15 +187,18 @@ def reset_image(image):
 
 
 def run_configure_image():
-    parser = argparse.ArgumentParser(prog=SCRIPT_NAME)
+    parser = argparse.ArgumentParser(
+        prog=SCRIPT_NAME,
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
     parser.add_argument(
         "--image-input-path",
-        default=os.path.join(IMAGE_DIR, "image.qcow2"),
+        default=os.path.join(GENERATED_IMAGE_DIR, "image.qcow2"),
         help="The path to the image that is to be configured",
     )
     parser.add_argument(
         "---image-qemu-socket-path",
-        default=os.path.join(IMAGE_DIR, "qemu-monitor-socket"),
+        default=os.path.join(GENERATED_IMAGE_DIR, "qemu-monitor-socket"),
         help="The path to where the QEMU monitor socket should be placed which is used to send commands to the running image while it is being configured.",
     )
     parser.add_argument(
@@ -219,6 +222,7 @@ def run_configure_image():
         help="""The path to the cloud-init output seed image file that is generated
         based on the data defined in the user-data, meta-data, and vendor-data configs""",
     )
+    # # https://qemu-project.gitlab.io/qemu/system/qemu-cpu-models.html
     parser.add_argument(
         "--qemu-cpu-model",
         default="host",

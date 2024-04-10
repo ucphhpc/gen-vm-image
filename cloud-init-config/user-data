@@ -1,11 +1,11 @@
 #cloud-config
 system_info:
   default_user:
-    name: rocky
-    home: /home/rocky
+    name: default_user
+    home: /home/default_user
     sudo: ALL=(ALL) NOPASSWD:ALL
     passwd: ""
     lock_passwd: false
     shell: /bin/bash
-hostname: saga-base
+hostname: vm-image
 ssh_pwauth: False

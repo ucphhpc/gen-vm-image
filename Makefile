@@ -6,12 +6,6 @@ TAG:=edge
 PACKAGE_TIMEOUT:=60
 PACKAGE_NAME=gen-vm-image
 PACKAGE_NAME_FORMATTED=$(subst -,_,$(PACKAGE_NAME))
-IMAGE=saga-base
-IMAGE_PATH=image/$(IMAGE).qcow2
-IMAGE_OWNER=qemu
-QEMU_SOCKET_PATH=/tmp/qemu-monitor-socket
-# https://qemu-project.gitlab.io/qemu/system/qemu-cpu-models.html
-QEMU_CPU_MODEL=AuthenticAMD
 ARGS=
 
 all: venv install-dep install build configure
@@ -24,10 +18,10 @@ clean:
 	rm -fr tests/__pycache__
 
 build:
-	. $(VENV)/activate; gen-vm-image --image-output-path $(IMAGE_PATH) --image-owner $(IMAGE_OWNER) $(ARGS)
+	. $(VENV)/activate; gen-vm-image $(ARGS)
 
 configure:
-	. $(VENV)/activate; configure-vm-image --image-input-path $(IMAGE_PATH) ---image-qemu-socket-path $(QEMU_SOCKET_PATH) $(ARGS)
+	. $(VENV)/activate; configure-vm-image $(ARGS)
 
 dist:
 	$(VENV)/python setup.py sdist bdist_wheel

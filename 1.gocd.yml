@@ -3,10 +3,10 @@ environments:
     environment_variables:
       GIT_USER: '{{SECRET:[github][username]}}'
     pipelines:
-    - saga-base
+    - vm_image
 format_version: 10
 pipelines:
-  saga-base:
+  vm_image:
     display_order: -1
     group: bare_metal_vm_image
     label_template: ${COUNT}
@@ -23,7 +23,7 @@ pipelines:
       COMMIT_TAG: GO_REVISION_SIF_VM_IMAGES
       DEFAULT_TAG: 9.3
       IMAGE: Rocky
-      IMAGE_PIPELINE: saga-base
+      IMAGE_PIPELINE: vm_image
       PUSH_DIRECTORY: publish-docker-scripts
       SRC_DIRECTORY: gen-vm-image
       TEST_DIRECTORY: gen-vm-image

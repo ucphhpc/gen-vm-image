@@ -142,3 +142,6 @@ tmp/*
 
 # Ignore the generated seed files
 *seed.img
+
+# Ignore the generated vm images
+generated-images/
