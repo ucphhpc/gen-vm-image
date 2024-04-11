@@ -2,8 +2,6 @@
 .PHONY: installcheck uninstallcheck test test-all
 
 OWNER:=ucphhpc
-TAG:=edge
-PACKAGE_TIMEOUT:=60
 PACKAGE_NAME=gen-vm-image
 PACKAGE_NAME_FORMATTED=$(subst -,_,$(PACKAGE_NAME))
 BUILD_ARGS=
