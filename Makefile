@@ -59,14 +59,14 @@ check:
 # TODO, add checks
 
 dockercheck-clean:
-	docker rmi -f ucphhpc/gen-vm-image-tests
+	docker rmi -f $(OWNER)/gen-vm-image-tests
 
 dockercheck-build:
 # Use the docker image to test the installation
-	docker build -f tests/Dockerfile -t ucphhpc/gen-vm-image-tests .
+	docker build -f tests/Dockerfile -t $(OWNER)/gen-vm-image-tests .
 
 dockercheck-run:
-	docker run -it ucphhpc/gen-vm-image-tests
+	docker run -it $(OWNER)/gen-vm-image-tests
 
 
 include Makefile.venv
