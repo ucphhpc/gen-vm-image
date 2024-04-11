@@ -27,6 +27,7 @@ setup(
     version=version_ns["__version__"],
     description="",
     long_description=long_description,
+    long_description_content_type="text/x-rst",
     author="Rasmus Munk",
     author_email="munk1@live.dk",
     packages=find_packages(),

@@ -47,6 +47,7 @@ What name this architecture file is given is not important, but it should be in 
                 type: <string> # The type of checksum that should be used to validate the image. For valid types, see the supported algorithms `Here <https://docs.python.org/3/library/hashlib.html#hashlib.new>`_
                 value: <string> # The checksum value that should be used to validate the image
             size: <string> # The size of the to be generated vm image disk, can use suffixes such as 'K', 'M', 'G', 'T'.
+
 An example of such a file can be found in the `examples` directory.
 
 Upon creating such a file, the `gen-vm-image` command can be used to generate the virtual machine image.
