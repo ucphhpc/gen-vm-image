@@ -15,7 +15,11 @@ from src.common.defaults import (
     GO_REVISION_COMMIT_VAR,
 )
 from src.utils.io import load, exists, makedirs, write, chown, hashsum
-from src.utils.user import lookup_uid, lookup_gid
+from src.utils.user import (
+    lookup_uid,
+    lookup_gid,
+    find_user_with_username,
+)
 from src.utils.job import run
 
 
@@ -106,7 +110,7 @@ def run_build_image():
     )
     parser.add_argument(
         "--generated-image-owner",
-        default="qemu",
+        default=find_user_with_username("qemu"),
         help="Set the uid owner of the configured image",
     )
     parser.add_argument(
@@ -335,6 +339,7 @@ def run_build_image():
             print("Failed to save config")
             exit(-1)
         print("Generated a new GOCD config in: {}".format(gocd_config_path))
+    exit(0)
 
 
 if __name__ == "__main__":

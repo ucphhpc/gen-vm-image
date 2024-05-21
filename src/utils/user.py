@@ -16,3 +16,17 @@ def lookup_gid(groupname):
     except Exception as err:
         print("Failed to discover group gid: {} - {}".format(groupname, err))
     return False
+
+
+def find_user_with_username(username):
+    for user in pwd.getpwall():
+        if username in user.pw_name:
+            return user.pw_name
+    return False
+
+
+def find_group_with_groupname(groupname):
+    for group in grp.getgrall():
+        if groupname in group.gr_name:
+            return group.gr_name
+    return False
