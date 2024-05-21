@@ -1,6 +1,7 @@
 environments:
   gen-vm-image:
     environment_variables:
+      GIT_USER: "{{SECRET:[github][username]}}"
       PYPI_USERNAME: '{{SECRET:[gen-vm-image][username]}}'
       PYPI_PASSWORD: '{{SECRET:[gen-vm-image][password]}}'
     pipelines:
@@ -25,8 +26,6 @@ pipelines:
         destination: publish-python-scripts
     parameters:
       ARGS: ''
-      COMMIT_TAG: GO_REVISION_GEN_VM_IMAGE
-      DEFAULT_TAG: 0.0.0a1
       SRC_DIRECTORY: gen-vm-image
       TEST_DIRECTORY: gen-vm-image
       PUSH_DIRECTORY: publish-docker-scripts
