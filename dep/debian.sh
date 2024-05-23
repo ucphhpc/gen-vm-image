@@ -1,9 +1,5 @@
 #!/bin/bash
 
-# The cloud-localds is used to generate the configuration image
-# for cloud-init
-apt install -y cloud-utils
-
 # genisoimage is required for filesystem=iso9660
 apt install -y genisoimage
 

@@ -25,7 +25,7 @@ long_description = open("README.rst").read()
 setup(
     name="gen-vm-image",
     version=version_ns["__version__"],
-    description="This tool can be used for generating and configuring virtual machine images.",
+    description="This tool can be used for generating virtual machine images.",
     long_description=long_description,
     long_description_content_type="text/x-rst",
     author="Rasmus Munk",
@@ -42,7 +42,6 @@ setup(
     entry_points={
         "console_scripts": [
             "gen-vm-image = src.cli.build_image:run_build_image",
-            "configure-vm-image = src.cli.configure_image:run_configure_image",
         ]
     },
     classifiers=[

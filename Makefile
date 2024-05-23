@@ -5,9 +5,8 @@ OWNER:=ucphhpc
 PACKAGE_NAME=gen-vm-image
 PACKAGE_NAME_FORMATTED=$(subst -,_,$(PACKAGE_NAME))
 BUILD_ARGS=
-CONFIGURE_ARGS=
 
-all: venv install-dep install build configure
+all: venv install-dep install build
 
 clean:
 	$(MAKE) distclean
@@ -17,10 +16,7 @@ clean:
 	rm -fr tests/__pycache__
 
 build:
-	. $(VENV)/activate; gen-vm-image $(BUILD_ARGS)
-
-configure:
-	. $(VENV)/activate; configure-vm-image $(CONFIGURE_ARGS)
+	. $(VENV)/activate; gen-vm-image $(ARGS)
 
 dist:
 	$(VENV)/python setup.py sdist bdist_wheel

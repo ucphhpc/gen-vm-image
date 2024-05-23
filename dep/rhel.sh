@@ -1,9 +1,5 @@
 #!/bin/bash
 
-# The cloud-localds is used to generate the configuration image
-# for cloud-init
-dnf install -y cloud-utils --enablerepo devel
-
 # genisoimage is required for filesystem=iso9660
 dnf install -y genisoimage
 
