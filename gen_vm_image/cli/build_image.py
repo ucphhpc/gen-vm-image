@@ -348,7 +348,7 @@ def build_architecture(architecture_path, images_output_directory, verbose):
             disc_action.extend(new_action)
 
         disc_action_result = run(disc_action)
-        if disc_action_result["returncode"] != 0:
+        if disc_action_result["returncode"] != "0":
             print(
                 PATH_CREATE_ERROR_MSG.format(
                     vm_output_path, disc_action_result["error"]
@@ -366,13 +366,13 @@ def build_architecture(architecture_path, images_output_directory, verbose):
         # Amend to qcow2 version 3 which is required in RHEL 9
         amend_command = ["qemu-img", "amend", "-o", "compat=v3", vm_output_path]
         amended_result = run(amend_command)
-        if amended_result["returncode"] != 0:
+        if amended_result["returncode"] != "0":
             print(PATH_CREATE_ERROR_MSG.format(vm_output_path, amended_result["error"]))
 
         # Resize the vm disk image
         resize_command = ["qemu-img", "resize", vm_output_path, vm_size]
         resize_result = run(resize_command)
-        if resize_result["returncode"] != 0:
+        if resize_result["returncode"] != "0":
             print(
                 "Failed to resize the downloaded image: {}".format(
                     resize_result["error"]
@@ -382,7 +382,7 @@ def build_architecture(architecture_path, images_output_directory, verbose):
         # Check that the vm disk is consistent
         check_command = ["qemu-img", "check", "-f", vm_output_format, vm_output_path]
         check_result = run(check_command)
-        if check_result["returncode"] != 0:
+        if check_result["returncode"] != "0":
             print("The check of the vm disk failed: {}".format(check_result["error"]))
 
 
