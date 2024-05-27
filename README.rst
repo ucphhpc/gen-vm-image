@@ -2,7 +2,7 @@
 gen-vm-image
 ============
 
-This package can be used for generating and configuring virtual machine images.
+This package can be used for generating virtual machine images.
 
 ------------
 Dependencies
@@ -66,11 +66,11 @@ The totality of the command can be seen below::
         optional arguments:
         -h, --help            show this help message and exit
         --architecture-path ARCHITECTURE_PATH
-                                The path to the architecture file that is used to configure the images to be built (default: architecture.yml)
+                                The path to the architecture file that is used to build images (default: architecture.yml)
         --image-output-path IMAGE_OUTPUT_PATH
                                 The output path of the built image (default: generated-images/image.qcow2)
         --generated-image-owner GENERATED_IMAGE_OWNER
-                                Set the uid owner of the configured image (default: qemu)
+                                Set the uid owner of the built image (default: qemu)
         --generate-gocd-config
                                 Generate a GoCD config based on the architecture file (default: False)
         --gocd-config-name GOCD_CONFIG_NAME
