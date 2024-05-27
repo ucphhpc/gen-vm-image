@@ -145,3 +145,5 @@ tmp/*
 
 # Ignore the generated vm images
 generated-images/
+
+*.qcow2

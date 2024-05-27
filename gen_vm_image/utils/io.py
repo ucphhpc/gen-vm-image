@@ -1,5 +1,6 @@
 import os
 import shutil
+import re
 
 
 def makedirs(path):
@@ -69,6 +70,10 @@ def exists(path):
     return os.path.exists(os.path.expanduser(path))
 
 
+def join(path, *paths):
+    return os.path.join(path, *paths)
+
+
 def which(command):
     return shutil.which(command)
 
@@ -117,3 +122,12 @@ def hashsum(path, algorithm="sha1", buffer_size=65536):
     except Exception as err:
         print("Failed to calculate hashsum: {} - {}".format(path, err))
     return False
+
+
+def find(directory_path, regex_name):
+    found = []
+    for root, dirs, files in os.walk(directory_path):
+        for f in files:
+            if re.match(regex_name, f):
+                found.append(f)
+    return found

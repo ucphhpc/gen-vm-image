@@ -1,0 +1,25 @@
+owner: the-owner-name
+images:
+  image-1:
+    name: test-image-1
+    version: 9.4
+    format: qcow2
+    size: 10G
+  image-2:
+    name: test-image-2
+    version: 20.04
+    format: qcow2
+    size: 40G
+  image-3:
+    name: test-image-3
+    version: 8.4
+    format: qcow2
+    size: 30G
+  Debian-12:
+    name: Debian
+    version: 12
+    format: qcow2
+    size: 20G
+    input:
+      url: https://cloud.debian.org/images/cloud/bookworm/latest/debian-12-genericcloud-amd64.qcow2
+      format: qcow2

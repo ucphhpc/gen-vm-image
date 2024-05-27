@@ -1,0 +1,13 @@
+PATH_NOT_FOUND_ERROR = -1
+PATH_NOT_FOUND_ERROR_MSG = "Path not found: {} - error: {}"
+PATH_LOAD_ERROR = -2
+PATH_LOAD_ERROR_MSG = "Failed to load path: {}"
+PATH_CREATE_ERROR = -3
+PATH_CREATE_ERROR_MSG = "Failed to create path: {} - error: {}"
+MISSING_ATTRIBUTE_ERROR = -4
+MISSING_ATTRIBUTE_ERROR_MSG = "Missing attribute: {} in {}"
+INVALID_ATTRIBUTE_TYPE_ERROR = -5
+INVALID_ATTRIBUTE_TYPE_ERROR_MSG = (
+    "Invalid attribute type: {} for value: {} - must be {}"
+)
+CHECKSUM_ERROR = -6

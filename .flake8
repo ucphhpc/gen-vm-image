@@ -1,4 +1,4 @@
 [flake8]
-exclude = build,venv,examples
+exclude = build,venv,examples,tmp
 max-line-length = 88
 extend-ignore = E203, W503

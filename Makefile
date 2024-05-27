@@ -1,5 +1,5 @@
 .PHONY: help all clean build build-all maintainer-clean install-dep uninstall-dep
-.PHONY: installcheck uninstallcheck test test-all
+.PHONY: installtest uninstalltest test test-all
 
 OWNER:=ucphhpc
 PACKAGE_NAME=gen-vm-image
@@ -45,23 +45,23 @@ install-dep:
 uninstall-dep:
 	$(VENV)/pip uninstall -r requirements.txt
 
-uninstallcheck:
+uninstalltest:
 	$(VENV)/pip uninstall -y -r tests/requirements.txt
 
-installcheck:
+installtest:
 	$(VENV)/pip install -r tests/requirements.txt
 
-check:
-# TODO, add checks
+test:
+	pytest -s -v tests/
 
-dockercheck-clean:
+dockertest-clean:
 	docker rmi -f $(OWNER)/gen-vm-image-tests
 
-dockercheck-build:
+dockertest-build:
 # Use the docker image to test the installation
 	docker build -f tests/Dockerfile -t $(OWNER)/gen-vm-image-tests .
 
-dockercheck-run:
+dockertest-run:
 	docker run -it $(OWNER)/gen-vm-image-tests
 
 

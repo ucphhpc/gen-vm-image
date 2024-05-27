@@ -41,7 +41,7 @@ setup(
     },
     entry_points={
         "console_scripts": [
-            "gen-vm-image = src.cli.build_image:run_build_image",
+            "gen-vm-image = gen_vm_image.cli.build_image:cli",
         ]
     },
     classifiers=[
