@@ -1,0 +1,13 @@
+owner: the-owner-name
+images:
+  image-1:
+    name: rocky
+    version: 9.4
+    format: qcow2
+    size: 120G
+    input:
+      url: https://download.rockylinux.org/pub/rocky/9/images/x86_64/Rocky-9-GenericCloud-Base.latest.x86_64.qcow2
+      format: qcow2
+      checksum:
+        type: sha256
+        value: 2b521fdff4e4d1a0f1a10b53579a34bba8081ce5eb08e64e3ff22289557f0cfa

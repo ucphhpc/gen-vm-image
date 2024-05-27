@@ -1,9 +1,6 @@
 import argparse
 import os
 import yaml
-import requests
-import shutil
-from tqdm.auto import tqdm
 from gen_vm_image.common.defaults import (
     GOCD_GROUP,
     GOCD_TEMPLATE,
@@ -28,6 +25,7 @@ from gen_vm_image.common.errors import (
 from gen_vm_image.architecture import load_architecture, correct_architecture_structure
 from gen_vm_image.utils.io import exists, makedirs, write, hashsum
 from gen_vm_image.utils.job import run
+from gen_vm_image.utils.net import download_file
 
 
 current_dir = os.path.abspath(os.path.dirname(__file__))
@@ -167,7 +165,7 @@ def build_gocd_config(architecture, gocd_name, branch, verbose):
                 "DEFAULT_TAG": version,
                 "SRC_DIRECTORY": REPO_NAME,
                 "TEST_DIRECTORY": REPO_NAME,
-                "PUSH_DIRECTORY": "publish-docker-scripts",
+                "PUSH_DIRECTORY": "publish-python-scripts",
                 "COMMIT_TAG": GO_REVISION_COMMIT_VAR,
                 "ARGS": "",
             },
@@ -208,8 +206,6 @@ def build_architecture(architecture_path, images_output_directory, verbose):
     images = architecture.get("images", [])
     # Generate the image configuration
     for build, build_data in images.items():
-        # Base command used to either create or convert an image
-        disc_action = ["qemu-img"]
         vm_name = build_data["name"]
         vm_version = build_data["version"]
         vm_size = build_data["size"]
@@ -290,19 +286,11 @@ def build_architecture(architecture_path, images_output_directory, verbose):
 
                 input_url_filename = vm_input_url.split("/")[-1]
                 input_vm_path = os.path.join(TMP_DIR, input_url_filename)
+
                 if not exists(input_vm_path):
                     if verbose:
                         print("Downloading image from: {}".format(vm_input_url))
-                    with requests.get(vm_input_url, stream=True) as r:
-                        # check header to get content length, in bytes
-                        total_length = int(r.headers.get("Content-Length"))
-                        # implement progress bar via tqdm
-                        with tqdm.wrapattr(
-                            r.raw, "read", total=total_length, desc=""
-                        ) as raw:
-                            # Save the output
-                            with open(input_vm_path, "wb") as output:
-                                shutil.copyfileobj(raw, output)
+                    download_file(vm_input_url, input_vm_path)
 
                 checksum_type = vm_input_checksum["type"]
                 checksum_value = vm_input_checksum["value"]
@@ -332,46 +320,39 @@ def build_architecture(architecture_path, images_output_directory, verbose):
                         )
                     )
                     exit(PATH_NOT_FOUND_ERROR)
-            convert_action = [
-                "convert",
-                "-f",
-                vm_input_format,
-                "-O",
-                vm_output_format,
+
+            converted_result, msg = convert_image(
                 input_vm_path,
                 vm_output_path,
-            ]
-            disc_action.extend(convert_action)
+                input_format=vm_input_format,
+                output_format=vm_output_format,
+            )
+            if not converted_result:
+                print(msg)
+                exit(converted_result)
         else:
             # If no input is specified, then we assume that we are creating a new disc image
-            new_action = ["create", "-f", vm_output_format, vm_output_path, vm_size]
-            disc_action.extend(new_action)
-
-        disc_action_result = run(disc_action)
-        if disc_action_result["returncode"] != "0":
-            print(
-                PATH_CREATE_ERROR_MSG.format(
-                    vm_output_path, disc_action_result["error"]
-                )
+            create_image_result, msg = create_image(
+                vm_input, vm_version, vm_size, image_format=vm_output_format
             )
-            exit(PATH_CREATE_ERROR)
-        else:
-            if verbose:
-                print(
-                    "Created VM disk image at: {}".format(
-                        os.path.abspath(vm_output_path)
+            if not create_image_result:
+                print(msg)
+                exit(create_image_result)
+            else:
+                if verbose:
+                    print(
+                        "Generated image at: {}".format(os.path.abspath(vm_output_path))
                     )
-                )
 
         # Amend to qcow2 version 3 which is required in RHEL 9
         amend_command = ["qemu-img", "amend", "-o", "compat=v3", vm_output_path]
-        amended_result = run(amend_command)
+        amended_result = run(amend_command, format_output_str=True)
         if amended_result["returncode"] != "0":
             print(PATH_CREATE_ERROR_MSG.format(vm_output_path, amended_result["error"]))
 
         # Resize the vm disk image
         resize_command = ["qemu-img", "resize", vm_output_path, vm_size]
-        resize_result = run(resize_command)
+        resize_result = run(resize_command, format_output_str=True)
         if resize_result["returncode"] != "0":
             print(
                 "Failed to resize the downloaded image: {}".format(
@@ -381,7 +362,7 @@ def build_architecture(architecture_path, images_output_directory, verbose):
 
         # Check that the vm disk is consistent
         check_command = ["qemu-img", "check", "-f", vm_output_format, vm_output_path]
-        check_result = run(check_command)
+        check_result = run(check_command, format_output_str=True)
         if check_result["returncode"] != "0":
             print("The check of the vm disk failed: {}".format(check_result["error"]))
 
