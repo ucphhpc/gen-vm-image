@@ -4,7 +4,7 @@
 OWNER:=ucphhpc
 PACKAGE_NAME=gen-vm-image
 PACKAGE_NAME_FORMATTED=$(subst -,_,$(PACKAGE_NAME))
-BUILD_ARGS=
+ARGS=
 
 all: venv install-dep install build
 
