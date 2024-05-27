@@ -21,6 +21,10 @@ from gen_vm_image.common.errors import (
     INVALID_ATTRIBUTE_TYPE_ERROR,
     INVALID_ATTRIBUTE_TYPE_ERROR_MSG,
     CHECKSUM_ERROR,
+    RESIZE_ERROR,
+    RESIZE_ERROR_MSG,
+    CHECK_ERROR,
+    CHECK_ERROR_MSG,
 )
 from gen_vm_image.architecture import load_architecture, correct_architecture_structure
 from gen_vm_image.utils.io import exists, makedirs, write, hashsum
@@ -101,17 +105,17 @@ def get_materials(name, upstream_pipeline=None, stage=None, branch="main"):
 
 def create_image(name, version, size, image_format="qcow2"):
     image_name = "{}-{}.{}".format(name, version, image_format)
-    create_image_command = ["qemu-img", "create", "-f", image_format, image_name, size]
-    created_result = run(create_image_command, format_output_str=True)
-    if created_result["returncode"] != "0":
+    command = ["qemu-img", "create", "-f", image_format, image_name, size]
+    result = run(command, format_output_str=True)
+    if result["returncode"] != "0":
         return PATH_CREATE_ERROR, PATH_CREATE_ERROR_MSG.format(
-            image_name, created_result["error"]
+            image_name, result["error"]
         )
-    return created_result, None
+    return result, None
 
 
 def convert_image(input_path, output_path, input_format="qcow2", output_format="qcow2"):
-    convert_image_command = [
+    command = [
         "qemu-img",
         "convert",
         "-f",
@@ -121,12 +125,28 @@ def convert_image(input_path, output_path, input_format="qcow2", output_format="
         input_path,
         output_path,
     ]
-    converted_result = run(convert_image_command, format_output_str=True)
-    if converted_result["returncode"] != "0":
+    result = run(command, format_output_str=True)
+    if result["returncode"] != "0":
         return PATH_CREATE_ERROR, PATH_CREATE_ERROR_MSG.format(
-            input_path, converted_result["error"]
+            input_path, result["error"]
         )
-    return converted_result, None
+    return result, None
+
+
+def resize_image(path, size):
+    command = ["qemu-img", "resize", path, size]
+    result = run(command, format_output_str=True)
+    if result["returncode"] != "0":
+        return RESIZE_ERROR, RESIZE_ERROR_MSG.format(result["error"])
+    return result, None
+
+
+def check_image(path, image_format="qcow2"):
+    command = ["qemu-img", "check", "-f", image_format, path]
+    result = run(command, format_output_str=True)
+    if result["returncode"] != "0":
+        return CHECK_ERROR, CHECK_ERROR_MSG.format(result["error"])
+    return result, None
 
 
 def build_gocd_config(architecture, gocd_name, branch, verbose):
@@ -286,7 +306,6 @@ def build_architecture(architecture_path, images_output_directory, verbose):
 
                 input_url_filename = vm_input_url.split("/")[-1]
                 input_vm_path = os.path.join(TMP_DIR, input_url_filename)
-
                 if not exists(input_vm_path):
                     if verbose:
                         print("Downloading image from: {}".format(vm_input_url))
@@ -330,6 +349,12 @@ def build_architecture(architecture_path, images_output_directory, verbose):
             if not converted_result:
                 print(msg)
                 exit(converted_result)
+
+            # Resize the vm disk image
+            resized_result, resized_msg = resize_image(vm_output_path, vm_size)
+            if not resized_result:
+                print(resized_msg)
+                exit(resized_result)
         else:
             # If no input is specified, then we assume that we are creating a new disc image
             create_image_result, msg = create_image(
@@ -344,27 +369,19 @@ def build_architecture(architecture_path, images_output_directory, verbose):
                         "Generated image at: {}".format(os.path.abspath(vm_output_path))
                     )
 
+        # TODO, check if the image in question is a rhel9 based image
         # Amend to qcow2 version 3 which is required in RHEL 9
         amend_command = ["qemu-img", "amend", "-o", "compat=v3", vm_output_path]
         amended_result = run(amend_command, format_output_str=True)
         if amended_result["returncode"] != "0":
             print(PATH_CREATE_ERROR_MSG.format(vm_output_path, amended_result["error"]))
 
-        # Resize the vm disk image
-        resize_command = ["qemu-img", "resize", vm_output_path, vm_size]
-        resize_result = run(resize_command, format_output_str=True)
-        if resize_result["returncode"] != "0":
-            print(
-                "Failed to resize the downloaded image: {}".format(
-                    resize_result["error"]
-                )
-            )
-
-        # Check that the vm disk is consistent
-        check_command = ["qemu-img", "check", "-f", vm_output_format, vm_output_path]
-        check_result = run(check_command, format_output_str=True)
-        if check_result["returncode"] != "0":
-            print("The check of the vm disk failed: {}".format(check_result["error"]))
+        check_result, check_msg = check_image(
+            vm_output_path, image_format=vm_output_format
+        )
+        if not check_result:
+            print(check_msg)
+            exit(check_result)
 
 
 def cli():

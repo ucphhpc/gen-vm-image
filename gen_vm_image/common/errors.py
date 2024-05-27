@@ -11,3 +11,7 @@ INVALID_ATTRIBUTE_TYPE_ERROR_MSG = (
     "Invalid attribute type: {} for value: {} - must be {}"
 )
 CHECKSUM_ERROR = -6
+RESIZE_ERROR = -7
+RESIZE_ERROR_MSG = "Failed to resize path: {}"
+CHECK_ERROR = -8
+CHECK_ERROR_MSG = "Failed to check path: {}"

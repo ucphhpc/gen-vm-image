@@ -115,6 +115,7 @@ def hashsum(path, algorithm="sha1", buffer_size=65536):
         import hashlib
 
         hash_algorithm = hashlib.new(algorithm)
+
         with open(path, "rb") as fh:
             for chunk in iter(lambda: fh.read(buffer_size), b""):
                 hash_algorithm.update(chunk)
