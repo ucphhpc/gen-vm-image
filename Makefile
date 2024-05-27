@@ -52,7 +52,7 @@ installtest:
 	$(VENV)/pip install -r tests/requirements.txt
 
 test:
-	pytest -s -v tests/
+	$(VENV)/pytest -s -v tests/
 
 dockertest-clean:
 	docker rmi -f $(OWNER)/gen-vm-image-tests
