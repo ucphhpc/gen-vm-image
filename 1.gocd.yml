@@ -28,5 +28,5 @@ pipelines:
       ARGS: '--architecture-path examples/architecture.yml'
       SRC_DIRECTORY: gen-vm-image
       TEST_DIRECTORY: gen-vm-image
-      PUSH_DIRECTORY: publish-docker-scripts
+      PUSH_DIRECTORY: publish-python-scripts
     template: bare_metal_pypi_package
