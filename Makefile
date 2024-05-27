@@ -6,7 +6,9 @@ PACKAGE_NAME=gen-vm-image
 PACKAGE_NAME_FORMATTED=$(subst -,_,$(PACKAGE_NAME))
 ARGS=
 
-all: venv install-dep install build
+all: init install-dep install build
+
+init: venv
 
 clean:
 	$(MAKE) distclean
