@@ -69,3 +69,4 @@ class TestImageBuild(unittest.TestCase):
         self.assertEqual(result["returncode"], "0")
         self.assertIsNone(msg)
         self.assertTrue(exists(output_path))
+        # TODO, validate that the output image is of the correct size and format
