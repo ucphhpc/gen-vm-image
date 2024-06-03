@@ -1,14 +1,22 @@
 import requests
 import tqdm
-import shutil
 
 
-def download_file(url, ouput_path):
-    with requests.get(url, stream=True) as r:
-        # check header to get content length, in bytes
-        total_length = int(r.headers.get("Content-Length"))
-        # implement progress bar via tqdm
-        with tqdm.wrapattr(r.raw, "read", total=total_length, desc="") as raw:
-            # Save the output
-            with open(ouput_path, "wb") as output:
-                shutil.copyfileobj(raw, output)
+def download_file(url, ouput_path, chunk_size=8192):
+    with open(ouput_path, "wb") as _file:
+        with requests.get(url, stream=True) as r:
+            r.raise_for_status()
+            total = int(r.headers.get("content-length", 0))
+
+            tqdm_params = {
+                "desc": url,
+                "total": total,
+                "miniters": 1,
+                "unit": "B",
+                "unit_scale": True,
+                "unit_divisor": 1024,
+            }
+            with tqdm.tqdm(**tqdm_params) as pb:
+                for chunk in r.iter_content(chunk_size=chunk_size):
+                    pb.update(len(chunk))
+                    _file.write(chunk)
