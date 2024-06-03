@@ -261,39 +261,40 @@ def build_architecture(architecture_path, images_output_directory, verbose):
                     )
                     exit(INVALID_ATTRIBUTE_TYPE_ERROR)
 
-                if "checksum" not in vm_input:
-                    print(MISSING_ATTRIBUTE_ERROR_MSG.format("checksum", vm_input))
-                    exit(MISSING_ATTRIBUTE_ERROR)
-                if not isinstance(vm_input["checksum"], dict):
-                    print(
-                        INVALID_ATTRIBUTE_TYPE_ERROR_MSG.format(
-                            type(vm_input["checksum"]),
-                            vm_input["checksum"],
-                            "dictionary",
-                        )
-                    )
-                    exit(INVALID_ATTRIBUTE_TYPE_ERROR)
-                required_checksum_attributes = ["type", "value"]
-                for attr in required_checksum_attributes:
-                    if attr not in vm_input["checksum"]:
-                        print(
-                            MISSING_ATTRIBUTE_ERROR_MSG.format(
-                                attr, vm_input["checksum"]
-                            )
-                        )
-                        exit(MISSING_ATTRIBUTE_ERROR)
-                    if not isinstance(vm_input["checksum"][attr], str):
+                # If a checksum is present, then validate that it is correctly structured
+                vm_input_checksum = None
+                if "checksum" in vm_input:
+                    if not isinstance(vm_input["checksum"], dict):
                         print(
                             INVALID_ATTRIBUTE_TYPE_ERROR_MSG.format(
-                                type(vm_input["checksum"][attr]),
-                                vm_input["checksum"][attr],
-                                "string",
+                                type(vm_input["checksum"]),
+                                vm_input["checksum"],
+                                "dictionary",
                             )
                         )
                         exit(INVALID_ATTRIBUTE_TYPE_ERROR)
 
+                    required_checksum_attributes = ["type", "value"]
+                    for attr in required_checksum_attributes:
+                        if attr not in vm_input["checksum"]:
+                            print(
+                                MISSING_ATTRIBUTE_ERROR_MSG.format(
+                                    attr, vm_input["checksum"]
+                                )
+                            )
+                            exit(MISSING_ATTRIBUTE_ERROR)
+                        if not isinstance(vm_input["checksum"][attr], str):
+                            print(
+                                INVALID_ATTRIBUTE_TYPE_ERROR_MSG.format(
+                                    type(vm_input["checksum"][attr]),
+                                    vm_input["checksum"][attr],
+                                    "string",
+                                )
+                            )
+                            exit(INVALID_ATTRIBUTE_TYPE_ERROR)
+                    vm_input_checksum = vm_input["checksum"]
+
                 vm_input_url = vm_input["url"]
-                vm_input_checksum = vm_input["checksum"]
                 # Download the specified Url and save it into
                 # a tmp directory.
                 # First prepare the temporary directory
@@ -311,26 +312,31 @@ def build_architecture(architecture_path, images_output_directory, verbose):
                         print("Downloading image from: {}".format(vm_input_url))
                     download_file(vm_input_url, input_vm_path)
 
-                checksum_type = vm_input_checksum["type"]
-                checksum_value = vm_input_checksum["value"]
-                calculated_checksum = hashsum(input_vm_path, algorithm=checksum_type)
-                if not calculated_checksum:
-                    print("Failed to calculate the checksum of the downloaded image")
-                    exit(CHECKSUM_ERROR)
+                if vm_input_checksum:
+                    checksum_type = vm_input_checksum["type"]
+                    checksum_value = vm_input_checksum["value"]
+                    calculated_checksum = hashsum(
+                        input_vm_path, algorithm=checksum_type
+                    )
+                    if not calculated_checksum:
+                        print(
+                            "Failed to calculate the checksum of the downloaded image"
+                        )
+                        exit(CHECKSUM_ERROR)
 
-                if calculated_checksum != checksum_value:
-                    print(
-                        "The checksum of the downloaded image does not match the expected checksum: {} != {}".format(
-                            calculated_checksum, checksum_value
+                    if calculated_checksum != checksum_value:
+                        print(
+                            "The checksum of the downloaded image: {} does not match the expected checksum: {}".format(
+                                calculated_checksum, checksum_value
+                            )
                         )
-                    )
-                    exit(CHECKSUM_ERROR)
-                if verbose:
-                    print(
-                        "The calculated checksum: {} matches the defined checksum: {}".format(
-                            calculated_checksum, checksum_value
+                        exit(CHECKSUM_ERROR)
+                    if verbose:
+                        print(
+                            "The calculated checksum: {} matches the defined checksum: {}".format(
+                                calculated_checksum, checksum_value
+                            )
                         )
-                    )
             else:
                 if not exists(vm_input):
                     print(
