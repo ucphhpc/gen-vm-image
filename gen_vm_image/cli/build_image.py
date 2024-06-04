@@ -395,8 +395,7 @@ def cli():
         prog=PACKAGE_NAME, formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
     parser.add_argument(
-        "--architecture-path",
-        default="architecture.yml",
+        "architecture_path",
         help="The path to the architecture file that defines the images to build",
     )
     parser.add_argument(
