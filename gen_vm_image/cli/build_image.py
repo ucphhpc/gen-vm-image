@@ -149,7 +149,7 @@ def check_image(path, image_format="qcow2"):
     return result, None
 
 
-def build_gocd_config(architecture, gocd_name, branch, verbose):
+def build_gocd_config(architecture, gocd_name, branch, verbose=False):
     images = architecture.get("images", [])
 
     # GOCD file
@@ -202,7 +202,7 @@ def build_gocd_config(architecture, gocd_name, branch, verbose):
         print("Generated a new GOCD config in: {}".format(gocd_config_path))
 
 
-def build_architecture(architecture_path, images_output_directory, verbose):
+def build_architecture(architecture_path, images_output_directory, verbose=False):
     # Load the architecture file
     architecture, load_error_msg = load_architecture(architecture_path)
     if load_error_msg:
@@ -433,10 +433,10 @@ def cli():
     gocd_build_branch = args.gocd_build_branch
     verbose = args.verbose
 
-    build_architecture(architecture_path, images_output_directory, verbose)
+    build_architecture(architecture_path, images_output_directory, verbose=verbose)
     if generate_gocd_config:
         build_gocd_config(
-            architecture_path, gocd_config_name, gocd_build_branch, verbose
+            architecture_path, gocd_config_name, gocd_build_branch, verbose=verbose
         )
     exit(0)
 
