@@ -250,16 +250,38 @@ def build_architecture(architecture_path, images_output_directory, verbose=False
 
         if vm_input:
             if isinstance(vm_input, dict):
-                if "url" not in vm_input:
-                    print(MISSING_ATTRIBUTE_ERROR_MSG.format("url", vm_input))
-                    exit(MISSING_ATTRIBUTE_ERROR)
-                if not isinstance(vm_input["url"], str):
+                if "url" not in vm_input or "path" not in vm_input:
                     print(
-                        INVALID_ATTRIBUTE_TYPE_ERROR_MSG.format(
-                            type(vm_input["url"]), vm_input["url"], "string"
+                        MISSING_ATTRIBUTE_ERROR_MSG.format(
+                            "'url' or 'path' must be in the architecture input section",
+                            vm_input,
                         )
                     )
+                    exit(MISSING_ATTRIBUTE_ERROR)
+
+                if "url" in vm_input and "path" in vm_input:
+                    print(
+                        "Both 'url' and 'path' are defined in the architecture input section. Only one can be defined"
+                    )
                     exit(INVALID_ATTRIBUTE_TYPE_ERROR)
+
+                if "url" in vm_input:
+                    if not isinstance(vm_input["url"], str):
+                        print(
+                            INVALID_ATTRIBUTE_TYPE_ERROR_MSG.format(
+                                type(vm_input["url"]), vm_input["url"], "string"
+                            )
+                        )
+                        exit(INVALID_ATTRIBUTE_TYPE_ERROR)
+
+                if "path" in vm_input:
+                    if not isinstance(vm_input["path"], str):
+                        print(
+                            INVALID_ATTRIBUTE_TYPE_ERROR_MSG.format(
+                                type(vm_input["path"]), vm_input["path"], "string"
+                            )
+                        )
+                        exit(INVALID_ATTRIBUTE_TYPE_ERROR)
 
                 # If a checksum is present, then validate that it is correctly structured
                 vm_input_checksum = None
@@ -294,23 +316,34 @@ def build_architecture(architecture_path, images_output_directory, verbose=False
                             exit(INVALID_ATTRIBUTE_TYPE_ERROR)
                     vm_input_checksum = vm_input["checksum"]
 
-                vm_input_url = vm_input["url"]
-                # Download the specified Url and save it into
-                # a tmp directory.
-                # First prepare the temporary directory
-                # where the downloaded image will be prepared
-                if not exists(TMP_DIR):
-                    created, msg = makedirs(TMP_DIR)
-                    if not created:
-                        print(PATH_CREATE_ERROR_MSG.format(TMP_DIR, msg))
-                        exit(PATH_CREATE_ERROR)
+                if "url" in vm_input:
+                    vm_input_url = vm_input["url"]
+                    # Download the specified url and save it into
+                    # a tmp directory.
+                    # First prepare the temporary directory
+                    # where the downloaded image will be prepared
+                    if not exists(TMP_DIR):
+                        created, msg = makedirs(TMP_DIR)
+                        if not created:
+                            print(PATH_CREATE_ERROR_MSG.format(TMP_DIR, msg))
+                            exit(PATH_CREATE_ERROR)
 
-                input_url_filename = vm_input_url.split("/")[-1]
-                input_vm_path = os.path.join(TMP_DIR, input_url_filename)
-                if not exists(input_vm_path):
-                    if verbose:
-                        print("Downloading image from: {}".format(vm_input_url))
-                    download_file(vm_input_url, input_vm_path)
+                    input_url_filename = vm_input_url.split("/")[-1]
+                    input_vm_path = os.path.join(TMP_DIR, input_url_filename)
+                    if not exists(input_vm_path):
+                        if verbose:
+                            print("Downloading image from: {}".format(vm_input_url))
+                        download_file(vm_input_url, input_vm_path)
+                elif "path" in vm_input:
+                    input_vm_path = vm_input["path"]
+                    if not exists(input_vm_path):
+                        print(
+                            PATH_NOT_FOUND_ERROR_MSG.format(
+                                input_vm_path,
+                                "the defined input path to the does not exist",
+                            )
+                        )
+                        exit(PATH_NOT_FOUND_ERROR)
 
                 if vm_input_checksum:
                     checksum_type = vm_input_checksum["type"]
