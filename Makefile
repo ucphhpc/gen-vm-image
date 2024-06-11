@@ -10,50 +10,46 @@ all: init install-dep install build
 
 init: venv
 
-clean:
-	$(MAKE) distclean
-	$(MAKE) venv-clean
+clean: distclean venv-clean
 	rm -fr .env
 	rm -fr .pytest_cache
 	rm -fr tests/__pycache__
 
-build:
+build: venv
 	. $(VENV)/activate; gen-vm-image $(ARGS)
 
-dist:
+dist: venv
 	$(VENV)/python setup.py sdist bdist_wheel
 
 distclean:
 	rm -fr dist build $(PACKAGE_NAME).egg-info $(PACKAGE_NAME_FORMATTED).egg-info
 
-maintainer-clean:
+maintainer-clean: clean
 	@echo 'This command is intended for maintainers to use; it'
 	@echo 'deletes files that may need special tools to rebuild.'
-	$(MAKE) venv-clean
-	$(MAKE) clean
 
-install:
+install: install-dep
 	$(VENV)/pip install .
 
-uninstall:
+uninstall: venv
 	$(VENV)/pip uninstall -y gen-vm-image
 
-install-dev:
+install-dev: venv
 	$(VENV)/pip install -r requirements-dev.txt
 
-install-dep:
+install-dep: venv
 	$(VENV)/pip install -r requirements.txt
 
-uninstall-dep:
+uninstall-dep: venv
 	$(VENV)/pip uninstall -r requirements.txt
 
-uninstalltest:
+uninstalltest: venv
 	$(VENV)/pip uninstall -y -r tests/requirements.txt
 
-installtest:
+installtest: install
 	$(VENV)/pip install -r tests/requirements.txt
 
-test:
+test: installtest
 	$(VENV)/pytest -s -v tests/
 
 dockertest-clean:
