@@ -250,7 +250,7 @@ def build_architecture(architecture_path, images_output_directory, verbose=False
 
         if vm_input:
             if isinstance(vm_input, dict):
-                if "url" not in vm_input or "path" not in vm_input:
+                if "url" not in vm_input and "path" not in vm_input:
                     print(
                         MISSING_ATTRIBUTE_ERROR_MSG.format(
                             "'url' or 'path' must be in the architecture input section",
