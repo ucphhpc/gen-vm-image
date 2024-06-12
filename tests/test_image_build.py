@@ -61,9 +61,7 @@ class TestImageBuild(unittest.TestCase):
             image_format=image_1["format"],
             output_path=self.test_tmp_directory,
         )
-        self.assertNotIsInstance(result, int)
-        self.assertIsInstance(result, dict)
-        self.assertEqual(result["returncode"], "0")
+        self.assertTrue(result)
         self.assertIsNone(msg)
 
     def test_create_image_raw_2(self):
@@ -81,9 +79,7 @@ class TestImageBuild(unittest.TestCase):
             image_format=image_2["format"],
             output_path=self.test_tmp_directory,
         )
-        self.assertNotIsInstance(result, int)
-        self.assertIsInstance(result, dict)
-        self.assertEqual(result["returncode"], "0")
+        self.assertTrue(result)
         self.assertIsNone(msg)
 
     def test_image_path_input(self):
@@ -115,16 +111,16 @@ class TestImageBuild(unittest.TestCase):
             input_format=input_path_image["input"]["format"],
             output_format=input_path_image["format"],
         )
-        self.assertNotIsInstance(concert_result, int)
-        self.assertIsInstance(concert_result, dict)
-        self.assertEqual(concert_result["returncode"], "0")
+        self.assertTrue(concert_result)
         self.assertIsNone(convert_msg)
         self.assertTrue(exists(output_path))
 
-        resize_result, resize_msg = resize_image(output_path, input_path_image["size"])
-        self.assertNotIsInstance(resize_result, int)
-        self.assertIsInstance(resize_result, dict)
-        self.assertEqual(resize_result["returncode"], "0")
+        resize_result, resize_msg = resize_image(
+            output_path,
+            input_path_image["size"],
+            image_format=input_path_image["format"],
+        )
+        self.assertTrue(resize_result)
         self.assertIsNone(resize_msg)
         # TODO, validate that the size of the output image is correct
 
@@ -155,9 +151,7 @@ class TestImageBuild(unittest.TestCase):
             input_format=convert_image_dict["input"]["format"],
             output_format=convert_image_dict["format"],
         )
-        self.assertNotIsInstance(result, int)
-        self.assertIsInstance(result, dict)
-        self.assertEqual(result["returncode"], "0")
+        self.assertTrue(result)
         self.assertIsNone(msg)
         self.assertTrue(exists(output_path))
         # TODO, validate that the output image is of the correct size and format

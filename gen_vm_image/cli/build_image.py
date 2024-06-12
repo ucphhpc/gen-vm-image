@@ -104,46 +104,57 @@ def get_materials(name, upstream_pipeline=None, stage=None, branch="main"):
     return materials
 
 
-def create_image(name, version, size, image_format="qcow2", output_path=None):
+def qemu_img_call(action, args, format_output_str=True, verbose=False):
+    command = ["qemu-img", action]
+    if not verbose:
+        command.append("-q")
+    command.extend(args)
+
+    result = run(command, format_output_str=format_output_str)
+    if result["returncode"] != "0":
+        return False, result["error"]
+    return True, None
+
+
+def create_image(
+    name, version, size, image_format="qcow2", output_path=None, verbose=False
+):
     image_path = "{}-{}.{}".format(name, version, image_format)
     if output_path:
         image_path = join(output_path, image_path)
-    command = ["qemu-img", "create", "-f", image_format, image_path, size]
-    result = run(command, format_output_str=True)
-    if result["returncode"] != "0":
-        return PATH_CREATE_ERROR, PATH_CREATE_ERROR_MSG.format(
-            image_path, result["error"]
-        )
+
+    args = ["-f", image_format, image_path, size]
+    result, msg = qemu_img_call("create", args, verbose=verbose)
+
+    if not result:
+        return PATH_CREATE_ERROR, PATH_CREATE_ERROR_MSG.format(image_path, msg)
     return result, None
 
 
-def convert_image(input_path, output_path, input_format="qcow2", output_format="qcow2"):
-    command = [
-        "qemu-img",
-        "convert",
-        "-f",
-        input_format,
-        "-O",
-        output_format,
-        input_path,
-        output_path,
-    ]
-    result = run(command, format_output_str=True)
-    if result["returncode"] != "0":
-        return PATH_CREATE_ERROR, PATH_CREATE_ERROR_MSG.format(
-            input_path, result["error"]
-        )
+def convert_image(
+    input_path, output_path, input_format="qcow2", output_format="qcow2", verbose=False
+):
+    args = ["-f", input_format, "-O", output_format, input_path, output_path]
+    result, msg = qemu_img_call("convert", args, verbose=verbose)
+    if not result:
+        return PATH_CREATE_ERROR, PATH_CREATE_ERROR_MSG.format(input_path, msg)
     return result, None
 
 
 def resize_image(path, size, image_format="qcow2", verbose=False):
-    command = ["qemu-img", "resize", "-f", image_format]
-    if not verbose:
-        command.append("-q")
-    command.extend([path, size])
-    result = run(command, format_output_str=True)
-    if result["returncode"] != "0":
-        return RESIZE_ERROR, RESIZE_ERROR_MSG.format(result["error"])
+    result, msg = qemu_img_call(
+        "resize", ["-f", image_format, path, size], verbose=verbose
+    )
+    if not result:
+        return RESIZE_ERROR, RESIZE_ERROR_MSG.format(msg)
+    return result, None
+
+
+def amend_image(path, options, image_format="qcow2", verbose=False):
+    args = ["-f", image_format, "-o", options, path]
+    result, msg = qemu_img_call("amend", args, verbose=verbose)
+    if not result:
+        return PATH_CREATE_ERROR, PATH_CREATE_ERROR_MSG.format(path, msg)
     return result, None
 
 
@@ -153,15 +164,9 @@ def check_image(path, image_format="qcow2", verbose=False):
             image_format, CONSITENCY_SUPPPORTED_FORMATS
         )
         return False, msg
-
-    command = ["qemu-img", "check", "-f", image_format]
-    if not verbose:
-        command.append("-q")
-    command.append(path)
-
-    result = run(command, format_output_str=True)
-    if result["returncode"] != "0":
-        return CHECK_ERROR, CHECK_ERROR_MSG.format(result["error"])
+    result, msg = qemu_img_call("check", ["-f", image_format, path], verbose=verbose)
+    if not result:
+        return CHECK_ERROR, CHECK_ERROR_MSG.format(msg)
     return result, None
 
 
@@ -430,14 +435,11 @@ def build_architecture(architecture_path, images_output_directory, verbose=False
         # qcow2
         # TODO, validate that the image is a rhel based image
         if vm_output_format == "qcow2":
-            amend_command = ["qemu-img", "amend", "-o", "compat=v3", vm_output_path]
-            amended_result = run(amend_command, format_output_str=True)
-            if amended_result["returncode"] != "0":
-                print(
-                    PATH_CREATE_ERROR_MSG.format(
-                        vm_output_path, amended_result["error"]
-                    )
-                )
+            amend_result, amend_msg = amend_image(
+                vm_output_path, "compat=v3", verbose=verbose
+            )
+            if not amend_result:
+                print(PATH_CREATE_ERROR_MSG.format(vm_output_path, amend_msg))
 
         if vm_output_format in CONSITENCY_SUPPPORTED_FORMATS:
             check_result, check_msg = check_image(
