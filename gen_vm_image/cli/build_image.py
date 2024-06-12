@@ -415,6 +415,7 @@ def build_architecture(architecture_path, images_output_directory, verbose=False
             # If no input is specified, then we assume that we are creating a new disc image
             create_image_result, msg = create_image(
                 vm_output_path,
+                vm_size,
                 image_format=vm_output_format,
                 verbose=verbose,
             )
