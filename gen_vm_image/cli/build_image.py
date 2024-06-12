@@ -405,6 +405,7 @@ def build_architecture(architecture_path, images_output_directory, verbose=False
                 vm_output_path,
                 input_format=vm_input_format,
                 output_format=vm_output_format,
+                verbose=verbose,
             )
             if not converted_result:
                 print(msg)
@@ -420,7 +421,12 @@ def build_architecture(architecture_path, images_output_directory, verbose=False
         else:
             # If no input is specified, then we assume that we are creating a new disc image
             create_image_result, msg = create_image(
-                vm_input, vm_version, vm_size, image_format=vm_output_format
+                vm_input,
+                vm_version,
+                vm_size,
+                output_path=images_output_directory,
+                image_format=vm_output_format,
+                verbose=verbose,
             )
             if not create_image_result:
                 print(msg)
