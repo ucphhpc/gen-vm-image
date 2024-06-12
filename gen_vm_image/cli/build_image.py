@@ -10,6 +10,7 @@ from gen_vm_image.common.defaults import (
     TMP_DIR,
     GOCD_FORMAT_VERSION,
     GO_REVISION_COMMIT_VAR,
+    CONSITENCY_SUPPPORTED_FORMATS,
 )
 from gen_vm_image.common.errors import (
     PATH_NOT_FOUND_ERROR,
@@ -135,16 +136,29 @@ def convert_image(input_path, output_path, input_format="qcow2", output_format="
     return result, None
 
 
-def resize_image(path, size):
-    command = ["qemu-img", "resize", path, size]
+def resize_image(path, size, image_format="qcow2", verbose=False):
+    command = ["qemu-img", "resize", "-f", image_format]
+    if not verbose:
+        command.append("-q")
+    command.extend([path, size])
     result = run(command, format_output_str=True)
     if result["returncode"] != "0":
         return RESIZE_ERROR, RESIZE_ERROR_MSG.format(result["error"])
     return result, None
 
 
-def check_image(path, image_format="qcow2"):
-    command = ["qemu-img", "check", "-f", image_format, path]
+def check_image(path, image_format="qcow2", verbose=False):
+    if image_format not in CONSITENCY_SUPPPORTED_FORMATS:
+        msg = "format: '{}' not supported for consistency check, only one of: {} is supported".format(
+            image_format, CONSITENCY_SUPPPORTED_FORMATS
+        )
+        return False, msg
+
+    command = ["qemu-img", "check", "-f", image_format]
+    if not verbose:
+        command.append("-q")
+    command.append(path)
+
     result = run(command, format_output_str=True)
     if result["returncode"] != "0":
         return CHECK_ERROR, CHECK_ERROR_MSG.format(result["error"])
@@ -392,7 +406,9 @@ def build_architecture(architecture_path, images_output_directory, verbose=False
                 exit(converted_result)
 
             # Resize the vm disk image
-            resized_result, resized_msg = resize_image(vm_output_path, vm_size)
+            resized_result, resized_msg = resize_image(
+                vm_output_path, vm_size, image_format=vm_output_format, verbose=verbose
+            )
             if not resized_result:
                 print(resized_msg)
                 exit(resized_result)
@@ -423,12 +439,15 @@ def build_architecture(architecture_path, images_output_directory, verbose=False
                     )
                 )
 
-        check_result, check_msg = check_image(
-            vm_output_path, image_format=vm_output_format
-        )
-        if not check_result:
-            print(check_msg)
-            exit(check_result)
+        if vm_output_format in CONSITENCY_SUPPPORTED_FORMATS:
+            check_result, check_msg = check_image(
+                vm_output_path,
+                image_format=vm_output_format,
+                verbose=verbose,
+            )
+            if not check_result:
+                print(check_msg)
+                exit(check_result)
 
 
 def cli():

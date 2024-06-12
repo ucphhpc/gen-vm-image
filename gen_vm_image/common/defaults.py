@@ -9,3 +9,4 @@ IMAGE_CONFIG_DIR = "image-config"
 GENERATED_IMAGE_DIR = "generated-images"
 VM_DISK_DIR = "vmdisks"
 TMP_DIR = "tmp"
+CONSITENCY_SUPPPORTED_FORMATS = ["qcow2", "qed", "parallels", "vhdx", "vdi"]
