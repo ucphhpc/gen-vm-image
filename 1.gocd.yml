@@ -25,7 +25,7 @@ pipelines:
         password: "{{SECRET:[github][access_token]}}"
         destination: publish-python-scripts
     parameters:
-      ARGS: 'examples/architecture.yml'
+      ARGS: ''
       SRC_DIRECTORY: gen-vm-image
       TEST_DIRECTORY: gen-vm-image
       PUSH_DIRECTORY: publish-python-scripts
