@@ -28,7 +28,7 @@ from gen_vm_image.common.errors import (
     CHECK_ERROR_MSG,
 )
 from gen_vm_image.architecture import load_architecture, correct_architecture_structure
-from gen_vm_image.utils.io import exists, makedirs, write, hashsum, join
+from gen_vm_image.utils.io import exists, makedirs, write, hashsum
 from gen_vm_image.utils.job import run
 from gen_vm_image.utils.net import download_file
 
@@ -116,18 +116,11 @@ def qemu_img_call(action, args, format_output_str=True, verbose=False):
     return True, None
 
 
-def create_image(
-    name, version, size, image_format="qcow2", output_path=None, verbose=False
-):
-    image_path = "{}-{}.{}".format(name, version, image_format)
-    if output_path:
-        image_path = join(output_path, image_path)
-
-    args = ["-f", image_format, image_path, size]
+def create_image(path, size, image_format="qcow2", verbose=False):
+    args = ["-f", image_format, path, size]
     result, msg = qemu_img_call("create", args, verbose=verbose)
-
     if not result:
-        return PATH_CREATE_ERROR, PATH_CREATE_ERROR_MSG.format(image_path, msg)
+        return PATH_CREATE_ERROR, PATH_CREATE_ERROR_MSG.format(path, msg)
     return result, None
 
 
@@ -421,10 +414,7 @@ def build_architecture(architecture_path, images_output_directory, verbose=False
         else:
             # If no input is specified, then we assume that we are creating a new disc image
             create_image_result, msg = create_image(
-                vm_input,
-                vm_version,
-                vm_size,
-                output_path=images_output_directory,
+                vm_output_path,
                 image_format=vm_output_format,
                 verbose=verbose,
             )

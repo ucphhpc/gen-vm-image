@@ -54,12 +54,13 @@ class TestImageBuild(unittest.TestCase):
         self.assertEqual(image_1["format"], "qcow2")
         self.assertEqual(image_1["size"], "10G")
 
+        new_image_path = join(
+            self.test_tmp_directory, "{}.{}".format(image_1_name, image_1["format"])
+        )
         result, msg = create_image(
-            image_1_name,
-            image_1["version"],
+            new_image_path,
             image_1["size"],
             image_format=image_1["format"],
-            output_path=self.test_tmp_directory,
         )
         self.assertTrue(result)
         self.assertIsNone(msg)
@@ -72,12 +73,13 @@ class TestImageBuild(unittest.TestCase):
         self.assertEqual(image_2["format"], "raw")
         self.assertEqual(image_2["size"], "10G")
 
+        new_image_path = join(
+            self.test_tmp_directory, "{}.{}".format(image_2_name, image_2["format"])
+        )
         result, msg = create_image(
-            image_2_name,
-            image_2["version"],
+            new_image_path,
             image_2["size"],
             image_format=image_2["format"],
-            output_path=self.test_tmp_directory,
         )
         self.assertTrue(result)
         self.assertIsNone(msg)
