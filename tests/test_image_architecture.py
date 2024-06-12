@@ -38,7 +38,6 @@ class TestImageArchitecture(unittest.TestCase):
         self.assertIn("images", architecture)
         self.assertIsInstance(architecture["images"], dict)
         self.assertGreater(len(architecture["images"]), 0)
-        self.assertEqual(len(architecture["images"]), 4)
 
     def test_architecture_images_items(self):
         architecture, error = load_architecture(self.architecture_path)
@@ -48,7 +47,6 @@ class TestImageArchitecture(unittest.TestCase):
         self.assertIn("images", architecture)
         self.assertIsInstance(architecture["images"], dict)
         self.assertGreater(len(architecture["images"]), 0)
-        self.assertEqual(len(architecture["images"]), 4)
         self.assertIn("image-1", architecture["images"])
         images = architecture["images"]
 

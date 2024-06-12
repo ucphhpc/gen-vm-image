@@ -7,19 +7,37 @@ images:
     size: 10G
   image-2:
     name: test-image-2
-    version: 20.04
-    format: qcow2
-    size: 40G
+    version: 9.4
+    format: raw
+    size: 10G
   image-3:
     name: test-image-3
     version: 8.4
     format: qcow2
     size: 30G
-  Debian-12:
-    name: Debian
+  image-4:
+    name: test-image-4
+    version: 8.4
+    format: raw
+    size: 30G
+  image-5:
+    name: test-image-5
+    version: 9.4
+    format: raw
+    size: 30G
+  input_path_image:
+    name: input-path-image
     version: 12
     format: qcow2
     size: 20G
     input:
-      url: https://cloud.debian.org/images/cloud/bookworm/latest/debian-12-genericcloud-amd64.qcow2
+     path: tests/tmp/debian-12.qcow2
+     format: qcow2
+  convert_input_image_format:
+    name: convert_input_image_format
+    version: 12
+    format: raw
+    size: 20G
+    input:
+      path: tests/tmp/debian-12.qcow2
       format: qcow2

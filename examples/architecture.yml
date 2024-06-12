@@ -5,3 +5,6 @@ images:
     version: 9.4
     format: qcow2
     size: 120G
+    input:
+     path: /path/to/rocky.qcow2
+     format: qcow2

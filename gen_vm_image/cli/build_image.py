@@ -27,7 +27,7 @@ from gen_vm_image.common.errors import (
     CHECK_ERROR_MSG,
 )
 from gen_vm_image.architecture import load_architecture, correct_architecture_structure
-from gen_vm_image.utils.io import exists, makedirs, write, hashsum
+from gen_vm_image.utils.io import exists, makedirs, write, hashsum, join
 from gen_vm_image.utils.job import run
 from gen_vm_image.utils.net import download_file
 
@@ -103,13 +103,15 @@ def get_materials(name, upstream_pipeline=None, stage=None, branch="main"):
     return materials
 
 
-def create_image(name, version, size, image_format="qcow2"):
-    image_name = "{}-{}.{}".format(name, version, image_format)
-    command = ["qemu-img", "create", "-f", image_format, image_name, size]
+def create_image(name, version, size, image_format="qcow2", output_path=None):
+    image_path = "{}-{}.{}".format(name, version, image_format)
+    if output_path:
+        image_path = join(output_path, image_path)
+    command = ["qemu-img", "create", "-f", image_format, image_path, size]
     result = run(command, format_output_str=True)
     if result["returncode"] != "0":
         return PATH_CREATE_ERROR, PATH_CREATE_ERROR_MSG.format(
-            image_name, result["error"]
+            image_path, result["error"]
         )
     return result, None
 
@@ -408,12 +410,18 @@ def build_architecture(architecture_path, images_output_directory, verbose=False
                         "Generated image at: {}".format(os.path.abspath(vm_output_path))
                     )
 
-        # TODO, check if the image in question is a rhel9 based image
-        # Amend to qcow2 version 3 which is required in RHEL 9
-        amend_command = ["qemu-img", "amend", "-o", "compat=v3", vm_output_path]
-        amended_result = run(amend_command, format_output_str=True)
-        if amended_result["returncode"] != "0":
-            print(PATH_CREATE_ERROR_MSG.format(vm_output_path, amended_result["error"]))
+        # Amend to qcow2 version 3 which is required in RHEL 9 if the output format is
+        # qcow2
+        # TODO, validate that the image is a rhel based image
+        if vm_output_format == "qcow2":
+            amend_command = ["qemu-img", "amend", "-o", "compat=v3", vm_output_path]
+            amended_result = run(amend_command, format_output_str=True)
+            if amended_result["returncode"] != "0":
+                print(
+                    PATH_CREATE_ERROR_MSG.format(
+                        vm_output_path, amended_result["error"]
+                    )
+                )
 
         check_result, check_msg = check_image(
             vm_output_path, image_format=vm_output_format

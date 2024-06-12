@@ -46,17 +46,19 @@ def write(path, content, mode="w", mkdirs=False, handler=None, **handler_kwargs)
     return False
 
 
-def remove(path):
+def remove(path, recursive=False):
     try:
-        if exists(path):
-            os.remove(os.path.expanduser(path))
-            return True, "Removed file: {}".format(path)
+        if recursive:
+            shutil.rmtree(path)
+        else:
+            os.remove(path)
+        return True, "Removed file: {}".format(path)
     except Exception as err:
         return False, "Failed to remove file: {} - {}".format(path, err)
     return False, "Failed to remove file: {}".format(path)
 
 
-def removedir(path):
+def removedirs(path):
     try:
         if exists(path):
             os.rmdir(os.path.expanduser(path))
@@ -132,3 +134,11 @@ def find(directory_path, regex_name):
             if re.match(regex_name, f):
                 found.append(f)
     return found
+
+
+def size(path):
+    try:
+        return os.path.getsize(path)
+    except Exception as err:
+        print("Failed to get the size of the file: {} - {}".format(path, err))
+    return False

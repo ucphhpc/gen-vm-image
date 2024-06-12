@@ -143,7 +143,12 @@ tmp/*
 # Ignore the generated seed files
 *seed.img
 
-# Ignore the generated vm images
+# Ignore the generated vm images default location
 generated-images/
 
+# Ignore any generated files in the base
 *.qcow2
+*.raw
+
+# Ignore any test generated tmp files
+tests/tmp
