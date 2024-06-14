@@ -216,7 +216,9 @@ def build_gocd_config(architecture, gocd_name, branch, verbose=False):
         print("Generated a new GOCD config in: {}".format(gocd_config_path))
 
 
-def build_architecture(architecture_path, images_output_directory, verbose=False):
+def build_architecture(
+    architecture_path, images_output_directory, overwrite=False, verbose=False
+):
     # Load the architecture file
     architecture, load_error_msg = load_architecture(architecture_path)
     if load_error_msg:
@@ -261,6 +263,17 @@ def build_architecture(architecture_path, images_output_directory, verbose=False
             images_output_directory,
             "{}-{}.{}".format(vm_name, vm_version, vm_output_format),
         )
+
+        if exists(vm_output_path):
+            print("The output image: {} already exists".format(vm_output_path))
+            if not overwrite:
+                print(
+                    "Use the --overwrite flag to overwrite the existing image, continuing to the next image..."
+                )
+                continue
+            else:
+                if verbose:
+                    print("Overwriting the existing image: {}".format(vm_output_path))
 
         if vm_input:
             if isinstance(vm_input, dict):
@@ -463,6 +476,12 @@ def cli():
         help="The path to the output directory where the images will be saved",
     )
     parser.add_argument(
+        "--overwrite",
+        action="store_true",
+        default=False,
+        help="Whether the tool should overwrite existing image disks",
+    )
+    parser.add_argument(
         "--generate-gocd-config",
         action="store_true",
         help="Generate a GoCD config based on the architecture file",
@@ -487,12 +506,15 @@ def cli():
 
     architecture_path = args.architecture_path
     images_output_directory = args.images_output_directory
+    overwrite = args.overwrite
     generate_gocd_config = args.generate_gocd_config
     gocd_config_name = args.gocd_config_name
     gocd_build_branch = args.gocd_build_branch
     verbose = args.verbose
 
-    build_architecture(architecture_path, images_output_directory, verbose=verbose)
+    build_architecture(
+        architecture_path, images_output_directory, overwrite=overwrite, verbose=verbose
+    )
     if generate_gocd_config:
         build_gocd_config(
             architecture_path, gocd_config_name, gocd_build_branch, verbose=verbose
