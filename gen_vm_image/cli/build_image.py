@@ -500,6 +500,7 @@ def cli():
         "--verbose",
         "-v",
         action="store_true",
+        default=False,
         help="Print verbose output",
     )
     args = parser.parse_args()
