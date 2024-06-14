@@ -265,11 +265,13 @@ def build_architecture(
         )
 
         if exists(vm_output_path):
-            print("The output image: {} already exists".format(vm_output_path))
+            if verbose:
+                print("The output image: {} already exists".format(vm_output_path))
             if not overwrite:
-                print(
-                    "Use the --overwrite flag to overwrite the existing image, continuing to the next image..."
-                )
+                if verbose:
+                    print(
+                        "Use the --overwrite flag to overwrite the existing image, continuing to the next image..."
+                    )
                 continue
             else:
                 if verbose:
