@@ -84,8 +84,5 @@ The totality of the command can be seen below::
                             The branch that GoCD should use to build images (default: main)
       --verbose, -v         Print verbose output (default: False)
 
-When the ``gen-vm-image`` command is executed, the generated VM disk image will be placed in the ``--image-output-path`` directory.
-
-If every default value is acceptable, the VM image can be built by simply running ``make build`` in the root directory of the project::
-
-    make build
+In summation, when the ``gen-vm-image path/to/architecture.yml`` command is executed,
+the specified images will be generated in the ``--image-output-path`` directory.
