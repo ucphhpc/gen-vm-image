@@ -11,24 +11,27 @@ Dependencies
 The dependencies required to use this package to generate virtual machine images
 can be found in the ``dep`` directory for the supported distributions.
 
------
-Setup
------
+------------
+Installation
+------------
 
-The ``qemu-kvm`` command might not be available in the default PATH.
-This can be determined via the ``which`` command::
+The current stable release version ``gen-vm-image`` tool can be installed directly from pypi via::
 
-    which qemu-kvm
+    pip install gen-vm-image
 
-If the command is not available, the qemu-kvm might be in a different location that is not part of
-your current PATH. In this case, you can create a symbolic link to the qemu-kvm command in a directory
+Alternatively, you can install the current development version by firstly cloning the repository::
 
-An example of this could be::
+  git clone https://github.com/ucphhpc/gen-vm-image.git
 
-    ln -s /usr/share/bash-completion/completions/qemu-kvm /usr/local/bin/qemu-kvm
+Then, secondly installing the ``gen-vm-image`` tool either in its own virtual environment::
 
-The ``gen-vm-image`` command can be used to generate virtual machine images for the supported distributions.
-To define which images should be generated, architecture.yml file should be created and defined beforehand.
+  cd gen-vm-image
+  make install
+
+or systemwide::
+
+    cd gen-vm-image
+    make install PYTHON=path/to/your/systemwide/python
 
 -----------------------------
 Build a Virtual Machine Image
@@ -58,6 +61,7 @@ The totality of the command can be seen below::
 
     usage: gen-vm-image [-h]
                         [--images-output-directory IMAGES_OUTPUT_DIRECTORY]
+                        [--overwrite]
                         [--generate-gocd-config]
                         [--gocd-config-name GOCD_CONFIG_NAME]
                         [--gocd-build-branch GOCD_BUILD_BRANCH]
@@ -67,10 +71,11 @@ The totality of the command can be seen below::
     positional arguments:
       architecture_path     The path to the architecture file that defines the images to build
 
-    options:
+    optional arguments:
       -h, --help            show this help message and exit
       --images-output-directory IMAGES_OUTPUT_DIRECTORY
                             The path to the output directory where the images will be saved (default: generated-images)
+      --overwrite           Whether the tool should overwrite existing image disks (default: False)
       --generate-gocd-config
                             Generate a GoCD config based on the architecture file (default: False)
       --gocd-config-name GOCD_CONFIG_NAME
