@@ -2,6 +2,8 @@
 gen-vm-image
 ============
 
+.. image:: https://img.shields.io/pypi/pyversions/gen-vm-image.svg
+    :target: https://img.shields.io/pypi/pyversions/gen-vm-image
 .. image:: https://badge.fury.io/py/gen-vm-image.svg
     :target: https://badge.fury.io/py/gen-vm-image
 
