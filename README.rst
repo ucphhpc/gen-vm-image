@@ -2,6 +2,9 @@
 gen-vm-image
 ============
 
+.. image:: https://badge.fury.io/py/gen-vm-image.svg
+    :target: https://badge.fury.io/py/gen-vm-image
+
 This package can be used for generating virtual machine images.
 
 ------------
