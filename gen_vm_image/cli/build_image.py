@@ -239,7 +239,15 @@ def build_architecture(
             print(PATH_CREATE_ERROR_MSG.format(images_output_directory, msg))
             exit(PATH_CREATE_ERROR)
 
-    images = architecture.get("images", [])
+    if "images" not in architecture:
+        print(MISSING_ATTRIBUTE_ERROR_MSG.format("images", architecture))
+        exit(MISSING_ATTRIBUTE_ERROR)
+
+    images = architecture.get("images")
+    if not isinstance(images, dict):
+        print(INVALID_ATTRIBUTE_TYPE_ERROR_MSG.format(type(images), images, dict))
+        exit(INVALID_ATTRIBUTE_TYPE_ERROR)
+
     # Generate the image configuration
     for build, build_data in images.items():
         vm_name = build_data["name"]
