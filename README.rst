@@ -49,7 +49,7 @@ What name this architecture file is given is not important, but it should be in 
     images: <key-value pair> # The images to be generated.
       <image-name>:
         name: <string> # The name of the image.
-        version: <string> # The version of the image.
+        version: <string> # (Optional) The version of the image.
         size: <string> # The size of the to be generated vm image disk, can use suffixes such as 'K', 'M', 'G', 'T'.
         input: <dict> # Input can be defined if the generated image should be based on a pre-existing image.
           url: <string> # An URL to an image that should be used as the input image for the generated image.

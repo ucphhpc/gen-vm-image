@@ -60,8 +60,9 @@ class TestImageArchitecture(unittest.TestCase):
             self.assertIsInstance(image_data["name"], str)
             self.assertGreater(len(image_data["name"]), 0)
 
-            self.assertIn("version", image_data)
-            self.assertIsInstance(image_data["version"], (float, int))
+            # Optional version attribute
+            if "version" in image_data:
+                self.assertIsInstance(image_data["version"], (float, int))
 
             self.assertIn("format", image_data)
             self.assertIsInstance(image_data["format"], str)

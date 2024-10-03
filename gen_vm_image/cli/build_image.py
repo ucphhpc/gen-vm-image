@@ -251,8 +251,9 @@ def build_architecture(
     # Generate the image configuration
     for build, build_data in images.items():
         vm_name = build_data["name"]
-        vm_version = build_data["version"]
         vm_size = build_data["size"]
+        # Optional version attribute for each image configuration
+        vm_version = build_data.get("version", None)
 
         # Optional attributes for each image configuration
         vm_output_format = build_data.get("format", "qcow2")
@@ -267,10 +268,15 @@ def build_architecture(
                 )
                 exit(INVALID_ATTRIBUTE_TYPE_ERROR)
 
-        vm_output_path = os.path.join(
-            images_output_directory,
-            "{}-{}.{}".format(vm_name, vm_version, vm_output_format),
-        )
+        if vm_version:
+            vm_output_path = os.path.join(
+                images_output_directory,
+                "{}-{}.{}".format(vm_name, vm_version, vm_output_format),
+            )
+        else:
+            vm_output_path = os.path.join(
+                images_output_directory, "{}.{}".format(vm_name, vm_output_format)
+            )
 
         if exists(vm_output_path):
             if verbose:

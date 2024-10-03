@@ -157,3 +157,24 @@ class TestImageBuild(unittest.TestCase):
         self.assertIsNone(msg)
         self.assertTrue(exists(output_path))
         # TODO, validate that the output image is of the correct size and format
+
+    def test_build_with_no_version(self):
+        image_no_version = self.architecture["images"]["non_version_image_test"]
+        self.assertEqual(image_no_version["name"], "non-version-image")
+        self.assertEqual(image_no_version["format"], "raw")
+        self.assertEqual(image_no_version["size"], "10G")
+
+        new_image_path = join(
+            self.test_tmp_directory,
+            "{}-{}.{}".format(
+                image_no_version["name"], self.seed, image_no_version["format"]
+            ),
+        )
+        result, msg = create_image(
+            new_image_path,
+            image_no_version["size"],
+            image_format=image_no_version["format"],
+        )
+        self.assertTrue(result)
+        self.assertIsNone(msg)
+        self.assertTrue(exists(new_image_path))

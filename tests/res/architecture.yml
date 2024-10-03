@@ -41,3 +41,7 @@ images:
     input:
       path: tests/tmp/debian-12.qcow2
       format: qcow2
+  non_version_image_test:
+    name: non-version-image
+    format: raw
+    size: 10G
