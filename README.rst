@@ -71,12 +71,13 @@ The totality of the command can be seen below::
                         [--gocd-config-name GOCD_CONFIG_NAME]
                         [--gocd-build-branch GOCD_BUILD_BRANCH]
                         [--verbose]
+                        [--version]
                         architecture_path
 
     positional arguments:
       architecture_path     The path to the architecture file that defines the images to build
 
-    optional arguments:
+    options:
       -h, --help            show this help message and exit
       --images-output-directory IMAGES_OUTPUT_DIRECTORY
                             The path to the output directory where the images will be saved (default: generated-images)
@@ -88,6 +89,7 @@ The totality of the command can be seen below::
       --gocd-build-branch GOCD_BUILD_BRANCH
                             The branch that GoCD should use to build images (default: main)
       --verbose, -v         Print verbose output (default: False)
+      --version             Print the version of the program
 
 In summation, when the ``gen-vm-image path/to/architecture.yml`` command is executed,
 the specified images will be generated in the ``--image-output-path`` directory.
