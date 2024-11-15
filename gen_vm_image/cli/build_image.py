@@ -17,6 +17,7 @@
 import argparse
 import os
 import yaml
+from gen_vm_image._version import __version__
 from gen_vm_image.common.defaults import (
     GOCD_GROUP,
     GOCD_TEMPLATE,
@@ -534,6 +535,12 @@ def cli():
         action="store_true",
         default=False,
         help="Print verbose output",
+    )
+    parser.add_argument(
+        "--version",
+        action="version",
+        version=__version__,
+        help="Print the version of the program",
     )
     args = parser.parse_args()
 

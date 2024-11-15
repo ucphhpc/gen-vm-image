@@ -14,67 +14,86 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-.PHONY: help all clean build build-all maintainer-clean install-dep uninstall-dep
-.PHONY: installtest uninstalltest test test-all
-
 OWNER:=ucphhpc
 PACKAGE_NAME=gen-vm-image
 PACKAGE_NAME_FORMATTED=$(subst -,_,$(PACKAGE_NAME))
 ARGS=
 
+.PHONY: all
 all: init install-dep install
 
+.PHONY: venv
 init: venv
 
+.PHONY: clean
 clean: distclean venv-clean
 	rm -fr .env
 	rm -fr .pytest_cache
 	rm -fr tests/__pycache__
 
+.PHONY: build
 build: venv
 	. $(VENV)/activate; gen-vm-image $(ARGS)
 
+.PHONY: dist
 dist: venv
 	$(VENV)/python setup.py sdist bdist_wheel
 
+.PHONY: distclean
 distclean:
 	rm -fr dist build $(PACKAGE_NAME).egg-info $(PACKAGE_NAME_FORMATTED).egg-info
 
+.PHONY: maintainer-clean
 maintainer-clean: clean
 	@echo 'This command is intended for maintainers to use; it'
 	@echo 'deletes files that may need special tools to rebuild.'
 
+.PHONY: install
 install: install-dep
 	$(VENV)/pip install .
 
+.PHONY: uninstall
 uninstall: venv
 	$(VENV)/pip uninstall -y gen-vm-image
 
+.PHONY: install-dev
 install-dev: venv
 	$(VENV)/pip install -r requirements-dev.txt
 
+.PHONY: uninstall-dev
+uninstall-dev: venv
+	$(VENV)/pip uninstall -r requirements-dev.txt
+
+.PHONY: install-dep
 install-dep: venv
 	$(VENV)/pip install -r requirements.txt
 
+.PHONY: uninstall-dep
 uninstall-dep: venv
 	$(VENV)/pip uninstall -r requirements.txt
 
-uninstalltest: venv
-	$(VENV)/pip uninstall -y -r tests/requirements.txt
-
+.PHONY: installtest
 installtest: install
 	$(VENV)/pip install -r tests/requirements.txt
 
+.PHONY: uninstalltest
+uninstalltest: venv
+	$(VENV)/pip uninstall -y -r tests/requirements.txt
+
+.PHONY: test
 test: installtest
 	$(VENV)/pytest -s -v tests/
 
+.PHONY: dockertest-clean
 dockertest-clean:
 	docker rmi -f $(OWNER)/gen-vm-image-tests
 
+.PHONY: dockertest-build
 dockertest-build:
 # Use the docker image to test the installation
 	docker build -f tests/Dockerfile -t $(OWNER)/gen-vm-image-tests .
 
+.PHONY: dockertest-run
 dockertest-run:
 	docker run -it $(OWNER)/gen-vm-image-tests
 
