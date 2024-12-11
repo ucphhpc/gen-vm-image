@@ -23,7 +23,6 @@ from gen_vm_image.cli.build_image import create_image, convert_image, resize_ima
 
 
 class TestImageBuild(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         # https://cloud.debian.org/images/cloud/bookworm/latest/input_path_image-genericcloud-amd64.qcow2

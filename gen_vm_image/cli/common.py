@@ -14,20 +14,16 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-PATH_NOT_FOUND_ERROR = -1
-PATH_NOT_FOUND_ERROR_MSG = "Path not found: {} - error: {}"
-PATH_LOAD_ERROR = -2
-PATH_LOAD_ERROR_MSG = "Failed to load path: {}"
-PATH_CREATE_ERROR = -3
-PATH_CREATE_ERROR_MSG = "Failed to create path: {} - error: {}"
-MISSING_ATTRIBUTE_ERROR = -4
-MISSING_ATTRIBUTE_ERROR_MSG = "Missing attribute: {} in {}"
-INVALID_ATTRIBUTE_TYPE_ERROR = -5
-INVALID_ATTRIBUTE_TYPE_ERROR_MSG = (
-    "Invalid attribute type: {} for value: {} - must be {}"
-)
-CHECKSUM_ERROR = -6
-RESIZE_ERROR = -7
-RESIZE_ERROR_MSG = "Failed to resize path: {}"
-CHECK_ERROR = -8
-CHECK_ERROR_MSG = "Failed to check path: {}"
+import datetime
+import sys
+
+
+def error_print(*args, **kwargs):
+    print(*args, file=sys.stderr, **kwargs)
+
+
+def to_str(o):
+    if hasattr(o, "asdict"):
+        return o.asdict()
+    if isinstance(o, datetime.datetime):
+        return o.__str__()

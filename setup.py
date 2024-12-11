@@ -63,6 +63,7 @@ setup(
         ],
         "corc.plugins": ["gen_vm_image=gen_vm_image"],
         "corc.plugins.initializer": ["gen_vm_image=gen_vm_image"],
+        "corc.plugins.cli": ["gen_vm_image=gen_vm_image.cli.build_image:corc_cli"],
     },
     classifiers=[
         "Intended Audience :: Developers",

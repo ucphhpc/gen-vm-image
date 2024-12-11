@@ -14,22 +14,20 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
+
 import argparse
+import json
+import sys
 import os
-import yaml
 from gen_vm_image._version import __version__
 from gen_vm_image.common.defaults import (
-    GOCD_GROUP,
-    GOCD_TEMPLATE,
-    REPO_NAME,
     PACKAGE_NAME,
     GENERATED_IMAGE_DIR,
     TMP_DIR,
-    GOCD_FORMAT_VERSION,
-    GO_REVISION_COMMIT_VAR,
     CONSITENCY_SUPPPORTED_FORMATS,
 )
-from gen_vm_image.common.errors import (
+from gen_vm_image.cli.common import error_print, to_str
+from gen_vm_image.cli.return_codes import (
     PATH_NOT_FOUND_ERROR,
     PATH_NOT_FOUND_ERROR_MSG,
     PATH_CREATE_ERROR,
@@ -43,82 +41,18 @@ from gen_vm_image.common.errors import (
     RESIZE_ERROR_MSG,
     CHECK_ERROR,
     CHECK_ERROR_MSG,
+    SUCCESS,
+    JSON_DUMP_ERROR,
+    JSON_DUMP_ERROR_MSG,
 )
 from gen_vm_image.architecture import load_architecture, correct_architecture_structure
-from gen_vm_image.utils.io import exists, makedirs, write, hashsum
+from gen_vm_image.utils.io import exists, makedirs, hashsum
 from gen_vm_image.utils.job import run
 from gen_vm_image.utils.net import download_file
 
 
 current_dir = os.path.abspath(os.path.dirname(__file__))
 parent_dir = os.path.dirname(current_dir)
-
-
-def get_pipelines(images):
-    pipelines = []
-    for build in images:
-        pipelines.append(build)
-    return pipelines
-
-
-def get_common_environment(pipelines):
-    common_environment = {
-        "environments": {
-            GOCD_GROUP: {
-                "environment_variables": {
-                    "GIT_USER": "{{SECRET:[github][username]}}",
-                },
-                "pipelines": pipelines,
-            }
-        }
-    }
-    return common_environment
-
-
-def get_common_pipeline():
-    common_pipeline = {
-        "group": GOCD_GROUP,
-        "label_template": "${COUNT}",
-        "lock_behaviour": "none",
-        "display_order": -1,
-        "template": GOCD_TEMPLATE,
-    }
-    return common_pipeline
-
-
-def get_common_materials(branch="main"):
-    common_materials = {
-        "ucphhpc_images": {
-            "git": "https://github.com/ucphhpc/{}.git".format(REPO_NAME),
-            "branch": branch,
-            "destination": REPO_NAME,
-            "username": "${GIT_USER}",
-            "password": "{{SECRET:[github][access_token]}}",
-        },
-        # this is the name of material
-        # says about type of material and url at once
-    }
-    return common_materials
-
-
-def get_upstream_materials(name, pipeline, stage):
-    upstream_materials = {
-        "upstream_{}".format(name): {
-            "pipeline": pipeline,
-            "stage": stage,
-        }
-    }
-    return upstream_materials
-
-
-def get_materials(name, upstream_pipeline=None, stage=None, branch="main"):
-    materials = {}
-    common_materials = get_common_materials(branch=branch)
-    materials.update(common_materials)
-    if upstream_pipeline and stage:
-        upstream_materials = get_upstream_materials(name, upstream_pipeline, stage)
-        materials.update(upstream_materials)
-    return materials
 
 
 def qemu_img_call(action, args, format_output_str=True, verbose=False):
@@ -180,90 +114,38 @@ def check_image(path, image_format="qcow2", verbose=False):
     return result, None
 
 
-def build_gocd_config(architecture, gocd_name, branch, verbose=False):
-    images = architecture.get("images", [])
-
-    # GOCD file
-    list_images = list(images.keys())
-
-    # Get all pipelines
-    pipelines = get_pipelines(list_images)
-
-    # GOCD environment
-    common_environments = get_common_environment(pipelines)
-
-    # Common GOCD pipeline params
-    common_pipeline_attributes = get_common_pipeline()
-
-    generated_config = {
-        "format_version": GOCD_FORMAT_VERSION,
-        **common_environments,
-        "pipelines": {},
-    }
-    # Generate the GOCD build config
-    for build, build_data in images.items():
-        name = build_data.get("name", None)
-        version = build_data.get("version", None)
-        materials = get_materials(name, branch=branch)
-
-        build_version_name = build
-        build_pipeline = {
-            **common_pipeline_attributes,
-            "materials": materials,
-            "parameters": {
-                "IMAGE": name,
-                "IMAGE_PIPELINE": build_version_name,
-                "DEFAULT_TAG": version,
-                "SRC_DIRECTORY": REPO_NAME,
-                "TEST_DIRECTORY": REPO_NAME,
-                "PUSH_DIRECTORY": "publish-python-scripts",
-                "COMMIT_TAG": GO_REVISION_COMMIT_VAR,
-                "ARGS": "",
-            },
-        }
-        generated_config["pipelines"][build_version_name] = build_pipeline
-
-    gocd_config_path = os.path.join(current_dir, gocd_name)
-    if not write(gocd_config_path, generated_config, handler=yaml):
-        print(
-            PATH_CREATE_ERROR_MSG.format(gocd_config_path, "Failed to save gocd config")
-        )
-        exit(PATH_CREATE_ERROR)
-    if verbose:
-        print("Generated a new GOCD config in: {}".format(gocd_config_path))
-
-
 def build_architecture(
     architecture_path, images_output_directory, overwrite=False, verbose=False
 ):
     # Load the architecture file
-    architecture, load_error_msg = load_architecture(architecture_path)
-    if load_error_msg:
-        print(load_error_msg)
-        exit(architecture)
+    architecture, return_message = load_architecture(architecture_path)
+    if not architecture:
+        return architecture, return_message
 
     correct_architecture, correct_error_msg = correct_architecture_structure(
         architecture
     )
     if not correct_architecture:
-        print(correct_error_msg)
-        exit(correct_architecture)
+        return correct_architecture, correct_error_msg
 
     # Create the destination directory where the images will be saved
     if not exists(images_output_directory):
         created, msg = makedirs(images_output_directory)
         if not created:
-            print(PATH_CREATE_ERROR_MSG.format(images_output_directory, msg))
-            exit(PATH_CREATE_ERROR)
+            return PATH_CREATE_ERROR, PATH_CREATE_ERROR_MSG.format(
+                images_output_directory, msg
+            )
 
     if "images" not in architecture:
-        print(MISSING_ATTRIBUTE_ERROR_MSG.format("images", architecture))
-        exit(MISSING_ATTRIBUTE_ERROR)
+        return MISSING_ATTRIBUTE_ERROR, MISSING_ATTRIBUTE_ERROR_MSG.format(
+            "images", architecture
+        )
 
     images = architecture.get("images")
     if not isinstance(images, dict):
-        print(INVALID_ATTRIBUTE_TYPE_ERROR_MSG.format(type(images), images, dict))
-        exit(INVALID_ATTRIBUTE_TYPE_ERROR)
+        return INVALID_ATTRIBUTE_TYPE_ERROR, INVALID_ATTRIBUTE_TYPE_ERROR_MSG.format(
+            type(images), images, dict
+        )
 
     # Generate the image configuration
     for build, build_data in images.items():
@@ -278,12 +160,12 @@ def build_architecture(
         if "input" in build_data:
             vm_input = build_data["input"]
             if not isinstance(vm_input, str) and not isinstance(vm_input, dict):
-                print(
+                return (
+                    INVALID_ATTRIBUTE_TYPE_ERROR,
                     INVALID_ATTRIBUTE_TYPE_ERROR_MSG.format(
                         type(vm_input), vm_input, "string or dictionary"
-                    )
+                    ),
                 )
-                exit(INVALID_ATTRIBUTE_TYPE_ERROR)
 
         if vm_version:
             vm_output_path = os.path.join(
@@ -311,69 +193,66 @@ def build_architecture(
         if vm_input:
             if isinstance(vm_input, dict):
                 if "url" not in vm_input and "path" not in vm_input:
-                    print(
-                        MISSING_ATTRIBUTE_ERROR_MSG.format(
-                            "'url' or 'path' must be in the architecture input section",
-                            vm_input,
-                        )
+                    return MISSING_ATTRIBUTE_ERROR, MISSING_ATTRIBUTE_ERROR_MSG.format(
+                        "'url' or 'path' must be in the architecture input section",
+                        vm_input,
                     )
-                    exit(MISSING_ATTRIBUTE_ERROR)
 
                 if "url" in vm_input and "path" in vm_input:
-                    print(
-                        "Both 'url' and 'path' are defined in the architecture input section. Only one can be defined"
+                    return (
+                        INVALID_ATTRIBUTE_TYPE_ERROR,
+                        "Both 'url' and 'path' are defined in the architecture input section. Only one can be defined",
                     )
-                    exit(INVALID_ATTRIBUTE_TYPE_ERROR)
 
                 if "url" in vm_input:
                     if not isinstance(vm_input["url"], str):
-                        print(
+                        return (
+                            INVALID_ATTRIBUTE_TYPE_ERROR,
                             INVALID_ATTRIBUTE_TYPE_ERROR_MSG.format(
                                 type(vm_input["url"]), vm_input["url"], "string"
-                            )
+                            ),
                         )
-                        exit(INVALID_ATTRIBUTE_TYPE_ERROR)
 
                 if "path" in vm_input:
                     if not isinstance(vm_input["path"], str):
-                        print(
+                        return (
+                            INVALID_ATTRIBUTE_TYPE_ERROR,
                             INVALID_ATTRIBUTE_TYPE_ERROR_MSG.format(
                                 type(vm_input["path"]), vm_input["path"], "string"
-                            )
+                            ),
                         )
-                        exit(INVALID_ATTRIBUTE_TYPE_ERROR)
 
                 # If a checksum is present, then validate that it is correctly structured
                 vm_input_checksum = None
                 if "checksum" in vm_input:
                     if not isinstance(vm_input["checksum"], dict):
-                        print(
+                        return (
+                            INVALID_ATTRIBUTE_TYPE_ERROR,
                             INVALID_ATTRIBUTE_TYPE_ERROR_MSG.format(
                                 type(vm_input["checksum"]),
                                 vm_input["checksum"],
                                 "dictionary",
-                            )
+                            ),
                         )
-                        exit(INVALID_ATTRIBUTE_TYPE_ERROR)
 
                     required_checksum_attributes = ["type", "value"]
                     for attr in required_checksum_attributes:
                         if attr not in vm_input["checksum"]:
-                            print(
+                            return (
+                                MISSING_ATTRIBUTE_ERROR,
                                 MISSING_ATTRIBUTE_ERROR_MSG.format(
                                     attr, vm_input["checksum"]
-                                )
+                                ),
                             )
-                            exit(MISSING_ATTRIBUTE_ERROR)
                         if not isinstance(vm_input["checksum"][attr], str):
-                            print(
+                            return (
+                                INVALID_ATTRIBUTE_TYPE_ERROR,
                                 INVALID_ATTRIBUTE_TYPE_ERROR_MSG.format(
                                     type(vm_input["checksum"][attr]),
                                     vm_input["checksum"][attr],
                                     "string",
-                                )
+                                ),
                             )
-                            exit(INVALID_ATTRIBUTE_TYPE_ERROR)
                     vm_input_checksum = vm_input["checksum"]
 
                 if "url" in vm_input:
@@ -385,8 +264,9 @@ def build_architecture(
                     if not exists(TMP_DIR):
                         created, msg = makedirs(TMP_DIR)
                         if not created:
-                            print(PATH_CREATE_ERROR_MSG.format(TMP_DIR, msg))
-                            exit(PATH_CREATE_ERROR)
+                            return PATH_CREATE_ERROR, PATH_CREATE_ERROR_MSG.format(
+                                TMP_DIR, msg
+                            )
 
                     input_url_filename = vm_input_url.split("/")[-1]
                     input_vm_path = os.path.join(TMP_DIR, input_url_filename)
@@ -397,13 +277,10 @@ def build_architecture(
                 elif "path" in vm_input:
                     input_vm_path = vm_input["path"]
                     if not exists(input_vm_path):
-                        print(
-                            PATH_NOT_FOUND_ERROR_MSG.format(
-                                input_vm_path,
-                                "the defined input path to the does not exist",
-                            )
+                        return PATH_NOT_FOUND_ERROR, PATH_NOT_FOUND_ERROR_MSG.format(
+                            input_vm_path,
+                            "the defined input path to the does not exist",
                         )
-                        exit(PATH_NOT_FOUND_ERROR)
 
                 if vm_input_checksum:
                     checksum_type = vm_input_checksum["type"]
@@ -412,18 +289,18 @@ def build_architecture(
                         input_vm_path, algorithm=checksum_type
                     )
                     if not calculated_checksum:
-                        print(
-                            "Failed to calculate the checksum of the downloaded image"
+                        return (
+                            CHECKSUM_ERROR,
+                            "Failed to calculate the checksum of the downloaded image",
                         )
-                        exit(CHECKSUM_ERROR)
 
                     if calculated_checksum != checksum_value:
-                        print(
+                        return (
+                            CHECKSUM_ERROR,
                             "The checksum of the downloaded image: {} does not match the expected checksum: {}".format(
                                 calculated_checksum, checksum_value
-                            )
+                            ),
                         )
-                        exit(CHECKSUM_ERROR)
                     if verbose:
                         print(
                             "The calculated checksum: {} matches the defined checksum: {}".format(
@@ -432,12 +309,9 @@ def build_architecture(
                         )
             else:
                 if not exists(vm_input):
-                    print(
-                        PATH_NOT_FOUND_ERROR_MSG.format(
-                            vm_input, "the defined input path to the does not exist"
-                        )
+                    return PATH_NOT_FOUND_ERROR, PATH_NOT_FOUND_ERROR_MSG.format(
+                        vm_input, "the defined input path to the does not exist"
                     )
-                    exit(PATH_NOT_FOUND_ERROR)
 
             converted_result, msg = convert_image(
                 input_vm_path,
@@ -447,16 +321,14 @@ def build_architecture(
                 verbose=verbose,
             )
             if not converted_result:
-                print(msg)
-                exit(converted_result)
+                return converted_result, msg
 
             # Resize the vm disk image
             resized_result, resized_msg = resize_image(
                 vm_output_path, vm_size, image_format=vm_output_format, verbose=verbose
             )
             if not resized_result:
-                print(resized_msg)
-                exit(resized_result)
+                return resized_result, resized_msg
         else:
             # If no input is specified, then we assume that we are creating a new disc image
             create_image_result, msg = create_image(
@@ -466,8 +338,7 @@ def build_architecture(
                 verbose=verbose,
             )
             if not create_image_result:
-                print(msg)
-                exit(create_image_result)
+                return create_image_result, msg
             else:
                 if verbose:
                     print(
@@ -482,7 +353,7 @@ def build_architecture(
                 vm_output_path, "compat=v3", verbose=verbose
             )
             if not amend_result:
-                print(PATH_CREATE_ERROR_MSG.format(vm_output_path, amend_msg))
+                error_print(PATH_CREATE_ERROR_MSG.format(vm_output_path, amend_msg))
 
         if vm_output_format in CONSITENCY_SUPPPORTED_FORMATS:
             check_result, check_msg = check_image(
@@ -491,14 +362,15 @@ def build_architecture(
                 verbose=verbose,
             )
             if not check_result:
-                print(check_msg)
-                exit(check_result)
+                return check_result, check_msg
+    return SUCCESS, "Successfully built the images"
 
 
-def cli():
-    parser = argparse.ArgumentParser(
-        prog=PACKAGE_NAME, formatter_class=argparse.ArgumentDefaultsHelpFormatter
+def build_image_cli(commands):
+    parser = commands.add_parser(
+        "build-image", help="Build images based on an architecture file"
     )
+
     parser.add_argument(
         "architecture_path",
         help="The path to the architecture file that defines the images to build",
@@ -515,21 +387,6 @@ def cli():
         help="Whether the tool should overwrite existing image disks",
     )
     parser.add_argument(
-        "--generate-gocd-config",
-        action="store_true",
-        help="Generate a GoCD config based on the architecture file",
-    )
-    parser.add_argument(
-        "--gocd-config-name",
-        default="1.gocd.yml",
-        help="Name of the generated gocd config file",
-    )
-    parser.add_argument(
-        "--gocd-build-branch",
-        default="main",
-        help="The branch that GoCD should use to build images",
-    )
-    parser.add_argument(
         "--verbose",
         "-v",
         action="store_true",
@@ -542,25 +399,47 @@ def cli():
         version=__version__,
         help="Print the version of the program",
     )
-    args = parser.parse_args()
 
-    architecture_path = args.architecture_path
-    images_output_directory = args.images_output_directory
-    overwrite = args.overwrite
-    generate_gocd_config = args.generate_gocd_config
-    gocd_config_name = args.gocd_config_name
-    gocd_build_branch = args.gocd_build_branch
-    verbose = args.verbose
 
-    build_architecture(
+def main(args):
+    parser = argparse.ArgumentParser(
+        prog=PACKAGE_NAME, formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
+    commands = parser.add_subparsers(title="COMMAND")
+    build_image_cli(commands)
+    parsed_args = parser.parse_args(args)
+
+    architecture_path = parsed_args.architecture_path
+    images_output_directory = parsed_args.images_output_directory
+    overwrite = parsed_args.overwrite
+    verbose = parsed_args.verbose
+
+    return_code, message = build_architecture(
         architecture_path, images_output_directory, overwrite=overwrite, verbose=verbose
     )
-    if generate_gocd_config:
-        build_gocd_config(
-            architecture_path, gocd_config_name, gocd_build_branch, verbose=verbose
-        )
-    exit(0)
+    response = {}
+    if return_code == SUCCESS:
+        response["status"] = "success"
+    else:
+        response["status"] = "failed"
+    response["msg"] = message
+    response["return_code"] = return_code
+
+    try:
+        output = json.dumps(response, indent=4, sort_keys=True, default=to_str)
+    except Exception as err:
+        error_print(JSON_DUMP_ERROR_MSG.format(err))
+        return JSON_DUMP_ERROR
+    if return_code == SUCCESS:
+        print(output)
+    else:
+        error_print(output)
+    return return_code
+
+
+def cli():
+    return main(sys.argv[1:])
 
 
 if __name__ == "__main__":
-    cli()
+    sys.exit(main(sys.argv[1:]))
