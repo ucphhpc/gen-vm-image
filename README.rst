@@ -8,6 +8,7 @@ gen-vm-image
     :target: https://badge.fury.io/py/gen-vm-image
 
 This package can be used for generating virtual machine images.
+The ``gen-vm-image`` tool can also be used as an initializer plugin for `corc <https://github.com/rasmunk/corc>`_
 
 ------------
 Dependencies

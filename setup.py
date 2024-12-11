@@ -56,10 +56,13 @@ setup(
         "test": read_req("tests/requirements.txt"),
         "dev": read_req("requirements-dev.txt"),
     },
+    # Ensures that the plugin can be discovered/loaded by corc
     entry_points={
         "console_scripts": [
             "gen-vm-image = gen_vm_image.cli.build_image:cli",
-        ]
+        ],
+        "corc.plugins": ["gen_vm_image=gen_vm_image"],
+        "corc.plugins.initializer": ["gen_vm_image=gen_vm_image"],
     },
     classifiers=[
         "Intended Audience :: Developers",
