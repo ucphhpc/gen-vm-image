@@ -25,21 +25,28 @@ class TestImageArchitecture(unittest.TestCase):
         self.architecture_path = join("tests", "res", "architecture.yml")
 
     def test_load_architecture(self):
-        architecture, error = load_architecture(self.architecture_path)
+        loaded, response = load_architecture(self.architecture_path)
+        self.assertTrue(loaded)
+        self.assertIn("architecture", response)
+        architecture = response["architecture"]
         self.assertNotEqual(architecture, None)
-        self.assertEqual(error, None)
         self.assertIsInstance(architecture, dict)
 
     def test_fail_load_architecture(self):
         missing_architecture_path = join("tests", "res", "missing.yml")
-        architecture, error = load_architecture(missing_architecture_path)
-        self.assertNotEqual(error, None)
-        self.assertEqual(architecture, PATH_NOT_FOUND_ERROR)
+        loaded, response = load_architecture(missing_architecture_path)
+        self.assertFalse(loaded)
+
+        self.assertNotIn("architecture", response)
+        self.assertIn("error_code", response)
+        self.assertEqual(response["error_code"], PATH_NOT_FOUND_ERROR)
 
     def test_architecture_owner(self):
-        architecture, error = load_architecture(self.architecture_path)
-        self.assertNotEqual(architecture, None)
-        self.assertEqual(error, None)
+        loaded, response = load_architecture(self.architecture_path)
+        self.assertTrue(loaded)
+        self.assertIn("architecture", response)
+        architecture = response["architecture"]
+
         self.assertIsInstance(architecture, dict)
         self.assertIn("owner", architecture)
         self.assertIsInstance(architecture["owner"], str)
@@ -47,18 +54,22 @@ class TestImageArchitecture(unittest.TestCase):
         self.assertEqual(architecture["owner"], "the-owner-name")
 
     def test_architecture_images_top(self):
-        architecture, error = load_architecture(self.architecture_path)
-        self.assertNotEqual(architecture, None)
-        self.assertEqual(error, None)
+        loaded, response = load_architecture(self.architecture_path)
+        self.assertTrue(loaded)
+        self.assertIn("architecture", response)
+        architecture = response["architecture"]
+
         self.assertIsInstance(architecture, dict)
         self.assertIn("images", architecture)
         self.assertIsInstance(architecture["images"], dict)
         self.assertGreater(len(architecture["images"]), 0)
 
     def test_architecture_images_items(self):
-        architecture, error = load_architecture(self.architecture_path)
-        self.assertNotEqual(architecture, None)
-        self.assertEqual(error, None)
+        loaded, response = load_architecture(self.architecture_path)
+        self.assertTrue(loaded)
+        self.assertIn("architecture", response)
+        architecture = response["architecture"]
+
         self.assertIsInstance(architecture, dict)
         self.assertIn("images", architecture)
         self.assertIsInstance(architecture["images"], dict)

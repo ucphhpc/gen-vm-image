@@ -37,9 +37,12 @@ class TestImageBuild(unittest.TestCase):
         assert exists(cls.input_image_path)
 
         cls.architecture_path = join(cls.test_res_directory, "architecture.yml")
-        cls.architecture, error = load_architecture(cls.architecture_path)
+        loaded, response = load_architecture(cls.architecture_path)
+        assert loaded
+        assert "architecture" in response
+
+        cls.architecture = response["architecture"]
         assert cls.architecture is not None
-        assert error is None
         assert isinstance(cls.architecture, dict)
 
     @classmethod
