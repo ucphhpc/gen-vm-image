@@ -366,11 +366,7 @@ def build_architecture(
     return SUCCESS, "Successfully built the images"
 
 
-def build_image_cli(commands):
-    parser = commands.add_parser(
-        "build-image", help="Build images based on an architecture file"
-    )
-
+def add_build_image_cli_arguments(parser):
     parser.add_argument(
         "architecture_path",
         help="The path to the architecture file that defines the images to build",
@@ -401,12 +397,19 @@ def build_image_cli(commands):
     )
 
 
+def corc_cli(commands):
+    parser = commands.add_parser(
+        "build-image",
+        help="Build the images defined in an architecture file.",
+    )
+    add_build_image_cli_arguments(parser)
+
+
 def main(args):
     parser = argparse.ArgumentParser(
         prog=PACKAGE_NAME, formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
-    commands = parser.add_subparsers(title="COMMAND")
-    build_image_cli(commands)
+    add_build_image_cli_arguments(parser)
     parsed_args = parser.parse_args(args)
 
     architecture_path = parsed_args.architecture_path
