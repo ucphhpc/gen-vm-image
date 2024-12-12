@@ -18,8 +18,8 @@ import requests
 import tqdm
 
 
-def download_file(url, ouput_path, chunk_size=8192):
-    with open(ouput_path, "wb") as _file:
+def download_file(url, output_path, chunk_size=8192):
+    with open(output_path, "wb") as _file:
         with requests.get(url, stream=True) as r:
             r.raise_for_status()
             total = int(r.headers.get("content-length", 0))
