@@ -18,7 +18,7 @@ import requests
 import tqdm
 
 
-def download_file(url, output_path, chunk_size=8192):
+def download_file(url, output_path, chunk_size=8192, verbose=False):
     with open(output_path, "wb") as _file:
         with requests.get(url, stream=True) as r:
             r.raise_for_status()
@@ -31,7 +31,12 @@ def download_file(url, output_path, chunk_size=8192):
                 "unit": "B",
                 "unit_scale": True,
                 "unit_divisor": 1024,
+                "disable": False,
+                "dynamic_ncols": True,
             }
+            if not verbose:
+                tqdm_params["disable"] = True
+
             with tqdm.tqdm(**tqdm_params) as pb:
                 for chunk in r.iter_content(chunk_size=chunk_size):
                     pb.update(len(chunk))

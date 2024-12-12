@@ -280,7 +280,7 @@ def build_architecture(
                             verbose_outputs.append(
                                 "Downloading image from: {}".format(vm_input_url)
                             )
-                        download_file(vm_input_url, input_vm_path)
+                        download_file(vm_input_url, input_vm_path, verbose=verbose)
                 elif "path" in vm_input:
                     input_vm_path = vm_input["path"]
                     if not exists(input_vm_path):
