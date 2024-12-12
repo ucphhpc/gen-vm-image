@@ -363,7 +363,9 @@ def build_architecture(
             )
             if not check_result:
                 return check_result, check_msg
-    return SUCCESS, "Successfully built the images"
+    return SUCCESS, "Successfully built the images in: {}".format(
+        os.path.abspath(images_output_directory)
+    )
 
 
 def add_build_image_cli_arguments(parser):
