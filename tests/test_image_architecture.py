@@ -17,7 +17,7 @@
 import unittest
 from gen_vm_image.utils.io import join
 from gen_vm_image.architecture import load_architecture
-from gen_vm_image.common.errors import PATH_NOT_FOUND_ERROR
+from gen_vm_image.common.codes import PATH_NOT_FOUND_ERROR
 
 
 class TestImageArchitecture(unittest.TestCase):
