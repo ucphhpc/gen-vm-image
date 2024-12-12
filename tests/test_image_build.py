@@ -81,7 +81,7 @@ class TestImageBuild(unittest.TestCase):
             image_format=image_1["format"],
         )
         self.assertTrue(result)
-        self.assertIsNone(msg)
+        self.assertEqual(msg, b"")
 
     def test_create_image_raw_2(self):
         image_2 = self.architecture["images"]["image-2"]
@@ -100,7 +100,7 @@ class TestImageBuild(unittest.TestCase):
             image_format=image_2["format"],
         )
         self.assertTrue(result)
-        self.assertIsNone(msg)
+        self.assertEqual(msg, b"")
 
     def test_image_path_input(self):
         input_path_image = self.architecture["images"]["input_path_image"]
@@ -132,7 +132,7 @@ class TestImageBuild(unittest.TestCase):
             output_format=input_path_image["format"],
         )
         self.assertTrue(concert_result)
-        self.assertIsNone(convert_msg)
+        self.assertEqual(convert_msg, b"")
         self.assertTrue(exists(output_path))
 
         resize_result, resize_msg = resize_image(
@@ -141,7 +141,7 @@ class TestImageBuild(unittest.TestCase):
             image_format=input_path_image["format"],
         )
         self.assertTrue(resize_result)
-        self.assertIsNone(resize_msg)
+        self.assertEqual(resize_msg, b"")
         # TODO, validate that the size of the output image is correct
 
     def test_convert_image_format(self):
@@ -172,7 +172,7 @@ class TestImageBuild(unittest.TestCase):
             output_format=convert_image_dict["format"],
         )
         self.assertTrue(result)
-        self.assertIsNone(msg)
+        self.assertEqual(msg, b"")
         self.assertTrue(exists(output_path))
         # TODO, validate that the output image is of the correct size and format
 
@@ -194,5 +194,5 @@ class TestImageBuild(unittest.TestCase):
             image_format=image_no_version["format"],
         )
         self.assertTrue(result)
-        self.assertIsNone(msg)
+        self.assertEqual(msg, b"")
         self.assertTrue(exists(new_image_path))
