@@ -27,7 +27,7 @@ from gen_vm_image.common.defaults import (
     CONSITENCY_SUPPPORTED_FORMATS,
 )
 from gen_vm_image.cli.common import error_print, to_str
-from gen_vm_image.cli.return_codes import (
+from gen_vm_image.common.codes import (
     PATH_NOT_FOUND_ERROR,
     PATH_NOT_FOUND_ERROR_MSG,
     PATH_CREATE_ERROR,
@@ -120,21 +120,24 @@ def build_architecture(
     response = {}
     verbose_outputs = []
     # Load the architecture file
-    architecture, return_message = load_architecture(architecture_path)
-    if not architecture:
-        return architecture, return_message
+    architecture_loaded, architecture_response = load_architecture(architecture_path)
+    if not architecture_loaded:
+        return architecture_response["error_code"], architecture_response["msg"]
 
-    correct_architecture, correct_error_msg = correct_architecture_structure(
+    architecture = response["architecture"]
+    correct_architecture, correct_response = correct_architecture_structure(
         architecture
     )
     if not correct_architecture:
-        return correct_architecture, correct_error_msg
+        return correct_response["error_code"], correct_response["msg"]
 
     # Create the destination directory where the images will be saved
     if not exists(images_output_directory):
-        created, msg = makedirs(images_output_directory)
+        created = makedirs(images_output_directory)
         if not created:
-            response["msg"] = PATH_CREATE_ERROR_MSG.format(images_output_directory, msg)
+            response["msg"] = PATH_CREATE_ERROR_MSG.format(
+                images_output_directory, "Failed to create the images output directory"
+            )
             response["verbose_outputs"] = verbose_outputs
             return PATH_CREATE_ERROR, response
 
