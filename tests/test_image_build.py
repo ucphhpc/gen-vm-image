@@ -49,9 +49,9 @@ class TestImageBuild(unittest.TestCase):
     def tearDownClass(cls):
         # Remove the downloaded test image
         if exists(cls.input_image_path):
-            assert remove(cls.input_image_path)[0]
+            assert remove(cls.input_image_path)
         if exists(cls.test_tmp_directory):
-            assert remove(cls.test_tmp_directory, recursive=True)[0]
+            assert remove(cls.test_tmp_directory, recursive=True)
 
     def setUp(self):
         self.seed = str(random.random())[2:10]
@@ -62,7 +62,7 @@ class TestImageBuild(unittest.TestCase):
         seed_files = find(self.test_tmp_directory, regex_name)
         for seed_file in seed_files:
             if exists(seed_file):
-                self.assertTrue(remove(seed_file)[0])
+                self.assertTrue(remove(seed_file))
 
     def test_create_image_qcow_1(self):
         image_1 = self.architecture["images"]["image-1"]
