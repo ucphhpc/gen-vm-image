@@ -270,9 +270,12 @@ def build_architecture(
                     # First prepare the temporary directory
                     # where the downloaded image will be prepared
                     if not exists(TMP_DIR):
-                        created, msg = makedirs(TMP_DIR)
+                        created = makedirs(TMP_DIR)
                         if not created:
-                            response["msg"] = PATH_CREATE_ERROR_MSG.format(TMP_DIR, msg)
+                            response["msg"] = PATH_CREATE_ERROR_MSG.format(
+                                TMP_DIR,
+                                "Failed to create the temporary download directory",
+                            )
                             response["verbose_outputs"] = verbose_outputs
                             return PATH_CREATE_ERROR, response
 
