@@ -124,7 +124,8 @@ def build_architecture(
     if not architecture_loaded:
         return architecture_response["error_code"], architecture_response["msg"]
 
-    architecture = response["architecture"]
+
+    architecture = architecture_response["architecture"]
     correct_architecture, correct_response = correct_architecture_structure(
         architecture
     )
