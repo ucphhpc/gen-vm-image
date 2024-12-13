@@ -15,29 +15,32 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import requests
-import tqdm
+import time
 
 
-def download_file(url, output_path, chunk_size=8192, verbose=False):
-    with open(output_path, "wb") as _file:
-        with requests.get(url, stream=True) as r:
-            r.raise_for_status()
-            total = int(r.headers.get("content-length", 0))
-
-            tqdm_params = {
-                "desc": url,
-                "total": total,
-                "miniters": 1,
-                "unit": "B",
-                "unit_scale": True,
-                "unit_divisor": 1024,
-                "disable": False,
-                "dynamic_ncols": True,
-            }
-            if not verbose:
-                tqdm_params["disable"] = True
-
-            with tqdm.tqdm(**tqdm_params) as pb:
+def download_file(url, output_path, chunk_size=8192):
+    response = {}
+    try:
+        with open(output_path, "wb") as _file:
+            response["download_destination"] = output_path
+            with requests.get(url, stream=True) as r:
+                response["download_src"] = url
+                r.raise_for_status()
+                total = int(r.headers.get("content-length", 0))
+                downloaded = 0
+                start_time = time.time()
                 for chunk in r.iter_content(chunk_size=chunk_size):
-                    pb.update(len(chunk))
+                    downloaded += len(chunk)
+                    percentage_progress = (downloaded / total) * 100
+                    response["download_progress"] = "{:.2f}%".format(
+                        percentage_progress
+                    )
                     _file.write(chunk)
+                stop_time = time.time()
+                response["download_time"] = "{:.2f} seconds".format(
+                    stop_time - start_time
+                )
+    except Exception as e:
+        response["msg"] = str(e)
+        return False, response
+    return True, response

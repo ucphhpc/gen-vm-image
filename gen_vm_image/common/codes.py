@@ -35,3 +35,4 @@ CHECK_ERROR = 8
 CHECK_ERROR_MSG = "Failed to check path: {}"
 JSON_DUMP_ERROR = 9
 JSON_DUMP_ERROR_MSG = "Failed to dump JSON: {}"
+DOWNLOAD_ERROR = 10

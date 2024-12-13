@@ -44,6 +44,7 @@ from gen_vm_image.common.codes import (
     SUCCESS,
     JSON_DUMP_ERROR,
     JSON_DUMP_ERROR_MSG,
+    DOWNLOAD_ERROR,
 )
 from gen_vm_image.architecture import load_architecture, correct_architecture_structure
 from gen_vm_image.utils.io import exists, makedirs, hashsum
@@ -123,7 +124,6 @@ def build_architecture(
     architecture_loaded, architecture_response = load_architecture(architecture_path)
     if not architecture_loaded:
         return architecture_response["error_code"], architecture_response["msg"]
-
 
     architecture = architecture_response["architecture"]
     correct_architecture, correct_response = correct_architecture_structure(
@@ -287,7 +287,17 @@ def build_architecture(
                             verbose_outputs.append(
                                 "Downloading image from: {}".format(vm_input_url)
                             )
-                        download_file(vm_input_url, input_vm_path, verbose=verbose)
+                        downloaded, download_response = download_file(
+                            vm_input_url, input_vm_path
+                        )
+                        if not downloaded:
+                            response["msg"] = download_response["msg"]
+                            response["verbose_outputs"] = verbose_outputs
+                            return DOWNLOAD_ERROR, response
+                        if verbose:
+                            verbose_outputs.append(
+                                "Download details: {}".format(download_response)
+                            )
                 elif "path" in vm_input:
                     input_vm_path = vm_input["path"]
                     if not exists(input_vm_path):
