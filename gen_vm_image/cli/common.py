@@ -27,3 +27,6 @@ def to_str(o):
         return o.asdict()
     if isinstance(o, datetime.datetime):
         return o.__str__()
+    if isinstance(o, bytes):
+        return o.decode("utf-8")
+    return o
