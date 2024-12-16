@@ -15,6 +15,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 from gen_vm_image.common.defaults import GENERATED_IMAGE_DIR
+from gen_vm_image.common.codes import SUCCESS
 from gen_vm_image.cli.build_image import (
     add_build_image_cli_arguments,
     build_architecture,
@@ -36,6 +37,10 @@ def corc_build_image_cli_exec(args):
     overwrite = args.get("overwrite", False)
     verbose = args.get("verbose", False)
 
-    return build_architecture(
+    return_code, result_dict = build_architecture(
         architecture_path, images_output_directory, overwrite=overwrite, verbose=verbose
     )
+
+    if return_code == SUCCESS:
+        return True, result_dict
+    return False, result_dict
