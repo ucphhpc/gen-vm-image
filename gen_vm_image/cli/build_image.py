@@ -442,15 +442,6 @@ def add_build_image_cli_arguments(parser):
     )
 
 
-def corc_cli(commands):
-    parser = commands.add_parser(
-        "build-image",
-        help="Build the images defined in an architecture file.",
-    )
-    add_build_image_cli_arguments(parser)
-    parser.set_defaults(func=main)
-
-
 def main(args):
     parser = argparse.ArgumentParser(
         prog=PACKAGE_NAME, formatter_class=argparse.ArgumentDefaultsHelpFormatter
