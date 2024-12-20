@@ -163,6 +163,8 @@ def build_architecture(
         vm_version = build_data.get("version", None)
 
         # Optional attributes for each image configuration
+        # TODO, allow for the output format to be a dictionary
+        # that supports the format and version keys
         vm_output_format = build_data.get("format", "qcow2")
         vm_input, vm_input_format = None, "qcow2"
         if "input" in build_data:
