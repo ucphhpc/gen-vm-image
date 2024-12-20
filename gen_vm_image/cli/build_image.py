@@ -234,6 +234,15 @@ def build_architecture(
                         response["verbose_outputs"] = verbose_outputs
                         return INVALID_ATTRIBUTE_TYPE_ERROR, response
 
+                if "format" in vm_input:
+                    vm_input_format = vm_input["format"]
+                    if not isinstance(vm_input_format, str):
+                        response["msg"] = INVALID_ATTRIBUTE_TYPE_ERROR_MSG.format(
+                            type(vm_input_format), vm_input_format, "string"
+                        )
+                        response["verbose_outputs"] = verbose_outputs
+                        return INVALID_ATTRIBUTE_TYPE_ERROR, response
+
                 # If a checksum is present, then validate that it is correctly structured
                 vm_input_checksum = None
                 if "checksum" in vm_input:

@@ -62,7 +62,9 @@ setup(
             "gen-vm-image = gen_vm_image.cli.build_image:cli",
         ],
         "corc.plugins": ["gen_vm_image=gen_vm_image"],
-        "corc.plugins.initializer": ["gen_vm_image=gen_vm_image.cli.build_image:build_architecture"],
+        "corc.plugins.initializer": [
+            "gen_vm_image=gen_vm_image.cli.build_image:build_architecture"
+        ],
         "corc.plugins.cli": ["gen_vm_image=gen_vm_image.cli.corc:build_image_cli"],
     },
     classifiers=[
