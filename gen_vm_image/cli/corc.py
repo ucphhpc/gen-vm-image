@@ -38,7 +38,10 @@ def corc_build_image_cli_exec(args):
     verbose = args.get("verbose", False)
 
     return_code, result_dict = build_architecture(
-        architecture_path, images_output_directory, overwrite=overwrite, verbose=verbose
+        architecture_path,
+        images_output_directory=images_output_directory,
+        overwrite=overwrite,
+        verbose=verbose,
     )
 
     if return_code == SUCCESS:

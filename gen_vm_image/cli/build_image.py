@@ -116,7 +116,10 @@ def check_image(path, image_format="qcow2", verbose=False):
 
 
 def build_architecture(
-    architecture_path, images_output_directory, overwrite=False, verbose=False
+    architecture_path,
+    images_output_directory=GENERATED_IMAGE_DIR,
+    overwrite=False,
+    verbose=False,
 ):
     response = {}
     verbose_outputs = []
@@ -466,7 +469,10 @@ def main(args):
     verbose = parsed_args.verbose
 
     return_code, result_dict = build_architecture(
-        architecture_path, images_output_directory, overwrite=overwrite, verbose=verbose
+        architecture_path,
+        images_output_directory=images_output_directory,
+        overwrite=overwrite,
+        verbose=verbose,
     )
     response = {}
     if return_code == SUCCESS:
