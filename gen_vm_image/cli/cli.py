@@ -24,7 +24,6 @@ import os
 from gen_vm_image._version import __version__
 from gen_vm_image.common.defaults import (
     PACKAGE_NAME,
-    GENERATED_IMAGE_DIR,
     GEN_VM_IMAGE_CLI_STRUCTURE,
     SINGLE,
     MULTIPLE,
@@ -35,11 +34,16 @@ from gen_vm_image.common.codes import (
     JSON_DUMP_ERROR_MSG,
 )
 from gen_vm_image.cli.common import error_print, to_str
-from gen_vm_image.cli.actions import PositionalArgumentsAction
+from gen_vm_image.cli.helpers import extract_arguments, strip_argument_group_prefix
 
 
 current_dir = os.path.abspath(os.path.dirname(__file__))
 parent_dir = os.path.dirname(current_dir)
+
+
+def import_from_module(module_path, module_name, func_name):
+    module = __import__(module_path, fromlist=[module_name])
+    return getattr(module, func_name)
 
 
 def cli_exec(arguments):
@@ -53,13 +57,27 @@ def cli_exec(arguments):
     else:
         positional_arguments = []
 
+    if "argument_groups" in arguments:
+        argument_groups = arguments.pop("argument_groups")
+    else:
+        argument_groups = []
+
     func = import_from_module(module_path, module_name, func_name)
     if not func:
         return False, {}
 
+    action_kwargs, remaining_action_kwargs = extract_arguments(
+        arguments, argument_groups
+    )
+    action_kwargs = strip_argument_group_prefix(action_kwargs, argument_groups)
+    if remaining_action_kwargs:
+        print("Unused arguments: {}".format(remaining_action_kwargs))
+
+    action_args = positional_arguments
+    print("Positional arguments: {} Arguments: {}".format(action_args, action_kwargs))
     if inspect.iscoroutinefunction(func):
-        return asyncio.run(func(*positional_arguments, **arguments))
-    return func(*positional_arguments, **arguments)
+        return asyncio.run(func(*action_args, **action_kwargs))
+    return func(*action_args, **action_kwargs)
 
 
 def add_base_cli_operations(parser):
@@ -79,70 +97,30 @@ def add_base_cli_operations(parser):
     )
 
 
-def add_single_cli_operations(parser):
-    parser.add_argument(
-        "name",
-        action=PositionalArgumentsAction,
-        help="The name of the image to build",
-    )
-    parser.add_argument(
-        "size",
-        action=PositionalArgumentsAction,
-        help="The size of the image to build",
-    )
-    parser.add_argument(
-        "--input",
-        help="The path of dictionary to the input image that the generated image should be based on",
-    )
-    parser.add_argument(
-        "--output-directory",
-        default=GENERATED_IMAGE_DIR,
-        help="The path to the output directory where the image will be saved",
-    )
-    parser.add_argument(
-        "--output-format",
-        default="qcow2",
-        help="The format of the output image",
-    )
-    parser.add_argument(
-        "--version",
-        help="The version of the image to build",
-    )
-
-
-def add_multiple_cli_arguments(parser):
-    parser.add_argument(
-        "architecture_path",
-        help="The path to the architecture file that defines the images to build",
-    )
-    parser.add_argument(
-        "--images-output-directory",
-        default=GENERATED_IMAGE_DIR,
-        help="The path to the output directory where the images will be saved",
-    )
-    parser.add_argument(
-        "--overwrite",
-        action="store_true",
-        default=False,
-        help="Whether the tool should overwrite existing image disks",
-    )
-
-
-def add_build_image_cli_arguments(commands):
+def add_build_image_cli_arguments(
+    commands, module_cli_prefix="gen_vm_image.cli.operations"
+):
     for command in GEN_VM_IMAGE_CLI_STRUCTURE:
         if command == SINGLE:
             parser = commands.add_parser(
                 SINGLE,
                 help="Build a single image",
             )
+            # TODO update this to use the new dynamic parser and input group function discover
             add_single_cli_operations(parser)
         if command == MULTIPLE:
             parser = commands.add_parser(
                 MULTIPLE,
                 help="Build multiple images",
             )
+            # TODO update this to use the new dynamic parser and input group function discover
             add_multiple_cli_arguments(parser)
-        parser.set_defaults(func=cli_exec)
+        parser.set_defaults(
+            func=cli_exec,
+            module_path="{}.{}.build".format(module_cli_prefix, command),
+            module_name="build",
+            func_name="{}_operation".format(command),
+        )
 
 
 def main(args):
