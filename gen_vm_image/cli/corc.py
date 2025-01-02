@@ -19,7 +19,29 @@ from gen_vm_image.common.codes import SUCCESS
 from gen_vm_image.cli.build_image import (
     add_build_image_cli_arguments,
     build_architecture,
+    generate_image,
 )
+
+
+def corc_initializer_plugin_entrypoint(build_data):
+    if not isinstance(build_data, dict):
+        return False, {"error": "The build data must be a dictionary."}
+
+    if "name" not in build_data:
+        return False, {"error": "The image configuration must have a name."}
+    if "size" not in build_data:
+        return False, {"error": "The image configuration must have a size."}
+
+    return generate_image(
+        build_data["name"],
+        build_data["size"],
+        version=build_data.get("version", None),
+        vm_input=build_data.get("input", None),
+        output_format=build_data.get("format", None),
+        images_output_directory=build_data.get("output_directory", GENERATED_IMAGE_DIR),
+        overwrite=build_data.get("overwrite", False),
+        verbose=build_data.get("verbose", False),
+    )
 
 
 def build_image_cli(commands):

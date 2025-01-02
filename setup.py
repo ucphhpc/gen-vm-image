@@ -59,11 +59,11 @@ setup(
     # Ensures that the plugin can be discovered/loaded by corc
     entry_points={
         "console_scripts": [
-            "gen-vm-image = gen_vm_image.cli.build_image:cli",
+            "gen-vm-image = gen_vm_image.cli.cli:cli",
         ],
         "corc.plugins": ["gen_vm_image=gen_vm_image"],
         "corc.plugins.initializer": [
-            "gen_vm_image=gen_vm_image.cli.build_image:build_architecture"
+            "gen_vm_image=gen_vm_image.cli.corc:corc_initializer_plugin_entrypoint"
         ],
         "corc.plugins.cli": ["gen_vm_image=gen_vm_image.cli.corc:build_image_cli"],
     },

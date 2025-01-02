@@ -19,7 +19,7 @@ import random
 import wget
 from gen_vm_image.utils.io import join, find, remove, exists, makedirs
 from gen_vm_image.architecture import load_architecture
-from gen_vm_image.cli.build_image import create_image, convert_image, resize_image
+from gen_vm_image.image import create_image, convert_image, resize_image
 
 
 class TestImageBuild(unittest.TestCase):

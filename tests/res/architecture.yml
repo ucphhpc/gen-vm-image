@@ -61,3 +61,11 @@ images:
     name: non-version-image
     format: raw
     size: 10G
+  image_with_output_path:
+    name: image-with-output-path
+    version: 9.4
+    format: qcow2
+    size: 10G
+    output:
+      path: tests/tmp/image-with-output-path.qcow2
+      format: qcow2

@@ -1,4 +1,4 @@
-# Copyright (C) 2024  The gen-vm-image Project by the Science HPC Center at UCPH
+# Copyright (C) 2025  The gen-vm-image Project by the Science HPC Center at UCPH
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,24 +14,19 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-PACKAGE_NAME = "gen-vm-image"
-REPO_NAME = "gen-vm-image"
-GOCD_GROUP = "bare_metal_vm_image"
-GOCD_TEMPLATE = "bare_metal_vm_image"
-GOCD_FORMAT_VERSION = 10
-GO_REVISION_COMMIT_VAR = "GO_REVISION_SIF_VM_IMAGES"
-CLOUD_CONFIG_DIR = "cloud-init-config"
-IMAGE_CONFIG_DIR = "image-config"
-GENERATED_IMAGE_DIR = "generated-images"
-VM_DISK_DIR = "vmdisks"
-TMP_DIR = "tmp"
-CONSITENCY_SUPPPORTED_FORMATS = ["qcow2", "qed", "parallels", "vhdx", "vdi"]
+import argparse
 
-# CLI
-SINGLE = "single"
-MULTIPLE = "multiple"
 
-GEN_VM_IMAGE_CLI_STRUCTURE = [
-    SINGLE,
-    MULTIPLE,
-]
+class PositionalArgumentsAction(argparse.Action):
+    def __init__(self, option_strings, dest, nargs=None, **kwargs):
+        if nargs is not None:
+            raise ValueError("nargs not allowed")
+        super().__init__(option_strings, dest, **kwargs)
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        if not hasattr(namespace, "positional_arguments") or not getattr(
+            namespace, "positional_arguments"
+        ):
+            setattr(namespace, "positional_arguments", [values])
+        else:
+            getattr(namespace, "positional_arguments").append(values)
