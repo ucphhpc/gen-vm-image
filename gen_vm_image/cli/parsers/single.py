@@ -34,8 +34,29 @@ def single_group(parser):
     build_single_group.add_argument(
         "-i",
         "--input",
-        dest="{}_input".format(SINGLE),
-        help="The path of dictionary to the input image that the generated image should be based on",
+        dest="{}_vm_input".format(SINGLE),
+        help="The path or url to the input image that the generated image should be based on",
+    )
+    build_single_group.add_argument(
+        "-if",
+        "--input-format",
+        dest="{}_input_format".format(SINGLE),
+        default=None,
+        help="The format of the input image. Will dynamically try to determine the format if not provided",
+    )
+    build_single_group.add_argument(
+        "-ict",
+        "--input-checksum-type",
+        dest="{}_input_checksum_type".format(SINGLE),
+        default=None,
+        help="The checksum type that should be used to validate the input image if set.",
+    )
+    build_single_group.add_argument(
+        "-ic",
+        "--input-checksum",
+        dest="{}_input_checksum".format(SINGLE),
+        default=None,
+        help="The checksum that should be used to validate the input image if set.",
     )
     build_single_group.add_argument(
         "-od",
