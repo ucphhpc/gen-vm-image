@@ -24,17 +24,19 @@ def single_group(parser):
     build_single_group.add_argument(
         "name",
         action=PositionalArgumentsAction,
+        type=str,
         help="The name of the image to build",
     )
     build_single_group.add_argument(
         "size",
         action=PositionalArgumentsAction,
+        type=str,
         help="The size of the image to build",
     )
     build_single_group.add_argument(
         "-i",
         "--input",
-        dest="{}_vm_input".format(SINGLE),
+        dest="{}_image_input".format(SINGLE),
         help="The path or url to the input image that the generated image should be based on",
     )
     build_single_group.add_argument(

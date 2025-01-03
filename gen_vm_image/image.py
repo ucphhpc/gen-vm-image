@@ -15,6 +15,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import os
+import validators
 from gen_vm_image.common.defaults import (
     GENERATED_IMAGE_DIR,
     TMP_DIR,
@@ -106,8 +107,10 @@ def generate_image(
     size,
     # Optional version attribute for each image configuration
     version=None,
-    vm_input=None,
+    image_input=None,
     input_format="qcow2",
+    input_checksum_type=None,
+    input_checksum=None,
     # Optional attributes for each image configuration
     # TODO, allow for the output format to be a dictionary
     # that supports the format and version keys
@@ -118,14 +121,6 @@ def generate_image(
 ):
     response = {}
     verbose_outputs = []
-
-    if vm_input:
-        if not isinstance(vm_input, str) and not isinstance(vm_input, dict):
-            response["msg"] = INVALID_ATTRIBUTE_TYPE_ERROR_MSG.format(
-                type(vm_input), vm_input, "string or dictionary"
-            )
-            response["verbose_outputs"] = verbose_outputs
-            return INVALID_ATTRIBUTE_TYPE_ERROR, response
 
     if version:
         vm_output_path = os.path.join(
@@ -155,164 +150,123 @@ def generate_image(
                     "Overwriting the existing image: {}".format(vm_output_path)
                 )
 
-    if vm_input:
-        if isinstance(vm_input, dict):
-            if "url" not in vm_input and "path" not in vm_input:
-                response["msg"] = MISSING_ATTRIBUTE_ERROR_MSG.format(
-                    "'url' or 'path' must be in the architecture input section",
-                    vm_input,
-                )
-                response["verbose_outputs"] = verbose_outputs
-                return MISSING_ATTRIBUTE_ERROR, response
+    if image_input:
+        if not isinstance(image_input, str):
+            response["msg"] = INVALID_ATTRIBUTE_TYPE_ERROR_MSG.format(
+                type(image_input), image_input, "string"
+            )
+            response["verbose_outputs"] = verbose_outputs
+            return INVALID_ATTRIBUTE_TYPE_ERROR, response
 
-            if "url" in vm_input and "path" in vm_input:
-                response["msg"] = (
-                    "Both 'url' and 'path' are defined in the architecture input section. Only one can be defined"
+        if input_format and not isinstance(input_format, str):
+            response["msg"] = INVALID_ATTRIBUTE_TYPE_ERROR_MSG.format(
+                type(input_format), input_format, "string"
+            )
+            response["verbose_outputs"] = verbose_outputs
+            return INVALID_ATTRIBUTE_TYPE_ERROR, response
+
+        # If a checksum is present, then validate that it is correctly structured
+        if input_checksum:
+            if not isinstance(input_checksum, str):
+                response["msg"] = INVALID_ATTRIBUTE_TYPE_ERROR_MSG.format(
+                    type(input_checksum),
+                    input_checksum,
+                    "string",
                 )
                 response["verbose_outputs"] = verbose_outputs
                 return INVALID_ATTRIBUTE_TYPE_ERROR, response
 
-            if "url" in vm_input:
-                if not isinstance(vm_input["url"], str):
-                    response["msg"] = INVALID_ATTRIBUTE_TYPE_ERROR_MSG.format(
-                        type(vm_input["url"]), vm_input["url"], "string"
+            if not input_checksum_type:
+                response["msg"] = MISSING_ATTRIBUTE_ERROR_MSG.format(
+                    "input_checksum_type", input_checksum
+                )
+                response["verbose_outputs"] = verbose_outputs
+                return MISSING_ATTRIBUTE_ERROR, response
+
+            if not isinstance(input_checksum_type, str):
+                response["msg"] = INVALID_ATTRIBUTE_TYPE_ERROR_MSG.format(
+                    type(input_checksum_type),
+                    input_checksum_type,
+                    "string",
+                )
+                response["verbose_outputs"] = verbose_outputs
+                return INVALID_ATTRIBUTE_TYPE_ERROR, response
+
+        if validators.url(image_input):
+            image_input_url = image_input
+            # Download the specified url and save it into
+            # a tmp directory.
+            # First prepare the temporary directory
+            # where the downloaded image will be prepared
+            if not exists(TMP_DIR):
+                created = makedirs(TMP_DIR)
+                if not created:
+                    response["msg"] = PATH_CREATE_ERROR_MSG.format(
+                        TMP_DIR,
+                        "Failed to create the temporary download directory",
                     )
                     response["verbose_outputs"] = verbose_outputs
-                    return INVALID_ATTRIBUTE_TYPE_ERROR, response
+                    return PATH_CREATE_ERROR, response
 
-            if "path" in vm_input:
-                if not isinstance(vm_input["path"], str):
-                    response["msg"] = INVALID_ATTRIBUTE_TYPE_ERROR_MSG.format(
-                        type(vm_input["path"]), vm_input["path"], "string"
-                    )
-                    response["verbose_outputs"] = verbose_outputs
-                    return INVALID_ATTRIBUTE_TYPE_ERROR, response
-
-            if "format" in vm_input:
-                vm_input_format = vm_input["format"]
-                if not isinstance(vm_input_format, str):
-                    response["msg"] = INVALID_ATTRIBUTE_TYPE_ERROR_MSG.format(
-                        type(vm_input_format), vm_input_format, "string"
-                    )
-                    response["verbose_outputs"] = verbose_outputs
-                    return INVALID_ATTRIBUTE_TYPE_ERROR, response
-
-            # If a checksum is present, then validate that it is correctly structured
-            vm_input_checksum = None
-            if "checksum" in vm_input:
-                if not isinstance(vm_input["checksum"], dict):
-                    response["msg"] = INVALID_ATTRIBUTE_TYPE_ERROR_MSG.format(
-                        type(vm_input["checksum"]),
-                        vm_input["checksum"],
-                        "dictionary",
-                    )
-                    response["verbose_outputs"] = verbose_outputs
-                    return INVALID_ATTRIBUTE_TYPE_ERROR, response
-
-                required_checksum_attributes = ["type", "value"]
-                for attr in required_checksum_attributes:
-                    if attr not in vm_input["checksum"]:
-                        response["msg"] = MISSING_ATTRIBUTE_ERROR_MSG.format(
-                            attr, vm_input["checksum"]
-                        )
-                        response["verbose_outputs"] = verbose_outputs
-                        return MISSING_ATTRIBUTE_ERROR, response
-                    if not isinstance(vm_input["checksum"][attr], str):
-                        response["msg"] = INVALID_ATTRIBUTE_TYPE_ERROR_MSG.format(
-                            type(vm_input["checksum"][attr]),
-                            vm_input["checksum"][attr],
-                            "string",
-                        )
-                        response["verbose_outputs"] = verbose_outputs
-                        return INVALID_ATTRIBUTE_TYPE_ERROR, response
-                vm_input_checksum = vm_input["checksum"]
-
-            if "url" in vm_input:
-                vm_input_url = vm_input["url"]
-                # Download the specified url and save it into
-                # a tmp directory.
-                # First prepare the temporary directory
-                # where the downloaded image will be prepared
-                if not exists(TMP_DIR):
-                    created = makedirs(TMP_DIR)
-                    if not created:
-                        response["msg"] = PATH_CREATE_ERROR_MSG.format(
-                            TMP_DIR,
-                            "Failed to create the temporary download directory",
-                        )
-                        response["verbose_outputs"] = verbose_outputs
-                        return PATH_CREATE_ERROR, response
-
-                input_url_filename = vm_input_url.split("/")[-1]
-                input_vm_path = os.path.join(TMP_DIR, input_url_filename)
-                if not exists(input_vm_path):
-                    if verbose:
-                        verbose_outputs.append(
-                            "Downloading image from: {}".format(vm_input_url)
-                        )
-                    downloaded, download_response = download_file(
-                        vm_input_url, input_vm_path
-                    )
-                    if not downloaded:
-                        response["msg"] = download_response["msg"]
-                        response["verbose_outputs"] = verbose_outputs
-                        return DOWNLOAD_ERROR, response
-                    if verbose:
-                        verbose_outputs.append(
-                            "Download details: {}".format(download_response)
-                        )
-            elif "path" in vm_input:
-                input_vm_path = vm_input["path"]
-                if not exists(input_vm_path):
-                    response["msg"] = PATH_NOT_FOUND_ERROR_MSG.format(
-                        input_vm_path,
-                        "the defined input path to the does not exist",
-                    )
-                    response["verbose_outputs"] = verbose_outputs
-                    return PATH_NOT_FOUND_ERROR, response
-
-            if vm_input_checksum:
-                checksum_type = vm_input_checksum["type"]
-                checksum_value = vm_input_checksum["value"]
-                calculated_checksum = hashsum(input_vm_path, algorithm=checksum_type)
-                if not calculated_checksum:
-                    response["msg"] = (
-                        "Failed to calculate the checksum of the downloaded image"
-                    )
-                    response["verbose_outputs"] = verbose_outputs
-                    return CHECKSUM_ERROR, response
-
-                if calculated_checksum != checksum_value:
-                    response["msg"] = (
-                        "The checksum of the downloaded image: {} does not match the expected checksum: {}".format(
-                            calculated_checksum, checksum_value
-                        )
-                    )
-                    response["verbose_outputs"] = verbose_outputs
-                    return CHECKSUM_ERROR, response
+            input_url_filename = image_input_url.split("/")[-1]
+            input_vm_path = os.path.join(TMP_DIR, input_url_filename)
+            if not exists(input_vm_path):
                 if verbose:
                     verbose_outputs.append(
-                        "The calculated checksum: {} matches the defined checksum: {}".format(
-                            calculated_checksum, checksum_value
-                        )
+                        "Downloading image from: {}".format(image_input_url)
+                    )
+                downloaded, download_response = download_file(
+                    image_input_url, input_vm_path
+                )
+                if not downloaded:
+                    response["msg"] = download_response["msg"]
+                    response["verbose_outputs"] = verbose_outputs
+                    return DOWNLOAD_ERROR, response
+                if verbose:
+                    verbose_outputs.append(
+                        "Download details: {}".format(download_response)
                     )
         else:
             # If the input is a string, then we assume that it is a path to the image
-            if not exists(vm_input):
+            if not exists(image_input):
                 response["msg"] = PATH_NOT_FOUND_ERROR_MSG.format(
-                    vm_input, "the defined input path to the does not exist"
+                    image_input, "the defined input path to the does not exist"
                 )
                 response["verbose_outputs"] = verbose_outputs
                 return PATH_NOT_FOUND_ERROR, response
-            input_vm_path = vm_input
+            input_vm_path = image_input
             # Try to discover the input format since we have
             # only been given a string value
-            vm_input_format = input_vm_path.split(".")[-1]
+            image_input_format = input_vm_path.split(".")[-1]
+
+        if input_checksum:
+            calculated_checksum = hashsum(input_vm_path, algorithm=input_checksum_type)
+            if not calculated_checksum:
+                response["msg"] = (
+                    "Failed to calculate the checksum of the downloaded image"
+                )
+                response["verbose_outputs"] = verbose_outputs
+                return CHECKSUM_ERROR, response
+
+            if calculated_checksum != input_checksum:
+                response["msg"] = (
+                    "The checksum of the downloaded image: {} does not match the expected checksum: {}".format(
+                        calculated_checksum, input_checksum
+                    )
+                )
+                response["verbose_outputs"] = verbose_outputs
+                return CHECKSUM_ERROR, response
+            if verbose:
+                verbose_outputs.append(
+                    "The calculated checksum: {} matches the defined checksum: {}".format(
+                        calculated_checksum, input_checksum
+                    )
+                )
 
         converted_result, msg = convert_image(
             input_vm_path,
             vm_output_path,
-            input_format=vm_input_format,
+            input_format=image_input_format,
             output_format=output_format,
             verbose=verbose,
         )

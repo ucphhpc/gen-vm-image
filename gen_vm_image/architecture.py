@@ -127,7 +127,7 @@ def build_architecture(
             build_data["name"],
             build_data["size"],
             version=build_data.get("version", None),
-            vm_input=build_data.get("input", None),
+            image_input=build_data.get("input", None),
             output_format=build_data.get("format", "qcow2"),
             images_output_directory=images_output_directory,
             overwrite=overwrite,

@@ -3,3 +3,4 @@ argparse
 jinja2
 wget
 requests
+validators

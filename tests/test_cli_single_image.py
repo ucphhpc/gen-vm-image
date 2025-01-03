@@ -189,10 +189,6 @@ class TestCLISingleImage(unittest.TestCase):
             name = "test-cli-single-image-input-{}".format(self.seed)
             size = "5G"
             image_url = "https://download.rockylinux.org/pub/rocky/9/images/x86_64/Rocky-9-GenericCloud-Base.latest.x86_64.qcow2"
-            input_path = [
-                "url={}".format(image_url),
-                "format=qcow2",
-            ]
             return_code = main(
                 [
                     SINGLE,
@@ -201,7 +197,7 @@ class TestCLISingleImage(unittest.TestCase):
                     "--output-directory",
                     self.images_dir,
                     "--input",
-                    input_path,
+                    image_url,
                 ]
             )
         except SystemExit as e:
