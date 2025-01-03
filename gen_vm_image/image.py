@@ -112,28 +112,29 @@ def generate_image(
     # TODO, allow for the output format to be a dictionary
     # that supports the format and version keys
     output_format="qcow2",
-    images_output_directory=GENERATED_IMAGE_DIR,
+    output_directory=GENERATED_IMAGE_DIR,
     overwrite=False,
     verbose=False,
 ):
     response = {}
     verbose_outputs = []
 
-    if not isinstance(vm_input, str) and not isinstance(vm_input, dict):
-        response["msg"] = INVALID_ATTRIBUTE_TYPE_ERROR_MSG.format(
-            type(vm_input), vm_input, "string or dictionary"
-        )
-        response["verbose_outputs"] = verbose_outputs
-        return INVALID_ATTRIBUTE_TYPE_ERROR, response
+    if vm_input:
+        if not isinstance(vm_input, str) and not isinstance(vm_input, dict):
+            response["msg"] = INVALID_ATTRIBUTE_TYPE_ERROR_MSG.format(
+                type(vm_input), vm_input, "string or dictionary"
+            )
+            response["verbose_outputs"] = verbose_outputs
+            return INVALID_ATTRIBUTE_TYPE_ERROR, response
 
     if version:
         vm_output_path = os.path.join(
-            images_output_directory,
+            output_directory,
             "{}-{}.{}".format(name, version, output_format),
         )
     else:
         vm_output_path = os.path.join(
-            images_output_directory, "{}.{}".format(name, output_format)
+            output_directory, "{}.{}".format(name, output_format)
         )
 
     if exists(vm_output_path):
@@ -296,12 +297,17 @@ def generate_image(
                         )
                     )
         else:
+            # If the input is a string, then we assume that it is a path to the image
             if not exists(vm_input):
                 response["msg"] = PATH_NOT_FOUND_ERROR_MSG.format(
                     vm_input, "the defined input path to the does not exist"
                 )
                 response["verbose_outputs"] = verbose_outputs
                 return PATH_NOT_FOUND_ERROR, response
+            input_vm_path = vm_input
+            # Try to discover the input format since we have
+            # only been given a string value
+            vm_input_format = input_vm_path.split(".")[-1]
 
         converted_result, msg = convert_image(
             input_vm_path,

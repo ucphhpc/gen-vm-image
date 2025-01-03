@@ -63,14 +63,7 @@ def add_cli_operations(
             )
         )
 
-    if len(input_groups) == 2:
-        provider_groups = input_groups[0]
-        argument_groups = input_groups[1]
-    else:
-        # Only a single datatype was returned
-        # and therefore should no longer be a tuple
-        provider_groups = input_groups
-
+    argument_groups = input_groups
     parser.set_defaults(
         func=cli_exec,
         module_path="{}.{}.build".format(module_operation_prefix, operation),
@@ -101,6 +94,7 @@ def cli_exec(arguments):
     if not func:
         return False, {}
 
+    print("Argument groups: {}".format(argument_groups))
     action_kwargs, remaining_action_kwargs = extract_arguments(
         arguments, argument_groups
     )
