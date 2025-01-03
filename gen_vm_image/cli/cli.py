@@ -47,7 +47,6 @@ def add_cli_operations(
     module_cli_input_group_prefix="gen_vm_image.cli.input_groups",
     module_operation_prefix="gen_vm_image.cli.operations",
 ):
-    operation_parser = parser.add_parser(operation)
     operation_input_groups_func = import_from_module(
         "{}.{}".format(module_cli_input_group_prefix, operation),
         "{}".format(operation),
@@ -56,7 +55,7 @@ def add_cli_operations(
 
     provider_groups = []
     argument_groups = []
-    input_groups = operation_input_groups_func(operation_parser)
+    input_groups = operation_input_groups_func(parser)
     if not input_groups:
         raise RuntimeError(
             "No input groups were returned by the input group function: {}".format(
@@ -137,8 +136,8 @@ def add_build_image_cli_arguments(
     commands, module_cli_prefix="gen_vm_image.cli.operations"
 ):
     for command in GEN_VM_IMAGE_CLI_STRUCTURE:
-        parser = commands.add_parser(command)
-        add_cli_operations(parser, command)
+        command_parser = commands.add_parser(command)
+        add_cli_operations(command_parser, command)
 
 
 def main(args):
