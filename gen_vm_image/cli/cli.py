@@ -22,12 +22,7 @@ import inspect
 import sys
 import os
 from gen_vm_image._version import __version__
-from gen_vm_image.common.defaults import (
-    PACKAGE_NAME,
-    GEN_VM_IMAGE_CLI_STRUCTURE,
-    SINGLE,
-    MULTIPLE,
-)
+from gen_vm_image.common.defaults import PACKAGE_NAME, GEN_VM_IMAGE_CLI_STRUCTURE
 from gen_vm_image.common.codes import (
     SUCCESS,
     JSON_DUMP_ERROR,
@@ -44,6 +39,47 @@ parent_dir = os.path.dirname(current_dir)
 def import_from_module(module_path, module_name, func_name):
     module = __import__(module_path, fromlist=[module_name])
     return getattr(module, func_name)
+
+
+def add_cli_operations(
+    parser,
+    operation,
+    module_cli_input_group_prefix="gen_vm_image.cli.input_groups",
+    module_operation_prefix="gen_vm_image.cli.operations",
+):
+    operation_parser = parser.add_parser(operation)
+    operation_input_groups_func = import_from_module(
+        "{}.{}".format(module_cli_input_group_prefix, operation),
+        "{}".format(operation),
+        "{}_groups".format(operation),
+    )
+
+    provider_groups = []
+    argument_groups = []
+    input_groups = operation_input_groups_func(operation_parser)
+    if not input_groups:
+        raise RuntimeError(
+            "No input groups were returned by the input group function: {}".format(
+                operation_input_groups_func.func_name
+            )
+        )
+
+    if len(input_groups) == 2:
+        provider_groups = input_groups[0]
+        argument_groups = input_groups[1]
+    else:
+        # Only a single datatype was returned
+        # and therefore should no longer be a tuple
+        provider_groups = input_groups
+
+    parser.set_defaults(
+        func=cli_exec,
+        module_path="{}.{}.build".format(module_operation_prefix, operation),
+        module_name="build",
+        func_name="{}_operation".format(operation),
+        provider_groups=provider_groups,
+        argument_groups=argument_groups,
+    )
 
 
 def cli_exec(arguments):
@@ -101,26 +137,8 @@ def add_build_image_cli_arguments(
     commands, module_cli_prefix="gen_vm_image.cli.operations"
 ):
     for command in GEN_VM_IMAGE_CLI_STRUCTURE:
-        if command == SINGLE:
-            parser = commands.add_parser(
-                SINGLE,
-                help="Build a single image",
-            )
-            # TODO update this to use the new dynamic parser and input group function discover
-            add_single_cli_operations(parser)
-        if command == MULTIPLE:
-            parser = commands.add_parser(
-                MULTIPLE,
-                help="Build multiple images",
-            )
-            # TODO update this to use the new dynamic parser and input group function discover
-            add_multiple_cli_arguments(parser)
-        parser.set_defaults(
-            func=cli_exec,
-            module_path="{}.{}.build".format(module_cli_prefix, command),
-            module_name="build",
-            func_name="{}_operation".format(command),
-        )
+        parser = commands.add_parser(command)
+        add_cli_operations(parser, command)
 
 
 def main(args):
