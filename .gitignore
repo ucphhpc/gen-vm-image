@@ -166,5 +166,8 @@ generated-images/
 *.qcow2
 *.raw
 
+# Keep the test images around
+!tests/res/*.qcow2
+
 # Ignore any test generated tmp files
 tests/tmp
