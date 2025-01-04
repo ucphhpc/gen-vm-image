@@ -108,6 +108,7 @@ def generate_image(
     # Optional version attribute for each image configuration
     version=None,
     image_input=None,
+    # TODO, automatically determine the input format if not provided
     input_format="qcow2",
     input_checksum_type=None,
     input_checksum=None,
