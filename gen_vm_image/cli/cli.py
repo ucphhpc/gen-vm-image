@@ -94,7 +94,6 @@ def cli_exec(arguments):
     if not func:
         return False, {}
 
-    print("Argument groups: {}".format(argument_groups))
     action_kwargs, remaining_action_kwargs = extract_arguments(
         arguments, argument_groups
     )
@@ -103,7 +102,6 @@ def cli_exec(arguments):
         print("Unused arguments: {}".format(remaining_action_kwargs))
 
     action_args = positional_arguments
-    print("Positional arguments: {} Arguments: {}".format(action_args, action_kwargs))
     if inspect.iscoroutinefunction(func):
         return asyncio.run(func(*action_args, **action_kwargs))
     return func(*action_args, **action_kwargs)

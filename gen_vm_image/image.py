@@ -209,14 +209,14 @@ def generate_image(
                     return PATH_CREATE_ERROR, response
 
             input_url_filename = image_input_url.split("/")[-1]
-            input_vm_path = os.path.join(TMP_DIR, input_url_filename)
-            if not exists(input_vm_path):
+            input_image_path = os.path.join(TMP_DIR, input_url_filename)
+            if not exists(input_image_path):
                 if verbose:
                     verbose_outputs.append(
                         "Downloading image from: {}".format(image_input_url)
                     )
                 downloaded, download_response = download_file(
-                    image_input_url, input_vm_path
+                    image_input_url, input_image_path
                 )
                 if not downloaded:
                     response["msg"] = download_response["msg"]
@@ -234,13 +234,15 @@ def generate_image(
                 )
                 response["verbose_outputs"] = verbose_outputs
                 return PATH_NOT_FOUND_ERROR, response
-            input_vm_path = image_input
+            input_image_path = image_input
             # Try to discover the input format since we have
             # only been given a string value
-            image_input_format = input_vm_path.split(".")[-1]
+            input_format = input_image_path.split(".")[-1]
 
         if input_checksum:
-            calculated_checksum = hashsum(input_vm_path, algorithm=input_checksum_type)
+            calculated_checksum = hashsum(
+                input_image_path, algorithm=input_checksum_type
+            )
             if not calculated_checksum:
                 response["msg"] = (
                     "Failed to calculate the checksum of the downloaded image"
@@ -264,14 +266,14 @@ def generate_image(
                 )
 
         converted_result, msg = convert_image(
-            input_vm_path,
+            input_image_path,
             vm_output_path,
-            input_format=image_input_format,
+            input_format=input_format,
             output_format=output_format,
             verbose=verbose,
         )
         if not converted_result:
-            response["msg"] = PATH_CREATE_ERROR_MSG.format(input_vm_path, msg)
+            response["msg"] = PATH_CREATE_ERROR_MSG.format(input_image_path, msg)
             response["verbose_outputs"] = verbose_outputs
             return PATH_CREATE_ERROR, response
 
