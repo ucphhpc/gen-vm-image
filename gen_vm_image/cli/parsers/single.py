@@ -25,13 +25,13 @@ def single_group(parser):
         "name",
         action=PositionalArgumentsAction,
         type=str,
-        help="The name of the image to build",
+        help="The name of the image to generate",
     )
     build_single_group.add_argument(
         "size",
         action=PositionalArgumentsAction,
         type=str,
-        help="The size of the image to build",
+        help="The size of the image to generate",
     )
     build_single_group.add_argument(
         "-i",
