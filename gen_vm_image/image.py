@@ -159,13 +159,6 @@ def generate_image(
             response["verbose_outputs"] = verbose_outputs
             return INVALID_ATTRIBUTE_TYPE_ERROR, response
 
-        if input_format and not isinstance(input_format, str):
-            response["msg"] = INVALID_ATTRIBUTE_TYPE_ERROR_MSG.format(
-                type(input_format), input_format, "string"
-            )
-            response["verbose_outputs"] = verbose_outputs
-            return INVALID_ATTRIBUTE_TYPE_ERROR, response
-
         # If a checksum is present, then validate that it is correctly structured
         if input_checksum:
             if not isinstance(input_checksum, str):
@@ -236,9 +229,18 @@ def generate_image(
                 response["verbose_outputs"] = verbose_outputs
                 return PATH_NOT_FOUND_ERROR, response
             input_image_path = image_input
+
+        if not input_format and input_image_path:
             # Try to discover the input format since we have
             # only been given a string value
             input_format = input_image_path.split(".")[-1]
+
+        if not isinstance(input_format, str):
+            response["msg"] = INVALID_ATTRIBUTE_TYPE_ERROR_MSG.format(
+                type(input_format), input_format, "string"
+            )
+            response["verbose_outputs"] = verbose_outputs
+            return INVALID_ATTRIBUTE_TYPE_ERROR, response
 
         if input_checksum:
             calculated_checksum = hashsum(
