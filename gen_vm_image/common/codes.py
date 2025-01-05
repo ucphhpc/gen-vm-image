@@ -36,3 +36,5 @@ CHECK_ERROR_MSG = "Failed to check path: {}"
 JSON_DUMP_ERROR = 9
 JSON_DUMP_ERROR_MSG = "Failed to dump JSON: {}"
 DOWNLOAD_ERROR = 10
+GETSIZE_ERROR = 11
+GETSIZE_ERROR_MSG = "Failed to get the size of path {}"

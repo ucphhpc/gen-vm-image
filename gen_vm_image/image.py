@@ -37,8 +37,11 @@ from gen_vm_image.common.codes import (
     CHECK_ERROR_MSG,
     SUCCESS,
     DOWNLOAD_ERROR,
+    GETSIZE_ERROR,
+    GETSIZE_ERROR_MSG,
 )
 from gen_vm_image.utils.io import exists, makedirs, hashsum
+from gen_vm_image.utils.io import size as get_size
 from gen_vm_image.utils.job import run
 from gen_vm_image.utils.net import download_file
 
@@ -73,9 +76,12 @@ def convert_image(
     return True, msg
 
 
-def resize_image(path, size, image_format="qcow2", verbose=False):
+def resize_image(path, size, image_format="qcow2", resize_args=None, verbose=False):
+    if not resize_args:
+        resize_args = []
+
     result, msg = qemu_img_call(
-        "resize", ["-f", image_format, path, size], verbose=verbose
+        "resize", [*resize_args, "-f", image_format, path, size], verbose=verbose
     )
     if not result:
         return False, msg
@@ -100,6 +106,46 @@ def check_image(path, image_format="qcow2", verbose=False):
     if not result:
         return False, msg
     return True, msg
+
+
+def expand_byte_magnitude(bytesize):
+    # Convert
+    expanded_bytesize = None
+    if "kib" in bytesize.lower() or "ki" in bytesize.lower():
+        expanded_bytesize = int(bytesize.lower().replace("kib", "").replace("ki", ""))
+    elif "mib" in bytesize.lower() or "mi" in bytesize.lower():
+        expanded_bytesize = (
+            int(bytesize.lower().replace("mib", "").replace("mi", "")) * 1024
+        )
+    elif "mb" in bytesize.lower() or "m" in bytesize.lower():
+        expanded_bytesize = (
+            int(bytesize.lower().replace("mb", "").replace("m", "")) * 1000
+        )
+    elif "gib" in bytesize.lower() or "gi" in bytesize.lower():
+        expanded_bytesize = (
+            int(bytesize.lower().replace("gib", "").replace("gi", "")) * 1024 * 1024
+        )
+    elif "gb" in bytesize.lower() or "g" in bytesize.lower():
+        expanded_bytesize = (
+            int(bytesize.lower().replace("gb", "").replace("g", "")) * 1000 * 1000
+        )
+    elif "tib" in bytesize.lower() or "ti" in bytesize.lower():
+        expanded_bytesize = (
+            int(bytesize.lower().replace("tib", "").replace("ti", ""))
+            * 1024
+            * 1024
+            * 1024
+        )
+    elif "tb" in bytesize.lower() or "t" in bytesize.lower():
+        expanded_bytesize = (
+            int(bytesize.lower().replace("tb", "").replace("t", ""))
+            * 1000
+            * 1000
+            * 1000
+        )
+    else:
+        expanded_bytesize = int(bytesize)
+    return expanded_bytesize
 
 
 def generate_image(
@@ -280,9 +326,24 @@ def generate_image(
             response["verbose_outputs"] = verbose_outputs
             return PATH_CREATE_ERROR, response
 
+        image_input_size = get_size(input_image_path)
+        if not image_input_size:
+            response["msg"] = GETSIZE_ERROR_MSG.format(input_image_path)
+            response["verbose_outputs"] = verbose_outputs
+            return GETSIZE_ERROR, response
+
+        expected_resize_size = expand_byte_magnitude(size)
+        resize_args = []
+        if expected_resize_size < image_input_size:
+            resize_args = ["--shrink"]
+
         # Resize the vm disk image
         resized_result, resized_msg = resize_image(
-            vm_output_path, size, image_format=output_format, verbose=verbose
+            vm_output_path,
+            size,
+            image_format=output_format,
+            resize_args=resize_args,
+            verbose=verbose,
         )
         if not resized_result:
             response["msg"] = RESIZE_ERROR_MSG.format(vm_output_path, resized_msg)
