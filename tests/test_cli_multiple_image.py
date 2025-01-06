@@ -23,7 +23,15 @@ from gen_vm_image.utils.io import exists, makedirs, join, remove
 from gen_vm_image.cli.cli import main
 
 BASIC_ARCHITECTURE_FILE = "basic_architecture.yml"
-BASIC_ARCHITECTURE_PATH = os.path.realpath(join("tests", "res", BASIC_ARCHITECTURE_FILE))
+BASIC_ARCHITECTURE_PATH = os.path.realpath(
+    join("tests", "res", BASIC_ARCHITECTURE_FILE)
+)
+
+ADVANCED_ARCHITECTURE_FILE = "advanced_architecture.yml"
+ADVANCED_ARCHITECTURE_PATH = os.path.realpath(
+    join("tests", "res", ADVANCED_ARCHITECTURE_FILE)
+)
+
 
 class TestCLIMultipleImage(unittest.TestCase):
 
@@ -48,7 +56,7 @@ class TestCLIMultipleImage(unittest.TestCase):
             return_code = e.code
         self.assertEqual(return_code, SUCCESS)
 
-    def test_cli_basic_multiple_image(self):
+    def test_cli_basic_multiple_images(self):
         return_code = None
         try:
             self.assertTrue(exists(BASIC_ARCHITECTURE_PATH))
@@ -56,6 +64,22 @@ class TestCLIMultipleImage(unittest.TestCase):
                 [
                     MULTIPLE,
                     BASIC_ARCHITECTURE_PATH,
+                    "--images-output-directory",
+                    self.images_dir,
+                ]
+            )
+        except SystemExit as e:
+            return_code = e.code
+        self.assertEqual(return_code, SUCCESS)
+
+    def test_cli_advanced_multiple_images(self):
+        return_code = None
+        try:
+            self.assertTrue(exists(ADVANCED_ARCHITECTURE_PATH))
+            return_code = main(
+                [
+                    MULTIPLE,
+                    ADVANCED_ARCHITECTURE_PATH,
                     "--images-output-directory",
                     self.images_dir,
                 ]

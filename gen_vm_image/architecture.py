@@ -129,7 +129,7 @@ def build_architecture(
             version=build_data.get("version", None),
             image_input=build_data.get("input", None),
             output_format=build_data.get("format", "qcow2"),
-            images_output_directory=images_output_directory,
+            output_directory=images_output_directory,
             overwrite=overwrite,
             verbose=verbose,
         )
