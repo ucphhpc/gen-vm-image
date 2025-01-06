@@ -42,3 +42,11 @@ def multiple_group(parser):
         default=False,
         help="Whether the tool should overwrite existing image disks",
     )
+    build_multiple_group.add_argument(
+        "--verbose",
+        "-v",
+        action="store_true",
+        dest="{}_verbose".format(MULTIPLE),
+        default=False,
+        help="Print verbose output",
+    )

@@ -75,8 +75,16 @@ def single_group(parser):
         help="The format of the output image",
     )
     build_single_group.add_argument(
-        "-v",
+        "-V",
         "--version",
         dest="{}_version".format(SINGLE),
         help="The version of the image to build",
+    )
+    build_single_group.add_argument(
+        "--verbose",
+        "-v",
+        action="store_true",
+        dest="{}_verbose".format(SINGLE),
+        default=False,
+        help="Print verbose output",
     )

@@ -151,8 +151,6 @@ def expand_byte_magnitude(bytesize):
 def generate_image(
     name,
     size,
-    # Optional version attribute for each image configuration
-    version=None,
     image_input=None,
     input_format="qcow2",
     input_checksum_type=None,
@@ -161,6 +159,8 @@ def generate_image(
     output_directory=GENERATED_IMAGE_DIR,
     overwrite=False,
     verbose=False,
+    # Optional version attribute for each image configuration
+    version=None,
 ):
     response = {}
     verbose_outputs = []

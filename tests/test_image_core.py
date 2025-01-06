@@ -16,7 +16,6 @@
 
 import unittest
 import random
-import wget
 from gen_vm_image.utils.io import join, find, remove, exists, makedirs
 from gen_vm_image.architecture import load_architecture
 from gen_vm_image.image import create_image, convert_image, resize_image
@@ -27,13 +26,11 @@ class TestImageBuild(unittest.TestCase):
     def setUpClass(cls):
         # https://cloud.debian.org/images/cloud/bookworm/latest/input_path_image-genericcloud-amd64.qcow2
         # Download the test image for the path input test
-        cls.input_path_url = "https://cloud.debian.org/images/cloud/bookworm/latest/debian-12-genericcloud-amd64.qcow2"
         cls.test_tmp_directory = join("tests", "tmp")
         cls.test_res_directory = join("tests", "res")
         if not exists(cls.test_tmp_directory):
             assert makedirs(cls.test_tmp_directory)
-        cls.input_image_path = join(cls.test_tmp_directory, "debian-12.qcow2")
-        wget.download(cls.input_path_url, out=cls.input_image_path)
+        cls.input_image_path = join(cls.test_res_directory, "test.qcow2")
         assert exists(cls.input_image_path)
 
         cls.architecture_path = join(
@@ -49,9 +46,6 @@ class TestImageBuild(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        # Remove the downloaded test image
-        if exists(cls.input_image_path):
-            assert remove(cls.input_image_path)
         if exists(cls.test_tmp_directory):
             assert remove(cls.test_tmp_directory, recursive=True)
 

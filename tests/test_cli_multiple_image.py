@@ -84,7 +84,6 @@ class TestCLIMultipleImage(unittest.TestCase):
             self.assertTrue(exists(ADVANCED_ARCHITECTURE_PATH))
             return_code = main(
                 [
-                    "--verbose",
                     MULTIPLE,
                     ADVANCED_ARCHITECTURE_PATH,
                     "--images-output-directory",
@@ -99,8 +98,9 @@ class TestCLIMultipleImage(unittest.TestCase):
             "test-image-2-9.4.raw",
             "test-image-3-8.4.qcow2",
             "test-image-4-8.4.raw",
-            "test-image-5-9.4.raw" "input-path-image-12.qcow2",
-            "convert_input_image_format-12.qcow2",
+            "test-image-5-9.4.raw",
+            "input-path-image-12.qcow2",
+            "convert_input_image_format-12.raw",
             "non-version-image.raw",
             "image-with-output-path-9.4.qcow2",
         ]

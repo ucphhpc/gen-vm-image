@@ -68,9 +68,6 @@ The totality of the command can be seen below::
     usage: gen-vm-image [-h]
                         [--images-output-directory IMAGES_OUTPUT_DIRECTORY]
                         [--overwrite]
-                        [--generate-gocd-config]
-                        [--gocd-config-name GOCD_CONFIG_NAME]
-                        [--gocd-build-branch GOCD_BUILD_BRANCH]
                         [--verbose]
                         [--version]
                         architecture_path
@@ -83,12 +80,6 @@ The totality of the command can be seen below::
       --images-output-directory IMAGES_OUTPUT_DIRECTORY
                             The path to the output directory where the images will be saved (default: generated-images)
       --overwrite           Whether the tool should overwrite existing image disks (default: False)
-      --generate-gocd-config
-                            Generate a GoCD config based on the architecture file (default: False)
-      --gocd-config-name GOCD_CONFIG_NAME
-                            Name of the generated gocd config file (default: 1.gocd.yml)
-      --gocd-build-branch GOCD_BUILD_BRANCH
-                            The branch that GoCD should use to build images (default: main)
       --verbose, -v         Print verbose output (default: False)
       --version             Print the version of the program
 

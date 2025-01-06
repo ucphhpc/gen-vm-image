@@ -115,13 +115,6 @@ def add_base_cli_operations(parser):
         version=__version__,
         help="Print the version of the program",
     )
-    parser.add_argument(
-        "--verbose",
-        "-v",
-        action="store_true",
-        default=False,
-        help="Print verbose output",
-    )
 
 
 def add_build_image_cli_arguments(
@@ -155,9 +148,8 @@ def main(args):
             response["status"] = "success"
         else:
             response["status"] = "failed"
-        if "verbose" in arguments:
-            response["outputs"] = result_dict.get("verbose_outputs", [])
-        response["msg"] = result_dict.get("msg", "")
+        response["verbose_messages"] = result_dict.get("verbose_outputs", [])
+        response["response"] = result_dict.get("msg", "")
         response["return_code"] = return_code
 
         try:

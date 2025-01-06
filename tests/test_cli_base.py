@@ -36,11 +36,3 @@ class TestCLIBase(unittest.TestCase):
         except SystemExit as e:
             return_code = e.code
         self.assertEqual(return_code, SUCCESS)
-
-    def test_cli_verbose(self):
-        return_code = None
-        try:
-            return_code = main(["--verbose"])
-        except SystemExit as e:
-            return_code = e.code
-        self.assertEqual(return_code, SUCCESS)

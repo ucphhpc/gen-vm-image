@@ -47,7 +47,7 @@ images:
     format: qcow2
     size: 20G
     input:
-     path: tests/tmp/debian-12.qcow2
+     path: tests/res/test.qcow2
      format: qcow2
   convert_input_image_format:
     name: convert_input_image_format
@@ -55,7 +55,7 @@ images:
     format: raw
     size: 20G
     input:
-      path: tests/tmp/debian-12.qcow2
+      path: tests/res/test.qcow2
       format: qcow2
   non_version_image_test:
     name: non-version-image
