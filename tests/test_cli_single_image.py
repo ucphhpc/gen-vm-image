@@ -17,10 +17,15 @@
 import unittest
 import os
 import random
-from gen_vm_image.common.codes import SUCCESS
+from gen_vm_image.common.codes import SUCCESS, CHECKSUM_ERROR
 from gen_vm_image.common.defaults import SINGLE
 from gen_vm_image.utils.io import makedirs, exists, remove, join
 from gen_vm_image.cli.cli import main
+
+
+TEST_RES_DIR = os.path.realpath(join("tests", "res"))
+TEST_IMAGE_NAME = "test.qcow2"
+TEST_IMAGE_PATH = os.path.realpath(join(TEST_RES_DIR, TEST_IMAGE_NAME))
 
 
 class TestCLISingleImage(unittest.TestCase):
@@ -29,7 +34,6 @@ class TestCLISingleImage(unittest.TestCase):
     def setUpClass(cls):
         cls.seed = str(random.random())[2:10]
         cls.images_dir = os.path.realpath(join("tests", "tmp", "images", cls.seed))
-        cls.res_dir = os.path.realpath(join("tests", "res"))
         if not exists(cls.images_dir):
             assert makedirs(cls.images_dir)
 
@@ -137,7 +141,6 @@ class TestCLISingleImage(unittest.TestCase):
         try:
             name = "test-cli-single-image-input-{}".format(self.seed)
             size = "5G"
-            input_path = join(self.res_dir, "test.qcow2")
             return_code = main(
                 [
                     SINGLE,
@@ -146,7 +149,7 @@ class TestCLISingleImage(unittest.TestCase):
                     "--output-directory",
                     self.images_dir,
                     "--input",
-                    input_path,
+                    TEST_IMAGE_PATH,
                 ]
             )
         except SystemExit as e:
@@ -161,7 +164,6 @@ class TestCLISingleImage(unittest.TestCase):
         try:
             name = "test-cli-single-image-input-{}".format(self.seed)
             size = "5G"
-            input_path = join(self.res_dir, "test.qcow2")
             output_format = "raw"
             return_code = main(
                 [
@@ -171,7 +173,7 @@ class TestCLISingleImage(unittest.TestCase):
                     "--output-directory",
                     self.images_dir,
                     "--input",
-                    input_path,
+                    TEST_IMAGE_PATH,
                     "--output-format",
                     output_format,
                 ]
@@ -207,4 +209,56 @@ class TestCLISingleImage(unittest.TestCase):
         output_path = join(self.images_dir, "{}.qcow2".format(name))
         self.assertTrue(exists(output_path))
 
-    # TODO add tests for checksum validation
+    def test_cli_single_image_with_checksum(self):
+        expected_checksum = "db12db337b0d1c82ab5b174c21241e0be24ee44a79e0d310aa05e3652e301a22bf604fd86c4cf9e4489bd512cab275feb8d8326847ca04b90e0903c72f39cb64"
+        return_code = None
+        try:
+            name = "test-cli-single-image-checksum-{}".format(self.seed)
+            size = "10G"
+            return_code = main(
+                [
+                    SINGLE,
+                    name,
+                    size,
+                    "--output-directory",
+                    self.images_dir,
+                    "--input",
+                    TEST_IMAGE_PATH,
+                    "--input-checksum-type",
+                    "sha512",
+                    "--input-checksum",
+                    expected_checksum,
+                ]
+            )
+        except SystemExit as e:
+            return_code = e.code
+        self.assertEqual(return_code, SUCCESS)
+        output_path = join(self.images_dir, "{}.qcow2".format(name))
+        self.assertTrue(exists(output_path))
+
+    def test_cli_single_image_incorrect_checksum(self):
+        expected_checksum = "12931j3901j39183189231230912309-01230-0-askdasidma"
+        return_code = None
+        try:
+            name = "test-cli-single-image-checksum-{}".format(self.seed)
+            size = "10G"
+            return_code = main(
+                [
+                    SINGLE,
+                    name,
+                    size,
+                    "--output-directory",
+                    self.images_dir,
+                    "--input",
+                    TEST_IMAGE_PATH,
+                    "--input-checksum-type",
+                    "sha512",
+                    "--input-checksum",
+                    expected_checksum,
+                ]
+            )
+        except SystemExit as e:
+            return_code = e.code
+        self.assertEqual(return_code, CHECKSUM_ERROR)
+        output_path = join(self.images_dir, "{}.qcow2".format(name))
+        self.assertFalse(exists(output_path))
