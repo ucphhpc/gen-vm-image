@@ -19,7 +19,7 @@
 import os
 from setuptools import setup, find_packages
 
-cur_dir = os.path.abspath(os.path.dirname(__file__))
+cur_dir = os.path.realpath(os.path.dirname(__file__))
 
 
 def read(path):

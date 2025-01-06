@@ -360,7 +360,7 @@ def generate_image(
         else:
             if verbose:
                 verbose_outputs.append(
-                    "Generated image at: {}".format(os.path.abspath(vm_output_path))
+                    "Generated image at: {}".format(os.path.realpath(vm_output_path))
                 )
 
     # Amend to qcow2 version 3 which is required in RHEL 9 if the output format is

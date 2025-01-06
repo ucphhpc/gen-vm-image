@@ -137,7 +137,7 @@ def build_architecture(
             return build_return_code, response
 
     response["msg"] = "Successfully built the images in: {}".format(
-        os.path.abspath(images_output_directory)
+        os.path.realpath(images_output_directory)
     )
     response["verbose_outputs"] = verbose_outputs
     return SUCCESS, response

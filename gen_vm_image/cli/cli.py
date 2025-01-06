@@ -32,7 +32,7 @@ from gen_vm_image.cli.common import error_print, to_str
 from gen_vm_image.cli.helpers import extract_arguments, strip_argument_group_prefix
 
 
-current_dir = os.path.abspath(os.path.dirname(__file__))
+current_dir = os.path.realpath(os.path.dirname(__file__))
 parent_dir = os.path.dirname(current_dir)
 
 
