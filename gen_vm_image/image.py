@@ -157,9 +157,6 @@ def generate_image(
     input_format="qcow2",
     input_checksum_type=None,
     input_checksum=None,
-    # Optional attributes for each image configuration
-    # TODO, allow for the output format to be a dictionary
-    # that supports the format and version keys
     output_format="qcow2",
     output_directory=GENERATED_IMAGE_DIR,
     overwrite=False,
