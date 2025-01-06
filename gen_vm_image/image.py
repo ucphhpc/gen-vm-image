@@ -88,6 +88,18 @@ def resize_image(path, size, image_format="qcow2", resize_args=None, verbose=Fal
     return True, msg
 
 
+def info_image(path, info_args=None, format_output_str=True):
+    if not info_args:
+        info_args = []
+
+    # The info call does not support verbosity/the -q option
+    command = ["qemu-img", "info", *info_args, path]
+    result = run(command, format_output_str=format_output_str, capture_output=True)
+    if result["returncode"] != "0":
+        return False, result["error"]
+    return True, result["output"]
+
+
 def amend_image(path, options, image_format="qcow2", verbose=False):
     args = ["-f", image_format, "-o", options, path]
     result, msg = qemu_img_call("amend", args, verbose=verbose)
@@ -106,6 +118,13 @@ def check_image(path, image_format="qcow2", verbose=False):
     if not result:
         return False, msg
     return True, msg
+
+
+def image_size(path):
+    # NOTE, this returns a long \n delimitered string with
+    # the output from the qemu-img command
+    # TODO, improve this to return better structured output
+    return info_image(path)
 
 
 def expand_byte_magnitude(bytesize):
