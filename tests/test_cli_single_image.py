@@ -206,3 +206,5 @@ class TestCLISingleImage(unittest.TestCase):
 
         output_path = join(self.images_dir, "{}.qcow2".format(name))
         self.assertTrue(exists(output_path))
+
+    # TODO add tests for checksum validation
