@@ -16,8 +16,8 @@
 
 owner: the-owner-name
 images:
-  image-1:
-    name: test-image-1
+  image:
+    name: test-image
     version: 9.4
     format: qcow2
     size: 10G

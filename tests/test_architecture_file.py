@@ -22,7 +22,7 @@ from gen_vm_image.common.codes import PATH_NOT_FOUND_ERROR
 
 class TestImageArchitecture(unittest.TestCase):
     def setUp(self):
-        self.architecture_path = join("tests", "res", "architecture.yml")
+        self.architecture_path = join("tests", "res", "advanced_architecture.yml")
 
     def test_load_architecture(self):
         loaded, response = load_architecture(self.architecture_path)

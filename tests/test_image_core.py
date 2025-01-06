@@ -36,7 +36,9 @@ class TestImageBuild(unittest.TestCase):
         wget.download(cls.input_path_url, out=cls.input_image_path)
         assert exists(cls.input_image_path)
 
-        cls.architecture_path = join(cls.test_res_directory, "architecture.yml")
+        cls.architecture_path = join(
+            cls.test_res_directory, "advanced_architecture.yml"
+        )
         loaded, response = load_architecture(cls.architecture_path)
         assert loaded
         assert "architecture" in response
