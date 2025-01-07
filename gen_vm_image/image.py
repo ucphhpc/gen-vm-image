@@ -170,7 +170,7 @@ def expand_byte_magnitude(bytesize):
 def generate_image(
     name,
     size,
-    image_input=None,
+    input=None,
     input_format="qcow2",
     input_checksum_type=None,
     input_checksum=None,
@@ -212,10 +212,10 @@ def generate_image(
                     "Overwriting the existing image: {}".format(vm_output_path)
                 )
 
-    if image_input:
-        if not isinstance(image_input, str):
+    if input:
+        if not isinstance(input, str):
             response["msg"] = INVALID_ATTRIBUTE_TYPE_ERROR_MSG.format(
-                type(image_input), image_input, "string"
+                type(input), input, "string"
             )
             response["verbose_outputs"] = verbose_outputs
             return INVALID_ATTRIBUTE_TYPE_ERROR, response
@@ -247,8 +247,8 @@ def generate_image(
                 response["verbose_outputs"] = verbose_outputs
                 return INVALID_ATTRIBUTE_TYPE_ERROR, response
 
-        if validators.url(image_input):
-            image_input_url = image_input
+        if validators.url(input):
+            input_url = input
             # Download the specified url and save it into
             # a tmp directory.
             # First prepare the temporary directory
@@ -263,15 +263,15 @@ def generate_image(
                     response["verbose_outputs"] = verbose_outputs
                     return PATH_CREATE_ERROR, response
 
-            input_url_filename = image_input_url.split("/")[-1]
+            input_url_filename = input_url.split("/")[-1]
             input_image_path = os.path.join(TMP_DIR, input_url_filename)
             if not exists(input_image_path):
                 if verbose:
                     verbose_outputs.append(
-                        "Downloading image from: {}".format(image_input_url)
+                        "Downloading image from: {}".format(input_url)
                     )
                 downloaded, download_response = download_file(
-                    image_input_url, input_image_path
+                    input_url, input_image_path
                 )
                 if not downloaded:
                     response["msg"] = download_response["msg"]
@@ -283,13 +283,13 @@ def generate_image(
                     )
         else:
             # If the input is a string, then we assume that it is a path to the image
-            if not exists(image_input):
+            if not exists(input):
                 response["msg"] = PATH_NOT_FOUND_ERROR_MSG.format(
-                    image_input, "the defined input path to the does not exist"
+                    input, "the defined input path to the does not exist"
                 )
                 response["verbose_outputs"] = verbose_outputs
                 return PATH_NOT_FOUND_ERROR, response
-            input_image_path = image_input
+            input_image_path = input
 
         if not input_format and input_image_path:
             # Try to discover the input format since we have
@@ -341,15 +341,15 @@ def generate_image(
             response["verbose_outputs"] = verbose_outputs
             return PATH_CREATE_ERROR, response
 
-        image_input_size = get_size(input_image_path)
-        if not image_input_size:
+        input_size = get_size(input_image_path)
+        if not input_size:
             response["msg"] = GETSIZE_ERROR_MSG.format(input_image_path)
             response["verbose_outputs"] = verbose_outputs
             return GETSIZE_ERROR, response
 
         expected_resize_size = expand_byte_magnitude(size)
         resize_args = []
-        if expected_resize_size < image_input_size:
+        if expected_resize_size < input_size:
             resize_args = ["--shrink"]
 
         # Resize the vm disk image

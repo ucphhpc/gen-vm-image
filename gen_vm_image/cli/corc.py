@@ -15,28 +15,16 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 from gen_vm_image.common.defaults import GENERATED_IMAGE_DIR
-from gen_vm_image.common.codes import SUCCESS
-from gen_vm_image.cli.build_image import (
-    add_build_image_cli_arguments,
-    build_architecture,
-    generate_image,
-)
+from gen_vm_image.cli.cli import add_build_image_cli_arguments
+from gen_vm_image.image import generate_image
 
 
 def corc_initializer_plugin_entrypoint(build_data):
-    if not isinstance(build_data, dict):
-        return False, {"error": "The build data must be a dictionary."}
-
-    if "name" not in build_data:
-        return False, {"error": "The image configuration must have a name."}
-    if "size" not in build_data:
-        return False, {"error": "The image configuration must have a size."}
-
     return generate_image(
         build_data["name"],
         build_data["size"],
         version=build_data.get("version", None),
-        image_input=build_data.get("input", None),
+        input=build_data.get("input", None),
         output_format=build_data.get("format", None),
         images_output_directory=build_data.get("output_directory", GENERATED_IMAGE_DIR),
         overwrite=build_data.get("overwrite", False),
@@ -44,28 +32,5 @@ def corc_initializer_plugin_entrypoint(build_data):
     )
 
 
-def build_image_cli(commands):
-    parser = commands.add_parser(
-        "build-image",
-        help="Build the images defined in an architecture file.",
-    )
-    add_build_image_cli_arguments(parser)
-    parser.set_defaults(func=corc_build_image_cli_exec)
-
-
-def corc_build_image_cli_exec(args):
-    architecture_path = args.get("architecture_path")
-    images_output_directory = args.get("images_output_directory", GENERATED_IMAGE_DIR)
-    overwrite = args.get("overwrite", False)
-    verbose = args.get("verbose", False)
-
-    return_code, result_dict = build_architecture(
-        architecture_path,
-        images_output_directory=images_output_directory,
-        overwrite=overwrite,
-        verbose=verbose,
-    )
-
-    if return_code == SUCCESS:
-        return True, result_dict
-    return False, result_dict
+def gen_vm_image_cli(commands):
+    add_build_image_cli_arguments(commands)

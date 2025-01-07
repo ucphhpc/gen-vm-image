@@ -80,48 +80,48 @@ def correct_architecture_structure(architecture):
     return True, response
 
 
-def validate_image_input(image_input_data):
+def validate_input(input_data):
     response = {}
-    if not isinstance(image_input_data, str) and not isinstance(image_input_data, dict):
+    if not isinstance(input_data, str) and not isinstance(input_data, dict):
         response["error_code"] = INVALID_ATTRIBUTE_TYPE_ERROR
         response["msg"] = INVALID_ATTRIBUTE_TYPE_ERROR_MSG.format(
-            type(image_input_data),
-            image_input_data,
+            type(input_data),
+            input_data,
             "image input must be a string or dictionary",
         )
         return False, response
 
-    if isinstance(image_input_data, dict):
-        if "url" not in image_input_data and "path" not in image_input_data:
+    if isinstance(input_data, dict):
+        if "url" not in input_data and "path" not in input_data:
             response["msg"] = MISSING_ATTRIBUTE_ERROR_MSG.format(
                 "'url' or 'path' must be in the architecture input section"
             )
 
-        if "url" in image_input_data and "path" in image_input_data:
+        if "url" in input_data and "path" in input_data:
             response["error_code"] = INVALID_ATTRIBUTE_TYPE_ERROR
             response["msg"] = (
                 "Both 'url' and 'path' are defined in the architecture input section. Only one can be defined"
             )
             return False, response
 
-        if "url" in image_input_data:
-            if not isinstance(image_input_data["url"], str):
+        if "url" in input_data:
+            if not isinstance(input_data["url"], str):
                 response["error_code"] = INVALID_ATTRIBUTE_TYPE_ERROR
                 response["msg"] = INVALID_ATTRIBUTE_TYPE_ERROR_MSG.format(
-                    type(image_input_data["url"]), image_input_data["url"], "string"
+                    type(input_data["url"]), input_data["url"], "string"
                 )
                 return False, response
 
-        if "path" in image_input_data:
-            if not isinstance(image_input_data["path"], str):
+        if "path" in input_data:
+            if not isinstance(input_data["path"], str):
                 response["error_code"] = INVALID_ATTRIBUTE_TYPE_ERROR
                 response["msg"] = INVALID_ATTRIBUTE_TYPE_ERROR_MSG.format(
-                    type(image_input_data["path"]), image_input_data["path"], "string"
+                    type(input_data["path"]), input_data["path"], "string"
                 )
                 return False, response
 
-        if "format" in image_input_data:
-            vm_input_format = image_input_data["format"]
+        if "format" in input_data:
+            vm_input_format = input_data["format"]
             if not isinstance(vm_input_format, str):
                 response["error_code"] = INVALID_ATTRIBUTE_TYPE_ERROR
                 response["msg"] = INVALID_ATTRIBUTE_TYPE_ERROR_MSG.format(
@@ -130,50 +130,50 @@ def validate_image_input(image_input_data):
                 return False, response
 
         # If a checksum is present, then validate that it is correctly structured
-        if "checksum" in image_input_data:
-            if not isinstance(image_input_data["checksum"], dict):
+        if "checksum" in input_data:
+            if not isinstance(input_data["checksum"], dict):
                 response["error_code"] = INVALID_ATTRIBUTE_TYPE_ERROR
                 response["msg"] = INVALID_ATTRIBUTE_TYPE_ERROR_MSG.format(
-                    type(image_input_data["checksum"]),
-                    image_input_data["checksum"],
+                    type(input_data["checksum"]),
+                    input_data["checksum"],
                     "dictionary",
                 )
                 return False, response
 
             required_checksum_attributes = ["type", "value"]
             for attr in required_checksum_attributes:
-                if attr not in image_input_data["checksum"]:
+                if attr not in input_data["checksum"]:
                     response["error_code"] = MISSING_ATTRIBUTE_ERROR
                     response["msg"] = MISSING_ATTRIBUTE_ERROR_MSG.format(
-                        attr, image_input_data["checksum"]
+                        attr, input_data["checksum"]
                     )
                     return False, response
-                if not isinstance(image_input_data["checksum"][attr], str):
+                if not isinstance(input_data["checksum"][attr], str):
                     response["error_code"] = INVALID_ATTRIBUTE_TYPE_ERROR
                     response["msg"] = INVALID_ATTRIBUTE_TYPE_ERROR_MSG.format(
-                        type(image_input_data["checksum"][attr]),
-                        image_input_data["checksum"][attr],
+                        type(input_data["checksum"][attr]),
+                        input_data["checksum"][attr],
                         "string",
                     )
                     return False, response
     return True, response
 
 
-def prepare_image_input_kwargs(image_input_data):
-    image_input_kwargs = {}
+def prepare_input_kwargs(input_data):
+    input_kwargs = {}
 
-    checksum = image_input_data.get("checksum", None)
+    checksum = input_data.get("checksum", None)
     if checksum:
-        image_input_kwargs["input_checksum_type"] = checksum.get("type", None)
-        image_input_kwargs["input_checksum"] = checksum.get("value", None)
+        input_kwargs["input_checksum_type"] = checksum.get("type", None)
+        input_kwargs["input_checksum"] = checksum.get("value", None)
 
-    if "path" in image_input_data:
-        image_input_kwargs["image_input"] = image_input_data.get("path", None)
-    if "url" in image_input_data:
-        image_input_kwargs["image_input"] = image_input_data.get("url", None)
-    if "format" in image_input_data:
-        image_input_kwargs["input_format"] = image_input_data.get("format", None)
-    return image_input_kwargs
+    if "path" in input_data:
+        input_kwargs["input"] = input_data.get("path", None)
+    if "url" in input_data:
+        input_kwargs["input"] = input_data.get("url", None)
+    if "format" in input_data:
+        input_kwargs["input_format"] = input_data.get("format", None)
+    return input_kwargs
 
 
 def build_architecture(
@@ -221,19 +221,17 @@ def build_architecture(
     for _, build_data in images.items():
         generate_image_kwargs = {}
 
-        image_input = build_data.get("input", None)
-        if image_input:
-            correct_image_input, correct_image_input_response = validate_image_input(
-                image_input
-            )
-            if not correct_image_input:
+        input = build_data.get("input", None)
+        if input:
+            correct_input, correct_input_response = validate_input(input)
+            if not correct_input:
                 return (
-                    correct_image_input_response["error_code"],
-                    correct_image_input_response["msg"],
+                    correct_input_response["error_code"],
+                    correct_input_response["msg"],
                 )
 
-            if isinstance(image_input, dict):
-                generate_image_kwargs.update(**prepare_image_input_kwargs(image_input))
+            if isinstance(input, dict):
+                generate_image_kwargs.update(**prepare_input_kwargs(input))
 
         generate_image_kwargs["output_directory"] = images_output_directory
         generate_image_kwargs["output_format"] = build_data.get("format", "qcow2")

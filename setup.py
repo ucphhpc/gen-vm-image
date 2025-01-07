@@ -62,10 +62,8 @@ setup(
             "gen-vm-image = gen_vm_image.cli.cli:cli",
         ],
         "corc.plugins": ["gen_vm_image=gen_vm_image"],
-        "corc.plugins.initializer": [
-            "gen_vm_image=gen_vm_image.cli.corc:corc_initializer_plugin_entrypoint"
-        ],
-        "corc.plugins.cli": ["gen_vm_image=gen_vm_image.cli.corc:build_image_cli"],
+        "corc.plugins.initializer": ["gen_vm_image=gen_vm_image.image:generate_image"],
+        "corc.plugins.cli": ["gen_vm_image=gen_vm_image.cli.corc:gen_vm_image_cli"],
     },
     classifiers=[
         "Intended Audience :: Developers",
