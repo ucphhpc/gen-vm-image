@@ -46,7 +46,7 @@ from gen_vm_image.utils.job import run
 from gen_vm_image.utils.net import download_file
 
 
-def qemu_img_call(action, args, format_output_str=True, verbose=False):
+async def qemu_img_call(action, args, format_output_str=True, verbose=False):
     command = ["qemu-img", action]
     if not verbose:
         command.append("-q")
@@ -58,29 +58,31 @@ def qemu_img_call(action, args, format_output_str=True, verbose=False):
     return True, result["output"]
 
 
-def create_image(path, size, image_format="qcow2", verbose=False):
+async def create_image(path, size, image_format="qcow2", verbose=False):
     args = ["-f", image_format, path, size]
-    result, msg = qemu_img_call("create", args, verbose=verbose)
+    result, msg = await qemu_img_call("create", args, verbose=verbose)
     if not result:
         return False, msg
     return True, msg
 
 
-def convert_image(
+async def convert_image(
     input_path, output_path, input_format="qcow2", output_format="qcow2", verbose=False
 ):
     args = ["-f", input_format, "-O", output_format, input_path, output_path]
-    result, msg = qemu_img_call("convert", args, verbose=verbose)
+    result, msg = await qemu_img_call("convert", args, verbose=verbose)
     if not result:
         return False, msg
     return True, msg
 
 
-def resize_image(path, size, image_format="qcow2", resize_args=None, verbose=False):
+async def resize_image(
+    path, size, image_format="qcow2", resize_args=None, verbose=False
+):
     if not resize_args:
         resize_args = []
 
-    result, msg = qemu_img_call(
+    result, msg = await qemu_img_call(
         "resize", [*resize_args, "-f", image_format, path, size], verbose=verbose
     )
     if not result:
@@ -88,7 +90,7 @@ def resize_image(path, size, image_format="qcow2", resize_args=None, verbose=Fal
     return True, msg
 
 
-def info_image(path, info_args=None, format_output_str=True):
+async def info_image(path, info_args=None, format_output_str=True):
     if not info_args:
         info_args = []
 
@@ -100,31 +102,33 @@ def info_image(path, info_args=None, format_output_str=True):
     return True, result["output"]
 
 
-def amend_image(path, options, image_format="qcow2", verbose=False):
+async def amend_image(path, options, image_format="qcow2", verbose=False):
     args = ["-f", image_format, "-o", options, path]
-    result, msg = qemu_img_call("amend", args, verbose=verbose)
+    result, msg = await qemu_img_call("amend", args, verbose=verbose)
     if not result:
         return False, msg
     return True, msg
 
 
-def check_image(path, image_format="qcow2", verbose=False):
+async def check_image(path, image_format="qcow2", verbose=False):
     if image_format not in CONSITENCY_SUPPPORTED_FORMATS:
         msg = "format: '{}' not supported for consistency check, only one of: {} is supported".format(
             image_format, CONSITENCY_SUPPPORTED_FORMATS
         )
         return False, msg
-    result, msg = qemu_img_call("check", ["-f", image_format, path], verbose=verbose)
+    result, msg = await qemu_img_call(
+        "check", ["-f", image_format, path], verbose=verbose
+    )
     if not result:
         return False, msg
     return True, msg
 
 
-def image_size(path):
+async def image_size(path):
     # NOTE, this returns a long \n delimitered string with
     # the output from the qemu-img command
     # TODO, improve this to return better structured output
-    return info_image(path)
+    return await info_image(path)
 
 
 def expand_byte_magnitude(bytesize):
@@ -167,7 +171,7 @@ def expand_byte_magnitude(bytesize):
     return expanded_bytesize
 
 
-def generate_image(
+async def generate_image(
     name,
     size,
     input=None,
@@ -270,7 +274,7 @@ def generate_image(
                     verbose_outputs.append(
                         "Downloading image from: {}".format(input_url)
                     )
-                downloaded, download_response = download_file(
+                downloaded, download_response = await download_file(
                     input_url, input_image_path
                 )
                 if not downloaded:
@@ -304,7 +308,7 @@ def generate_image(
             return INVALID_ATTRIBUTE_TYPE_ERROR, response
 
         if input_checksum:
-            calculated_checksum = hashsum(
+            calculated_checksum = await hashsum(
                 input_image_path, algorithm=input_checksum_type
             )
             if not calculated_checksum:
@@ -329,7 +333,7 @@ def generate_image(
                     )
                 )
 
-        converted_result, msg = convert_image(
+        converted_result, msg = await convert_image(
             input_image_path,
             vm_output_path,
             input_format=input_format,
@@ -353,7 +357,7 @@ def generate_image(
             resize_args = ["--shrink"]
 
         # Resize the vm disk image
-        resized_result, resized_msg = resize_image(
+        resized_result, resized_msg = await resize_image(
             vm_output_path,
             size,
             image_format=output_format,
@@ -366,7 +370,7 @@ def generate_image(
             return RESIZE_ERROR, response
     else:
         # If no input is specified, then we assume that we are creating a new disc image
-        create_image_result, msg = create_image(
+        create_image_result, msg = await create_image(
             vm_output_path,
             size,
             image_format=output_format,
@@ -386,7 +390,7 @@ def generate_image(
     # qcow2
     # TODO, validate that the image is a rhel based image
     if output_format == "qcow2":
-        amend_result, amend_msg = amend_image(
+        amend_result, amend_msg = await amend_image(
             vm_output_path, "compat=v3", verbose=verbose
         )
         if not amend_result:
@@ -395,7 +399,7 @@ def generate_image(
             )
 
     if output_format in CONSITENCY_SUPPPORTED_FORMATS:
-        check_result, check_msg = check_image(
+        check_result, check_msg = await check_image(
             vm_output_path,
             image_format=output_format,
             verbose=verbose,

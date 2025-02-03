@@ -17,5 +17,5 @@
 from gen_vm_image.image import generate_image
 
 
-def single_operation(*args, **kwargs):
-    return generate_image(*args, **kwargs)
+async def single_operation(*args, **kwargs):
+    return await generate_image(*args, **kwargs)

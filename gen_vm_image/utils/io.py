@@ -121,7 +121,7 @@ def copy(original, target):
 
 
 # Read chunks of a file, default to 64KB
-def hashsum(path, algorithm="sha1", buffer_size=65536):
+async def hashsum(path, algorithm="sha1", buffer_size=65536):
     try:
         import hashlib
 

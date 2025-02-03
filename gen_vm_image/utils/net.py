@@ -18,7 +18,7 @@ import requests
 import time
 
 
-def download_file(url, output_path, chunk_size=8192):
+async def download_file(url, output_path, chunk_size=8192):
     response = {}
     try:
         with open(output_path, "wb") as _file:

@@ -176,7 +176,7 @@ def prepare_input_kwargs(input_data):
     return input_kwargs
 
 
-def build_architecture(
+async def build_architecture(
     architecture_path,
     images_output_directory=GENERATED_IMAGE_DIR,
     overwrite=False,
@@ -237,7 +237,7 @@ def build_architecture(
         generate_image_kwargs["output_format"] = build_data.get("format", "qcow2")
         generate_image_kwargs["version"] = build_data.get("version", None)
 
-        build_return_code, build_response = generate_image(
+        build_return_code, build_response = await generate_image(
             build_data["name"],
             build_data["size"],
             **generate_image_kwargs,

@@ -16,52 +16,32 @@
 
 import unittest
 import random
-from gen_vm_image.utils.io import join, find, remove, exists, makedirs
-from gen_vm_image.architecture import load_architecture
+from gen_vm_image.utils.io import join, find, remove, exists
 from gen_vm_image.image import create_image, convert_image, resize_image
+from .context import AsyncImageTestContext
 
 
-class TestImageBuild(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        # https://cloud.debian.org/images/cloud/bookworm/latest/input_path_image-genericcloud-amd64.qcow2
-        # Download the test image for the path input test
-        cls.test_tmp_directory = join("tests", "tmp")
-        cls.test_res_directory = join("tests", "res")
-        if not exists(cls.test_tmp_directory):
-            assert makedirs(cls.test_tmp_directory)
-        cls.input_image_path = join(cls.test_res_directory, "test.qcow2")
-        assert exists(cls.input_image_path)
+class TestImageBuild(unittest.IsolatedAsyncioTestCase):
+    context = AsyncImageTestContext()
 
-        cls.architecture_path = join(
-            cls.test_res_directory, "advanced_architecture.yml"
-        )
-        loaded, response = load_architecture(cls.architecture_path)
-        assert loaded
-        assert "architecture" in response
-
-        cls.architecture = response["architecture"]
-        assert cls.architecture is not None
-        assert isinstance(cls.architecture, dict)
-
-    @classmethod
-    def tearDownClass(cls):
-        if exists(cls.test_tmp_directory):
-            assert remove(cls.test_tmp_directory, recursive=True)
-
-    def setUp(self):
+    async def asyncSetUp(self):
+        await self.context.setUp()
         self.seed = str(random.random())[2:10]
 
-    def tearDown(self):
+    async def asyncTearDown(self):
         # Remove every seed file
         regex_name = ".*{}.*".format(self.seed)
-        seed_files = find(self.test_tmp_directory, regex_name)
+        seed_files = find(self.context.test_tmp_directory, regex_name)
         for seed_file in seed_files:
             if exists(seed_file):
                 self.assertTrue(remove(seed_file))
 
-    def test_create_image_qcow_1(self):
-        image_1 = self.architecture["images"]["image-1"]
+    @classmethod
+    def tearDownClass(cls):
+        cls.context.tearDown()
+
+    async def test_create_image_qcow_1(self):
+        image_1 = self.context.architecture["images"]["image-1"]
         self.assertEqual(image_1["name"], "test-image-1")
         image_1_name = "{}-{}".format(image_1["name"], self.seed)
         self.assertEqual(image_1["version"], 9.4)
@@ -69,9 +49,10 @@ class TestImageBuild(unittest.TestCase):
         self.assertEqual(image_1["size"], "10G")
 
         new_image_path = join(
-            self.test_tmp_directory, "{}.{}".format(image_1_name, image_1["format"])
+            self.context.test_tmp_directory,
+            "{}.{}".format(image_1_name, image_1["format"]),
         )
-        result, msg = create_image(
+        result, msg = await create_image(
             new_image_path,
             image_1["size"],
             image_format=image_1["format"],
@@ -79,8 +60,8 @@ class TestImageBuild(unittest.TestCase):
         self.assertTrue(result)
         self.assertEqual(msg, b"")
 
-    def test_create_image_raw_2(self):
-        image_2 = self.architecture["images"]["image-2"]
+    async def test_create_image_raw_2(self):
+        image_2 = self.context.architecture["images"]["image-2"]
         self.assertEqual(image_2["name"], "test-image-2")
         image_2_name = "{}-{}".format(image_2["name"], self.seed)
         self.assertEqual(image_2["version"], 9.4)
@@ -88,9 +69,10 @@ class TestImageBuild(unittest.TestCase):
         self.assertEqual(image_2["size"], "10G")
 
         new_image_path = join(
-            self.test_tmp_directory, "{}.{}".format(image_2_name, image_2["format"])
+            self.context.test_tmp_directory,
+            "{}.{}".format(image_2_name, image_2["format"]),
         )
-        result, msg = create_image(
+        result, msg = await create_image(
             new_image_path,
             image_2["size"],
             image_format=image_2["format"],
@@ -98,8 +80,8 @@ class TestImageBuild(unittest.TestCase):
         self.assertTrue(result)
         self.assertEqual(msg, b"")
 
-    def test_image_path_input(self):
-        input_path_image = self.architecture["images"]["input_path_image"]
+    async def test_image_path_input(self):
+        input_path_image = self.context.architecture["images"]["input_path_image"]
         self.assertEqual(input_path_image["name"], "input-path-image")
         self.assertEqual(input_path_image["version"], 12)
         self.assertEqual(input_path_image["format"], "qcow2")
@@ -110,18 +92,20 @@ class TestImageBuild(unittest.TestCase):
         self.assertIn("path", input_path_image["input"])
         self.assertIn("format", input_path_image["input"])
 
-        self.assertEqual(input_path_image["input"]["path"], self.input_image_path)
+        self.assertEqual(
+            input_path_image["input"]["path"], self.context.input_image_path
+        )
         self.assertEqual(input_path_image["input"]["format"], "qcow2")
-        self.assertTrue(exists(self.input_image_path))
+        self.assertTrue(exists(self.context.input_image_path))
 
         output_path = join(
-            self.test_tmp_directory,
+            self.context.test_tmp_directory,
             "{}-{}.{}".format(
                 input_path_image["name"], self.seed, input_path_image["format"]
             ),
         )
 
-        concert_result, convert_msg = convert_image(
+        concert_result, convert_msg = await convert_image(
             input_path_image["input"]["path"],
             output_path,
             input_format=input_path_image["input"]["format"],
@@ -131,7 +115,7 @@ class TestImageBuild(unittest.TestCase):
         self.assertEqual(convert_msg, b"")
         self.assertTrue(exists(output_path))
 
-        resize_result, resize_msg = resize_image(
+        resize_result, resize_msg = await resize_image(
             output_path,
             input_path_image["size"],
             image_format=input_path_image["format"],
@@ -140,8 +124,10 @@ class TestImageBuild(unittest.TestCase):
         self.assertEqual(resize_msg, b"")
         # TODO, validate that the size of the output image is correct
 
-    def test_convert_image_format(self):
-        convert_image_dict = self.architecture["images"]["convert_input_image_format"]
+    async def test_convert_image_format(self):
+        convert_image_dict = self.context.architecture["images"][
+            "convert_input_image_format"
+        ]
         self.assertEqual(convert_image_dict["name"], "convert_input_image_format")
         self.assertEqual(convert_image_dict["version"], 12)
         self.assertEqual(convert_image_dict["format"], "raw")
@@ -155,13 +141,13 @@ class TestImageBuild(unittest.TestCase):
 
         self.assertTrue(exists(convert_image_dict["input"]["path"]))
         output_path = join(
-            self.test_tmp_directory,
+            self.context.test_tmp_directory,
             "{}-{}.{}".format(
                 convert_image_dict["name"], self.seed, convert_image_dict["format"]
             ),
         )
 
-        result, msg = convert_image(
+        result, msg = await convert_image(
             convert_image_dict["input"]["path"],
             output_path,
             input_format=convert_image_dict["input"]["format"],
@@ -172,19 +158,19 @@ class TestImageBuild(unittest.TestCase):
         self.assertTrue(exists(output_path))
         # TODO, validate that the output image is of the correct size and format
 
-    def test_build_with_no_version(self):
-        image_no_version = self.architecture["images"]["non_version_image_test"]
+    async def test_build_with_no_version(self):
+        image_no_version = self.context.architecture["images"]["non_version_image_test"]
         self.assertEqual(image_no_version["name"], "non-version-image")
         self.assertEqual(image_no_version["format"], "raw")
         self.assertEqual(image_no_version["size"], "10G")
 
         new_image_path = join(
-            self.test_tmp_directory,
+            self.context.test_tmp_directory,
             "{}-{}.{}".format(
                 image_no_version["name"], self.seed, image_no_version["format"]
             ),
         )
-        result, msg = create_image(
+        result, msg = await create_image(
             new_image_path,
             image_no_version["size"],
             image_format=image_no_version["format"],

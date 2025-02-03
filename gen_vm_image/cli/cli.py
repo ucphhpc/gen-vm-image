@@ -94,12 +94,8 @@ def cli_exec(arguments):
     if not func:
         return False, {}
 
-    action_kwargs, remaining_action_kwargs = extract_arguments(
-        arguments, argument_groups
-    )
+    action_kwargs, _ = extract_arguments(arguments, argument_groups)
     action_kwargs = strip_argument_group_prefix(action_kwargs, argument_groups)
-    if remaining_action_kwargs:
-        print("Unused arguments: {}".format(remaining_action_kwargs))
 
     action_args = positional_arguments
     if inspect.iscoroutinefunction(func):

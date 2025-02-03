@@ -17,5 +17,5 @@
 from gen_vm_image.architecture import build_architecture
 
 
-def multiple_operation(*args, **kwargs):
-    return build_architecture(*args, **kwargs)
+async def multiple_operation(*args, **kwargs):
+    return await build_architecture(*args, **kwargs)
