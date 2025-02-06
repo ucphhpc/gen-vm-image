@@ -17,6 +17,7 @@
 import os
 import validators
 from gen_vm_image.common.defaults import (
+    DEFAULT_BUFFER_SIZE,
     GENERATED_IMAGE_DIR,
     TMP_DIR,
     CONSITENCY_SUPPPORTED_FORMATS,
@@ -178,6 +179,8 @@ async def generate_image(
     input_format="qcow2",
     input_checksum_type=None,
     input_checksum=None,
+    input_checksum_buffer_size=DEFAULT_BUFFER_SIZE,
+    input_checksum_read_bytes=None,
     output_format="qcow2",
     output_directory=GENERATED_IMAGE_DIR,
     overwrite=False,
@@ -309,7 +312,10 @@ async def generate_image(
 
         if input_checksum:
             calculated_checksum = await hashsum(
-                input_image_path, algorithm=input_checksum_type
+                input_image_path,
+                algorithm=input_checksum_type,
+                buffer_size=input_checksum_buffer_size,
+                read_bytes_of_file=input_checksum_read_bytes,
             )
             if not calculated_checksum:
                 response["msg"] = (

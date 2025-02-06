@@ -14,7 +14,11 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-from gen_vm_image.common.defaults import SINGLE, GENERATED_IMAGE_DIR
+from gen_vm_image.common.defaults import (
+    SINGLE,
+    GENERATED_IMAGE_DIR,
+    DEFAULT_BUFFER_SIZE,
+)
 from gen_vm_image.cli.parsers.actions import PositionalArgumentsAction
 
 
@@ -59,6 +63,20 @@ def single_group(parser):
         dest="{}_input_checksum".format(SINGLE),
         default=None,
         help="The checksum that should be used to validate the input image if set.",
+    )
+    build_single_group.add_argument(
+        "-icbs",
+        "--input-checksum-buffer-size",
+        dest="{}_input_checksum_buffer_size".format(SINGLE),
+        default=DEFAULT_BUFFER_SIZE,
+        help="The buffer size that is used to read the input image when calculating the checksum value",
+    )
+    build_single_group.add_argument(
+        "-icrb",
+        "--input-checksum-read-bytes",
+        dest="{}_input_checksum_read_bytes",
+        default=None,
+        help="The amount of bytes that should be read from the input image to be used to calculate the expected checksum value",
     )
     build_single_group.add_argument(
         "-od",

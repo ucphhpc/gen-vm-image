@@ -16,7 +16,7 @@
 
 import os
 import yaml
-from gen_vm_image.common.defaults import GENERATED_IMAGE_DIR
+from gen_vm_image.common.defaults import GENERATED_IMAGE_DIR, DEFAULT_BUFFER_SIZE
 from gen_vm_image.common.codes import (
     PATH_CREATE_ERROR,
     PATH_CREATE_ERROR_MSG,
@@ -166,6 +166,10 @@ def prepare_input_kwargs(input_data):
     if checksum:
         input_kwargs["input_checksum_type"] = checksum.get("type", None)
         input_kwargs["input_checksum"] = checksum.get("value", None)
+        input_kwargs["input_checksum_buffer_size"] = checksum.get(
+            "buffer_size", DEFAULT_BUFFER_SIZE
+        )
+        input_kwargs["input_checksum_read_bytes"] = checksum.get("read_bytes", None)
 
     if "path" in input_data:
         input_kwargs["input"] = input_data.get("path", None)

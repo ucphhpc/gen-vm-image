@@ -18,6 +18,8 @@ import os
 import shutil
 import re
 
+from gen_vm_image.common.defaults import DEFAULT_BUFFER_SIZE
+
 
 def makedirs(path):
     try:
@@ -121,14 +123,26 @@ def copy(original, target):
 
 
 # Read chunks of a file, default to 64KB
-async def hashsum(path, algorithm="sha1", buffer_size=65536):
+async def hashsum(
+    path, algorithm="sha1", buffer_size=DEFAULT_BUFFER_SIZE, read_bytes_of_file=None
+):
     try:
         import hashlib
 
         hash_algorithm = hashlib.new(algorithm)
+        if read_bytes_of_file:
+            bytes_read = 0
+
         with open(path, "rb") as fh:
             for chunk in iter(lambda: fh.read(buffer_size), b""):
                 hash_algorithm.update(chunk)
+                if read_bytes_of_file:
+                    if (bytes_read + buffer_size) >= read_bytes_of_file:
+                        buffer_size = read_bytes_of_file - bytes_read
+                    if buffer_size == 0:
+                        break
+                    bytes_read += buffer_size
+
         return hash_algorithm.hexdigest()
     except Exception:
         # TODO, add logging
@@ -146,6 +160,7 @@ def find(directory_path, regex_name):
 
 
 def size(path):
+    """Returns the size of a file in bytes"""
     try:
         return os.path.getsize(path)
     except Exception:
