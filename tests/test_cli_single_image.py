@@ -262,3 +262,33 @@ class TestCLISingleImage(unittest.TestCase):
         self.assertEqual(return_code, CHECKSUM_ERROR)
         output_path = join(self.images_dir, "{}.qcow2".format(name))
         self.assertFalse(exists(output_path))
+
+    def test_cli_single_image_with_checksum_and_partial_bytes(self):
+        expected_checksum = "1d7e67951f6b693b8f0ec66c7ad27743edb9088bee19b60cdd564abe0f3d1f36664299aa03ad4903e60fccdd60faf71b4eacb498c8c33da06bd5f6f33f7852ce"
+        return_code = None
+        try:
+            name = "test-cli-single-image-checksum-partial-bytes-{}".format(self.seed)
+            size = "5G"
+            read_bytes_of_file = "1000"
+            return_code = main(
+                [
+                    SINGLE,
+                    name,
+                    size,
+                    "--output-directory",
+                    self.images_dir,
+                    "--input",
+                    TEST_IMAGE_PATH,
+                    "--input-checksum-type",
+                    "sha512",
+                    "--input-checksum",
+                    expected_checksum,
+                    "--input-checksum-read-bytes",
+                    read_bytes_of_file,
+                ]
+            )
+        except SystemExit as e:
+            return_code = e.code
+        self.assertEqual(return_code, SUCCESS)
+        output_path = join(self.images_dir, "{}.qcow2".format(name))
+        self.assertTrue(exists(output_path))

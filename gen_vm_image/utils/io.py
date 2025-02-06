@@ -132,16 +132,18 @@ async def hashsum(
         hash_algorithm = hashlib.new(algorithm)
         if read_bytes_of_file:
             bytes_read = 0
+            if buffer_size > read_bytes_of_file:
+                buffer_size = read_bytes_of_file
 
         with open(path, "rb") as fh:
             for chunk in iter(lambda: fh.read(buffer_size), b""):
                 hash_algorithm.update(chunk)
                 if read_bytes_of_file:
+                    bytes_read += buffer_size
                     if (bytes_read + buffer_size) >= read_bytes_of_file:
                         buffer_size = read_bytes_of_file - bytes_read
                     if buffer_size == 0:
                         break
-                    bytes_read += buffer_size
 
         return hash_algorithm.hexdigest()
     except Exception:
