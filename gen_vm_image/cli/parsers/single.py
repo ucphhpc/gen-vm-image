@@ -74,7 +74,7 @@ def single_group(parser):
     build_single_group.add_argument(
         "-icrb",
         "--input-checksum-read-bytes",
-        dest="{}_input_checksum_read_bytes",
+        dest="{}_input_checksum_read_bytes".format(SINGLE),
         default=None,
         help="The amount of bytes that should be read from the input image to be used to calculate the expected checksum value",
     )
