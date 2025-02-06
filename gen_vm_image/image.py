@@ -254,6 +254,26 @@ async def generate_image(
                 response["verbose_outputs"] = verbose_outputs
                 return INVALID_ATTRIBUTE_TYPE_ERROR, response
 
+            if not isinstance(input_checksum_buffer_size, int):
+                response["msg"] = INVALID_ATTRIBUTE_TYPE_ERROR_MSG.format(
+                    type(input_checksum_buffer_size),
+                    input_checksum_buffer_size,
+                    "int",
+                )
+                response["verbose_outputs"] = verbose_outputs
+                return INVALID_ATTRIBUTE_TYPE_ERROR, response
+
+            if input_checksum_read_bytes and not isinstance(
+                input_checksum_read_bytes, int
+            ):
+                response["msg"] = INVALID_ATTRIBUTE_TYPE_ERROR_MSG.format(
+                    type(input_checksum_read_bytes),
+                    input_checksum_read_bytes,
+                    "int",
+                )
+                response["verbose_outputs"] = verbose_outputs
+                return INVALID_ATTRIBUTE_TYPE_ERROR, response
+
         if validators.url(input):
             input_url = input
             # Download the specified url and save it into
