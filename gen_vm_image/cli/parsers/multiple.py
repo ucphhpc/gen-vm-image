@@ -19,30 +19,30 @@ from gen_vm_image.cli.parsers.actions import PositionalArgumentsAction
 
 
 def multiple_group(parser):
-    build_multiple_group = parser.add_argument_group(
-        title="Build multiple images arguments"
+    generate_multiple_group = parser.add_argument_group(
+        title="Generate multiple Virtual Machine Images"
     )
 
-    build_multiple_group.add_argument(
+    generate_multiple_group.add_argument(
         "architecture_path",
         action=PositionalArgumentsAction,
         help="The path to the architecture file that defines the images to build",
     )
-    build_multiple_group.add_argument(
+    generate_multiple_group.add_argument(
         "-iod",
         "--images-output-directory",
         dest="{}_images_output_directory".format(MULTIPLE),
         default=GENERATED_IMAGE_DIR,
         help="The path to the output directory where the images will be saved",
     )
-    build_multiple_group.add_argument(
+    generate_multiple_group.add_argument(
         "--overwrite",
         dest="{}_overwrite".format(MULTIPLE),
         action="store_true",
         default=False,
         help="Whether the tool should overwrite existing image disks",
     )
-    build_multiple_group.add_argument(
+    generate_multiple_group.add_argument(
         "--verbose",
         "-v",
         action="store_true",

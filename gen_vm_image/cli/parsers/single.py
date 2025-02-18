@@ -23,55 +23,55 @@ from gen_vm_image.cli.parsers.actions import PositionalArgumentsAction
 
 
 def single_group(parser):
-    build_single_group = parser.add_argument_group(title="Build single image arguments")
+    generate_single_group = parser.add_argument_group(title="Generate a single Virtual Machine Image")
 
-    build_single_group.add_argument(
+    generate_single_group.add_argument(
         "name",
         action=PositionalArgumentsAction,
         type=str,
         help="The name of the image that will be generated",
     )
-    build_single_group.add_argument(
+    generate_single_group.add_argument(
         "size",
         action=PositionalArgumentsAction,
         type=str,
         help="The size of the image that will be generated",
     )
-    build_single_group.add_argument(
+    generate_single_group.add_argument(
         "-i",
         "--input",
         dest="{}_input".format(SINGLE),
         help="The path or url to the input image that the generated image should be based on",
     )
-    build_single_group.add_argument(
+    generate_single_group.add_argument(
         "-if",
         "--input-format",
         dest="{}_input_format".format(SINGLE),
         default=None,
         help="The format of the input image. Will dynamically try to determine the format if not provided",
     )
-    build_single_group.add_argument(
+    generate_single_group.add_argument(
         "-ict",
         "--input-checksum-type",
         dest="{}_input_checksum_type".format(SINGLE),
         default=None,
         help="The checksum type that should be used to validate the input image if set.",
     )
-    build_single_group.add_argument(
+    generate_single_group.add_argument(
         "-ic",
         "--input-checksum",
         dest="{}_input_checksum".format(SINGLE),
         default=None,
         help="The checksum that should be used to validate the input image if set.",
     )
-    build_single_group.add_argument(
+    generate_single_group.add_argument(
         "-icbs",
         "--input-checksum-buffer-size",
         dest="{}_input_checksum_buffer_size".format(SINGLE),
         default=DEFAULT_BUFFER_SIZE,
         help="The buffer size that is used to read the input image when calculating the checksum value",
     )
-    build_single_group.add_argument(
+    generate_single_group.add_argument(
         "-icrb",
         "--input-checksum-read-bytes",
         dest="{}_input_checksum_read_bytes".format(SINGLE),
@@ -79,27 +79,27 @@ def single_group(parser):
         type=int,
         help="The amount of bytes that should be read from the input image to be used to calculate the expected checksum value",
     )
-    build_single_group.add_argument(
+    generate_single_group.add_argument(
         "-od",
         "--output-directory",
         dest="{}_output_directory".format(SINGLE),
         default=GENERATED_IMAGE_DIR,
         help="The path to the output directory where the image will be saved",
     )
-    build_single_group.add_argument(
+    generate_single_group.add_argument(
         "-of",
         "--output-format",
         dest="{}_output_format".format(SINGLE),
         default="qcow2",
         help="The format of the output image",
     )
-    build_single_group.add_argument(
+    generate_single_group.add_argument(
         "-V",
         "--version",
         dest="{}_version".format(SINGLE),
         help="The version of the image to build",
     )
-    build_single_group.add_argument(
+    generate_single_group.add_argument(
         "--verbose",
         "-v",
         action="store_true",
