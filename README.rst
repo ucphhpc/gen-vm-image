@@ -120,7 +120,7 @@ If no optional ``-od/--output-directory`` is set, the disk image will be generat
 Image Based on an Existing Image
 --------------------------------
 
-The following example will generate a 10 GB GenericCloud single disk image based on the Debian 12 distribution.
+The following example will generate a 10 GB GenericCloud single disk image based on the Debian 12 distribution::
 
     gen-vm-image single basic-image 10G -i https://cloud.debian.org/images/cloud/bookworm/latest/debian-12-generic-amd64.qcow2
 
