@@ -112,7 +112,7 @@ Basic Single Image Disk Example
 
 To generate a simple 20 GB disk image that is not based on any existing image, the following basic command can be used::
 
-  gen-vm-image single basic-disk-image 20G
+    gen-vm-image single basic-disk-image 20G
 
 If no optional ``-od/--output-directory`` is set, the disk image will be generated in the default ``generated-image`` directory in your current working directory.
 
