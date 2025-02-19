@@ -115,7 +115,7 @@ To generate a simple 20 GB disk image that is not based on any existing image, t
     gen-vm-image single basic-disk-image 20G
 
 If no optional ``-od/--output-directory`` is set, the disk image will be generated in the default ``generated-image`` directory in your current working directory.
-
+By default the ``gen-vm-image`` will generate the VMI with the `qcow2 https://en.wikipedia.org/wiki/Qcow`_ format. This can be changed via the ``-of/--output-format`` option.
 
 Image Based on an Existing Image
 --------------------------------
