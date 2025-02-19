@@ -61,7 +61,7 @@ Single Image
 
 The ``single`` CLI command provides the most straigthforward method for quickly generating a single VMI.
 Information on the various options for the ``single`` command can also be displayed via the ``--help`` option.
-As indicated by the help output, ``single`` command only requires two positional arguments 
+As indicated by the help output, ``single`` command only requires two positional arguments::
 
     usage: gen-vm-image single
                         [-h]
@@ -106,14 +106,34 @@ As indicated by the help output, ``single`` command only requires two positional
 
 Some simple examples for its usage can be seen below.
 
-Basic Single Image
-------------------
 
-The following example will generate a single image 
+Basic Single Image Disk Example
+-------------------------------
 
-  venv/bin/gen-vm-image single basic-image 10G -i https://cloud.debian.org/images/cloud/bookworm/latest/debian-12-generic-amd64.qcow2
+To generate a simple 20 GB disk image that is not based on any existing image, the following basic command can be used::
+
+  gen-vm-image single basic-disk-image 20G
+
+If no optional ``-od/--output-directory`` is set, the disk image will be generated in the default ``generated-image`` directory in your current working directory.
 
 
+Image Based on an Existing Image
+--------------------------------
+
+The following example will generate a 10 GB GenericCloud single disk image based on the Debian 12 distribution.
+
+    gen-vm-image single basic-image 10G -i https://cloud.debian.org/images/cloud/bookworm/latest/debian-12-generic-amd64.qcow2
+
+Verify Checksum of Downloaded Image
+-----------------------------------
+
+When generating a VMI based on an existing image that is downloaded, it is recommended that as part of the generation with
+``gen-vm-image`` that the downloaded image checksum is verified.
+
+For instance with the `Image Based on an Existing Image` example, the expected checksum of the downloaded image
+can be found at https://cloud.debian.org/images/cloud/bookworm/latest/SHA512SUMS::
+
+    gen-vm-image single basic-image 10G --input-checksum-type sha512 --input-checksum <expected_sha512_checksum_of_the_downloaded_image> -i https://cloud.debian.org/images/cloud/bookworm/latest/debian-12-generic-amd64.qcow2
 
 
 Multiple Images
