@@ -7,15 +7,14 @@ gen-vm-image
 .. image:: https://badge.fury.io/py/gen-vm-image.svg
     :target: https://badge.fury.io/py/gen-vm-image
 
-This package can be used for generating virtual machine images.
+This package can be used for generating Virtual Machine Image(s) (VMI)s.
 The ``gen-vm-image`` tool can also be used as an initializer plugin for `corc <https://github.com/rasmunk/corc>`_
 
 ------------
 Dependencies
 ------------
 
-The dependencies required to use this package to generate virtual machine images
-can be found in the ``dep`` directory for the supported distributions.
+The dependencies required to use this package to generate VMIs can be found in the ``dep`` directory for the supported distributions.
 
 ------------
 Installation
@@ -39,11 +38,88 @@ or systemwide::
     cd gen-vm-image
     make install PYTHON=path/to/your/systemwide/python
 
------------------------------
-Build a Virtual Machine Image
------------------------------
+-----------------------------------
+Generating Virtual Machine Image(s)
+-----------------------------------
 
-Before an image can be generated, you first have to create an architecture file that defines which images should be built.
+The ``gen-vm-image`` tool provides two distinct methods for generating VMIs, namely the ``single`` and ``multiple`` commands for generating image(s).
+Either of these commands can be selected via the ``gen-vm-image`` CLI::
+
+    gen-vm-image --help
+    usage: gen-vm-image [-h] [--version] {single,multiple} ...
+
+    options:
+      -h, --help         show this help message and exit
+      --version, -V      Print the version of the program
+
+    COMMAND:
+      {single,multiple}
+
+
+Single Image
+============
+
+The ``single`` CLI command provides the most straigthforward method for quickly generating a single VMI.
+Information on the various options for the ``single`` command can also be displayed via the ``--help`` option.
+As indicated by the help output, ``single`` command only requires two positional arguments 
+
+    usage: gen-vm-image single
+                        [-h]
+                        [-i SINGLE_INPUT]
+                        [-if SINGLE_INPUT_FORMAT]
+                        [-ict SINGLE_INPUT_CHECKSUM_TYPE]
+                        [-ic SINGLE_INPUT_CHECKSUM]
+                        [-icbs SINGLE_INPUT_CHECKSUM_BUFFER_SIZE]
+                        [-icrb SINGLE_INPUT_CHECKSUM_READ_BYTES]
+                        [-od SINGLE_OUTPUT_DIRECTORY]
+                        [-of SINGLE_OUTPUT_FORMAT]
+                        [-V SINGLE_VERSION]
+                        [--verbose]
+                        name
+                        size
+
+    options:
+      -h, --help            show this help message and exit
+
+    Generate a single Virtual Machine Image:
+      name                  The name of the image that will be generated
+      size                  The size of the image that will be generated
+      -i SINGLE_INPUT, --input SINGLE_INPUT
+                            The path or url to the input image that the generated image should be based on
+      -if SINGLE_INPUT_FORMAT, --input-format SINGLE_INPUT_FORMAT
+                            The format of the input image. Will dynamically try to determine the format if not provided
+      -ict SINGLE_INPUT_CHECKSUM_TYPE, --input-checksum-type SINGLE_INPUT_CHECKSUM_TYPE
+                            The checksum type that should be used to validate the input image if set.
+      -ic SINGLE_INPUT_CHECKSUM, --input-checksum SINGLE_INPUT_CHECKSUM
+                            The checksum that should be used to validate the input image if set.
+      -icbs SINGLE_INPUT_CHECKSUM_BUFFER_SIZE, --input-checksum-buffer-size SINGLE_INPUT_CHECKSUM_BUFFER_SIZE
+                            The buffer size that is used to read the input image when calculating the checksum value
+      -icrb SINGLE_INPUT_CHECKSUM_READ_BYTES, --input-checksum-read-bytes SINGLE_INPUT_CHECKSUM_READ_BYTES
+                            The amount of bytes that should be read from the input image to be used to calculate the expected checksum value
+      -od SINGLE_OUTPUT_DIRECTORY, --output-directory SINGLE_OUTPUT_DIRECTORY
+                            The path to the output directory where the image will be saved
+      -of SINGLE_OUTPUT_FORMAT, --output-format SINGLE_OUTPUT_FORMAT
+                            The format of the output image
+      -V SINGLE_VERSION, --version SINGLE_VERSION
+                            The version of the image to build
+      --verbose, -v         Print verbose output
+
+Some simple examples for its usage can be seen below.
+
+Basic Single Image
+------------------
+
+The following example will generate a single image 
+
+  venv/bin/gen-vm-image single basic-image 10G -i https://cloud.debian.org/images/cloud/bookworm/latest/debian-12-generic-amd64.qcow2
+
+
+
+
+Multiple Images
+===============
+
+To generate multiple images in one execution, you first have to create an architecture file that defines which images should be built.
 What name this architecture file is given is not important, but it should be in YAML format and contain the following structure::
 
     owner: <string> # The owner of the image.
