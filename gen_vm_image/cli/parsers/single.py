@@ -23,7 +23,9 @@ from gen_vm_image.cli.parsers.actions import PositionalArgumentsAction
 
 
 def single_group(parser):
-    generate_single_group = parser.add_argument_group(title="Generate a single Virtual Machine Image")
+    generate_single_group = parser.add_argument_group(
+        title="Generate a single Virtual Machine Image"
+    )
 
     generate_single_group.add_argument(
         "name",

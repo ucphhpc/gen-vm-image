@@ -225,17 +225,17 @@ async def build_architecture(
     for _, build_data in images.items():
         generate_image_kwargs = {}
 
-        input = build_data.get("input", None)
-        if input:
-            correct_input, correct_input_response = validate_input(input)
+        input_ = build_data.get("input", None)
+        if input_:
+            correct_input, correct_input_response = validate_input(input_)
             if not correct_input:
                 return (
                     correct_input_response["error_code"],
                     correct_input_response["msg"],
                 )
 
-            if isinstance(input, dict):
-                generate_image_kwargs.update(**prepare_input_kwargs(input))
+            if isinstance(input_, dict):
+                generate_image_kwargs.update(**prepare_input_kwargs(input_))
 
         generate_image_kwargs["output_directory"] = images_output_directory
         generate_image_kwargs["output_format"] = build_data.get("format", "qcow2")
