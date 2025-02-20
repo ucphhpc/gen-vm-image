@@ -26,21 +26,21 @@ def multiple_group(parser):
     generate_multiple_group.add_argument(
         "architecture_path",
         action=PositionalArgumentsAction,
-        help="The path to the architecture file that defines the images to build",
+        help="The path to the architecture file that defines the images that should be generated.",
     )
     generate_multiple_group.add_argument(
-        "-iod",
-        "--images-output-directory",
-        dest="{}_images_output_directory".format(MULTIPLE),
+        "-od",
+        "--output-directory",
+        dest="{}_output_directory".format(MULTIPLE),
         default=GENERATED_IMAGE_DIR,
-        help="The path to the output directory where the images will be saved",
+        help="The path to the output directory where the images will be saved.",
     )
     generate_multiple_group.add_argument(
         "--overwrite",
         dest="{}_overwrite".format(MULTIPLE),
         action="store_true",
         default=False,
-        help="Whether the tool should overwrite existing image disks",
+        help="Whether the tool should overwrite existing image disks.",
     )
     generate_multiple_group.add_argument(
         "--verbose",
@@ -48,5 +48,5 @@ def multiple_group(parser):
         action="store_true",
         dest="{}_verbose".format(MULTIPLE),
         default=False,
-        help="Print verbose output",
+        help="Print verbose output.",
     )

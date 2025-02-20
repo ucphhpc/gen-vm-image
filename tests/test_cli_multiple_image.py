@@ -66,7 +66,7 @@ class TestCLIMultipleImage(unittest.TestCase):
                 [
                     MULTIPLE,
                     BASIC_ARCHITECTURE_PATH,
-                    "--images-output-directory",
+                    "--output-directory",
                     self.images_dir,
                 ]
             )
@@ -86,7 +86,7 @@ class TestCLIMultipleImage(unittest.TestCase):
                 [
                     MULTIPLE,
                     ADVANCED_ARCHITECTURE_PATH,
-                    "--images-output-directory",
+                    "--output-directory",
                     self.images_dir,
                 ]
             )

@@ -182,7 +182,7 @@ def prepare_input_kwargs(input_data):
 
 async def build_architecture(
     architecture_path,
-    images_output_directory=GENERATED_IMAGE_DIR,
+    output_directory=GENERATED_IMAGE_DIR,
     overwrite=False,
     verbose=False,
 ):
@@ -202,11 +202,11 @@ async def build_architecture(
         return correct_response["error_code"], response
 
     # Create the destination directory where the images will be saved
-    if not exists(images_output_directory):
-        created = makedirs(images_output_directory)
+    if not exists(output_directory):
+        created = makedirs(output_directory)
         if not created:
             response["msg"] = PATH_CREATE_ERROR_MSG.format(
-                images_output_directory, "Failed to create the images output directory"
+                output_directory, "Failed to create the images output directory"
             )
             return PATH_CREATE_ERROR, response
 
@@ -237,7 +237,7 @@ async def build_architecture(
             if isinstance(input_, dict):
                 generate_image_kwargs.update(**prepare_input_kwargs(input_))
 
-        generate_image_kwargs["output_directory"] = images_output_directory
+        generate_image_kwargs["output_directory"] = output_directory
         generate_image_kwargs["output_format"] = build_data.get("format", "qcow2")
         generate_image_kwargs["version"] = build_data.get("version", None)
 
@@ -254,6 +254,6 @@ async def build_architecture(
             return build_return_code, response
 
     response["msg"] = "Successfully built the images in: {}".format(
-        os.path.realpath(images_output_directory)
+        os.path.realpath(output_directory)
     )
     return SUCCESS, response

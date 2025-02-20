@@ -26,7 +26,7 @@ def corc_initializer_plugin_entrypoint(build_data):
         version=build_data.get("version", None),
         input=build_data.get("input", None),
         output_format=build_data.get("format", None),
-        images_output_directory=build_data.get("output_directory", GENERATED_IMAGE_DIR),
+        output_directory=build_data.get("output_directory", GENERATED_IMAGE_DIR),
         overwrite=build_data.get("overwrite", False),
         verbose=build_data.get("verbose", False),
     )

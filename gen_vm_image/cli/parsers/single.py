@@ -31,26 +31,26 @@ def single_group(parser):
         "name",
         action=PositionalArgumentsAction,
         type=str,
-        help="The name of the image that will be generated",
+        help="The name of the image that will be generated.",
     )
     generate_single_group.add_argument(
         "size",
         action=PositionalArgumentsAction,
         type=str,
-        help="The size of the image that will be generated",
+        help="The size of the image that will be generated.",
     )
     generate_single_group.add_argument(
         "-i",
         "--input",
         dest="{}_input".format(SINGLE),
-        help="The path or url to the input image that the generated image should be based on",
+        help="The path or url to the input image that the generated image should be based on.",
     )
     generate_single_group.add_argument(
         "-if",
         "--input-format",
         dest="{}_input_format".format(SINGLE),
         default=None,
-        help="The format of the input image. Will dynamically try to determine the format if not provided",
+        help="The format of the input image. Will dynamically try to determine the format if not provided.",
     )
     generate_single_group.add_argument(
         "-ict",
@@ -71,7 +71,7 @@ def single_group(parser):
         "--input-checksum-buffer-size",
         dest="{}_input_checksum_buffer_size".format(SINGLE),
         default=DEFAULT_BUFFER_SIZE,
-        help="The buffer size that is used to read the input image when calculating the checksum value",
+        help="The buffer size that is used to read the input image when calculating the checksum value.",
     )
     generate_single_group.add_argument(
         "-icrb",
@@ -79,27 +79,27 @@ def single_group(parser):
         dest="{}_input_checksum_read_bytes".format(SINGLE),
         default=None,
         type=int,
-        help="The amount of bytes that should be read from the input image to be used to calculate the expected checksum value",
+        help="The amount of bytes that should be read from the input image to be used to calculate the expected checksum value.",
     )
     generate_single_group.add_argument(
         "-od",
         "--output-directory",
         dest="{}_output_directory".format(SINGLE),
         default=GENERATED_IMAGE_DIR,
-        help="The path to the output directory where the image will be saved",
+        help="The path to the output directory where the image will be saved.",
     )
     generate_single_group.add_argument(
         "-of",
         "--output-format",
         dest="{}_output_format".format(SINGLE),
         default="qcow2",
-        help="The format of the output image",
+        help="The format of the output image.",
     )
     generate_single_group.add_argument(
         "-V",
         "--version",
         dest="{}_version".format(SINGLE),
-        help="The version of the image to build",
+        help="The version of the image that is generated.",
     )
     generate_single_group.add_argument(
         "--verbose",
@@ -107,5 +107,5 @@ def single_group(parser):
         action="store_true",
         dest="{}_verbose".format(SINGLE),
         default=False,
-        help="Print verbose output",
+        help="Print verbose output.",
     )
