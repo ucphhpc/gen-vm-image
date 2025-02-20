@@ -82,30 +82,29 @@ As indicated by the help output, ``single`` command only requires two positional
       -h, --help            show this help message and exit
 
     Generate a single Virtual Machine Image:
-      name                  The name of the image that will be generated
-      size                  The size of the image that will be generated
+      name                  The name of the image that will be generated.
+      size                  The size of the image that will be generated.
       -i SINGLE_INPUT, --input SINGLE_INPUT
-                            The path or url to the input image that the generated image should be based on
+                            The path or url to the input image that the generated image should be based on.
       -if SINGLE_INPUT_FORMAT, --input-format SINGLE_INPUT_FORMAT
-                            The format of the input image. Will dynamically try to determine the format if not provided
+                            The format of the input image. Will dynamically try to determine the format if not provided.
       -ict SINGLE_INPUT_CHECKSUM_TYPE, --input-checksum-type SINGLE_INPUT_CHECKSUM_TYPE
                             The checksum type that should be used to validate the input image if set.
       -ic SINGLE_INPUT_CHECKSUM, --input-checksum SINGLE_INPUT_CHECKSUM
                             The checksum that should be used to validate the input image if set.
       -icbs SINGLE_INPUT_CHECKSUM_BUFFER_SIZE, --input-checksum-buffer-size SINGLE_INPUT_CHECKSUM_BUFFER_SIZE
-                            The buffer size that is used to read the input image when calculating the checksum value
+                            The buffer size that is used to read the input image when calculating the checksum value.
       -icrb SINGLE_INPUT_CHECKSUM_READ_BYTES, --input-checksum-read-bytes SINGLE_INPUT_CHECKSUM_READ_BYTES
-                            The amount of bytes that should be read from the input image to be used to calculate the expected checksum value
+                            The amount of bytes that should be read from the input image to be used to calculate the expected checksum value.
       -od SINGLE_OUTPUT_DIRECTORY, --output-directory SINGLE_OUTPUT_DIRECTORY
-                            The path to the output directory where the image will be saved
+                            The path to the output directory where the image will be saved.
       -of SINGLE_OUTPUT_FORMAT, --output-format SINGLE_OUTPUT_FORMAT
-                            The format of the output image
+                            The format of the output image.
       -V SINGLE_VERSION, --version SINGLE_VERSION
-                            The version of the image to build
-      --verbose, -v         Print verbose output
+                            The version of the image that is generated.
+      --verbose, -v         Print verbose output.
 
 Some simple examples for its usage can be seen below.
-
 
 Basic Single Image Disk Example
 -------------------------------
@@ -139,8 +138,27 @@ can be found at https://cloud.debian.org/images/cloud/bookworm/latest/SHA512SUMS
 Multiple Images
 ===============
 
-To generate multiple images in one execution, you first have to create an architecture file that defines which images should be built.
-What name this architecture file is given is not important, but it should be in YAML format and contain the following structure::
+When having to numerous many VMIs, it is useful to be able to do so in a single execution.
+Additionally, when maintaining an infrastructure with many VMIs over time, it can be useful to have a structured definition that defines
+this VMI infrastructure and is able to (re)produce it at will. The ``gen-vm-image`` tool allows you to do so with the ``multiple`` command::
+The totality of the command can be seen below::
+
+    gen-vm-image multiple -h
+    usage: gen-vm-image multiple [-h] [-iod MULTIPLE_OUTPUT_DIRECTORY] [--overwrite] [--verbose] architecture_path
+
+    options:
+      -h, --help            show this help message and exit
+
+    Generate multiple Virtual Machine Images:
+      architecture_path     The path to the architecture file that defines the images that should be generated.
+      -iod MULTIPLE_OUTPUT_DIRECTORY, --output-directory MULTIPLE_OUTPUT_DIRECTORY
+                            The path to the output directory where the images will be saved.
+      --overwrite           Whether the tool should overwrite existing image disks.
+      --verbose, -v         Print verbose output.
+
+
+The ``multiple`` command requires that you define and pass the path to an architecture file, that is a YAML formatted file that defines which VMIs that should be generated.
+The expected structure of said architecture file can be seen below::
 
     owner: <string> # The owner of the image.
     images: <key-value pair> # The images to be generated.
@@ -148,36 +166,12 @@ What name this architecture file is given is not important, but it should be in 
         name: <string> # The name of the image.
         version: <string> # (Optional) The version of the image.
         size: <string> # The size of the to be generated vm image disk, can use suffixes such as 'K', 'M', 'G', 'T'.
-        input: <dict> # Input can be defined if the generated image should be based on a pre-existing image.
-          url: <string> # An URL to an image that should be used as the input image for the generated image.
+        format: <string> # The format of the generated, cloud for instance be `raw` or `qcow2`.
+        input: <dict> # (Optional) Input can be defined if the generated image should be based on a pre-existing image.
+          path | url: <string> # A local filesystem path or URL to an image that should be used as the input image for the generated image.
           format: <string> # The format of the input image, could for instance be `raw` or `qcow2`.
           checksum: <dict> # A dictionary that defines the checksum that should be used to validate the input image.
-            type: <string> # The type of checksum that should be used to validate the image. For valid types, see the supported algorithms `Here <https://docs.python.org/3/library/hashlib.html#hashlib.new>`_
-            value: <string> # The checksum value that should be used to validate the image.
+            type: <string> # The type of checksum that should be used to validate the input image. For valid types, see the supported algorithms `Here <https://docs.python.org/3/library/hashlib.html#hashlib.new>`_
+            value: <string> # The checksum value that should be used to validate the input image.
 
-
-An example of such a file can be found in the ``examples`` directory.
-
-Upon creating such a file, the `gen-vm-image` command can be used to generate the virtual machine image.
-The totality of the command can be seen below::
-
-    usage: gen-vm-image [-h]
-                        [--images-output-directory IMAGES_OUTPUT_DIRECTORY]
-                        [--overwrite]
-                        [--verbose]
-                        [--version]
-                        architecture_path
-
-    positional arguments:
-      architecture_path     The path to the architecture file that defines the images to build
-
-    options:
-      -h, --help            show this help message and exit
-      --images-output-directory IMAGES_OUTPUT_DIRECTORY
-                            The path to the output directory where the images will be saved (default: generated-images)
-      --overwrite           Whether the tool should overwrite existing image disks (default: False)
-      --verbose, -v         Print verbose output (default: False)
-      --version             Print the version of the program
-
-In summation, when the ``gen-vm-image path/to/architecture.yml`` command is executed,
-the specified images will be generated in the ``--image-output-path`` directory.
+Practical examples of architecture files can be found in the ``examples`` directory.
