@@ -191,6 +191,9 @@ async def generate_image(
     response = {}
     verbose_outputs = []
 
+    # rename the special input variable to input_
+    input_ = input
+
     if version:
         vm_output_path = os.path.join(
             output_directory,
@@ -200,6 +203,16 @@ async def generate_image(
         vm_output_path = os.path.join(
             output_directory, "{}.{}".format(name, output_format)
         )
+
+    # Create the destination directory where the images will be saved
+    if not exists(output_directory):
+        created = makedirs(output_directory)
+        if not created:
+            response["msg"] = PATH_CREATE_ERROR_MSG.format(
+                output_directory, "Failed to create the images output directory"
+            )
+            return PATH_CREATE_ERROR, response
+
 
     if exists(vm_output_path):
         if verbose:
@@ -219,10 +232,10 @@ async def generate_image(
                     "Overwriting the existing image: {}".format(vm_output_path)
                 )
 
-    if input:
-        if not isinstance(input, str):
+    if input_:
+        if not isinstance(input_, str):
             response["msg"] = INVALID_ATTRIBUTE_TYPE_ERROR_MSG.format(
-                type(input), input, "string"
+                type(input_), input_, "string"
             )
             response["verbose_outputs"] = verbose_outputs
             return INVALID_ATTRIBUTE_TYPE_ERROR, response
@@ -274,8 +287,8 @@ async def generate_image(
                 response["verbose_outputs"] = verbose_outputs
                 return INVALID_ATTRIBUTE_TYPE_ERROR, response
 
-        if validators.url(input):
-            input_url = input
+        if validators.url(input_):
+            input_url = input_
             # Download the specified url and save it into
             # a tmp directory.
             # First prepare the temporary directory
@@ -309,17 +322,17 @@ async def generate_image(
                         "Download details: {}".format(download_response)
                     )
         else:
-            # If the input is a string, then we assume that it is a path to the image
-            if not exists(input):
+            # If the input_ is a string, then we assume that it is a path to the image
+            if not exists(input_):
                 response["msg"] = PATH_NOT_FOUND_ERROR_MSG.format(
-                    input, "the defined input path to the does not exist"
+                    input_, "the defined input_ path to the does not exist"
                 )
                 response["verbose_outputs"] = verbose_outputs
                 return PATH_NOT_FOUND_ERROR, response
-            input_image_path = input
+            input_image_path = input_
 
         if not input_format and input_image_path:
-            # Try to discover the input format since we have
+            # Try to discover the input_ format since we have
             # only been given a string value
             input_format = input_image_path.split(".")[-1]
 
@@ -395,7 +408,7 @@ async def generate_image(
             response["verbose_outputs"] = verbose_outputs
             return RESIZE_ERROR, response
     else:
-        # If no input is specified, then we assume that we are creating a new disc image
+        # If no input_ is specified, then we assume that we are creating a new disc image
         create_image_result, msg = await create_image(
             vm_output_path,
             size,
