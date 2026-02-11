@@ -43,6 +43,8 @@ pipelines:
     parameters:
       ARGS: ''
       SRC_DIRECTORY: gen-vm-image
+      BUILD_MAKE_ARGS: ''
       TEST_DIRECTORY: gen-vm-image
+      TEST_MAKE_ARGS: ''
       PUSH_DIRECTORY: publish-python-scripts
     template: bare_metal_pypi_package
