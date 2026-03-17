@@ -213,7 +213,6 @@ async def generate_image(
             )
             return PATH_CREATE_ERROR, response
 
-
     if exists(vm_output_path):
         if verbose:
             verbose_outputs.append(

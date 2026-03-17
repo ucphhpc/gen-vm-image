@@ -43,6 +43,7 @@ def single_group(parser):
         "-i",
         "--input",
         dest="{}_input".format(SINGLE),
+        default=None,
         help="The path or url to the input image that the generated image should be based on.",
     )
     generate_single_group.add_argument(
