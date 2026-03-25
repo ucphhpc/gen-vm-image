@@ -69,3 +69,17 @@ images:
     output:
       path: tests/tmp/image-with-output-path.qcow2
       format: qcow2
+  image_with_overlay:
+    name: image-with-overlay
+    version: 9.4
+    format: qcow2
+    size: 25G
+    extra_kwargs:
+      # This needs to be created beforehand before it
+      # can be used as a base image for the image-with-overlay
+      b: base-image
+      F: qcow2
+      o: encrypt.format=luks,encrypt.key=sec0
+    output:
+      path: tests/tmp/image-with-overlay.qcow2
+      format: qcow2

@@ -178,3 +178,78 @@ class TestImageBuild(unittest.IsolatedAsyncioTestCase):
         self.assertTrue(result)
         self.assertEqual(msg, b"")
         self.assertTrue(exists(new_image_path))
+
+
+class TestImageOverlay(unittest.IsolatedAsyncioTestCase):
+    context = AsyncImageTestContext()
+
+    async def asyncSetUp(self):
+        await self.context.setUp()
+        self.seed = str(random.random())[2:10]
+        # Create the base image that the overlay is based on
+        
+        base_image_name = "base-image-{}".format(self.seed)
+        base_image_format = "qcow2"
+        base_image_size = "10G"
+        self.base_image_settings = {
+            "path": join(
+                self.context.test_tmp_directory,
+                "{}.{}".format(base_image_name, base_image_format)
+            ),
+            "size": base_image_size,
+            "format": base_image_format
+        }
+
+        result, msg = await create_image(
+            self.base_image_settings["path"],
+            self.base_image_settings["size"],
+            image_format=self.base_image_settings["format"],
+
+        )
+        self.assertTrue(result)
+        self.assertEqual(msg, b"")
+
+    async def asyncTearDown(self):
+        # Remove every seed file
+        regex_name = ".*{}.*".format(self.seed)
+        seed_files = find(self.context.test_tmp_directory, regex_name)
+        for seed_file in seed_files:
+            if exists(seed_file):
+                self.assertTrue(remove(seed_file))
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.context.tearDown()
+
+    async def test_create_image_overlay(self):
+        image_with_overlay = self.context.architecture["images"]["image_with_overlay"]
+        image_with_overlay_name = "{}-{}".format(image_with_overlay["name"], self.seed)
+
+        self.assertIn("extra_kwargs", image_with_overlay)
+        self.assertIsInstance(image_with_overlay["extra_kwargs"], dict)
+        ## Base image settings
+        # Backing image
+        self.assertIn("b", image_with_overlay["extra_kwargs"])
+        # Backing image format
+        self.assertIn("F", image_with_overlay["extra_kwargs"])
+        # Create image options
+        self.assertIn("o", image_with_overlay["extra_kwargs"])
+
+        image_with_overlay_path = join(
+            self.context.test_tmp_directory,
+            "{}.{}".format(image_with_overlay_name, image_with_overlay["format"]),
+        )
+
+        create_extra_kwargs = {
+            "-b": image_with_overlay["extra_kwargs"]["b"],
+            "-F": image_with_overlay["extra_kwargs"]["F"],
+            "-o": image_with_overlay["extra_kwargs"]["o"]
+        }
+        result, msg = await create_image(
+            image_with_overlay_path,
+            image_with_overlay["size"],
+            image_format=image_with_overlay["format"],
+            extra_create_kwargs=create_extra_kwargs
+        )
+        self.assertTrue(result)
+        self.assertEqual(msg, b"")

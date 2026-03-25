@@ -59,8 +59,20 @@ async def qemu_img_call(action, args, format_output_str=True, verbose=False):
     return True, result["output"]
 
 
-async def create_image(path, size, image_format="qcow2", verbose=False):
+async def create_image(path, size, image_format="qcow2", verbose=False, extra_create_args=None, extra_create_kwargs=None):
+    if extra_create_args is None:
+        extra_create_args = []
+
+    if extra_create_kwargs is None:
+        extra_create_kwargs = {}
+
     args = ["-f", image_format, path, size]
+    args.extend(extra_create_args)
+
+    for key, value in extra_create_kwargs.items():
+        args.append(key)
+        args.append(value)
+
     result, msg = await qemu_img_call("create", args, verbose=verbose)
     if not result:
         return False, msg
