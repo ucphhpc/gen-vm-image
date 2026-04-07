@@ -20,7 +20,7 @@ PACKAGE_NAME_FORMATTED=$(subst -,_,$(PACKAGE_NAME))
 ARGS=
 
 .PHONY: all
-all: init install-dep install
+all: build
 
 .PHONY: venv
 init: venv
@@ -32,8 +32,7 @@ clean: distclean venv-clean
 	rm -fr tests/__pycache__
 
 .PHONY: build
-build: venv
-	. $(VENV)/activate; gen-vm-image $(ARGS)
+build: init install-dep
 
 .PHONY: dist
 dist: venv install-dist-dep
