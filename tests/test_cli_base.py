@@ -15,8 +15,9 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import unittest
-from gen_vm_image.common.codes import SUCCESS
+
 from gen_vm_image.cli.cli import main
+from gen_vm_image.common.codes import SUCCESS
 
 
 class TestCLIBase(unittest.TestCase):

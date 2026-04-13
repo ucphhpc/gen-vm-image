@@ -15,33 +15,35 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import os
+
 import validators
-from gen_vm_image.common.defaults import (
-    DEFAULT_BUFFER_SIZE,
-    GENERATED_IMAGE_DIR,
-    TMP_DIR,
-    CONSITENCY_SUPPPORTED_FORMATS,
-)
+
 from gen_vm_image.common.codes import (
-    PATH_NOT_FOUND_ERROR,
-    PATH_NOT_FOUND_ERROR_MSG,
-    PATH_CREATE_ERROR,
-    PATH_CREATE_ERROR_MSG,
-    MISSING_ATTRIBUTE_ERROR,
-    MISSING_ATTRIBUTE_ERROR_MSG,
-    INVALID_ATTRIBUTE_TYPE_ERROR,
-    INVALID_ATTRIBUTE_TYPE_ERROR_MSG,
-    CHECKSUM_ERROR,
-    RESIZE_ERROR,
-    RESIZE_ERROR_MSG,
     CHECK_ERROR,
     CHECK_ERROR_MSG,
-    SUCCESS,
+    CHECKSUM_ERROR,
     DOWNLOAD_ERROR,
     GETSIZE_ERROR,
     GETSIZE_ERROR_MSG,
+    INVALID_ATTRIBUTE_TYPE_ERROR,
+    INVALID_ATTRIBUTE_TYPE_ERROR_MSG,
+    MISSING_ATTRIBUTE_ERROR,
+    MISSING_ATTRIBUTE_ERROR_MSG,
+    PATH_CREATE_ERROR,
+    PATH_CREATE_ERROR_MSG,
+    PATH_NOT_FOUND_ERROR,
+    PATH_NOT_FOUND_ERROR_MSG,
+    RESIZE_ERROR,
+    RESIZE_ERROR_MSG,
+    SUCCESS,
 )
-from gen_vm_image.utils.io import exists, makedirs, hashsum
+from gen_vm_image.common.defaults import (
+    CONSITENCY_SUPPPORTED_FORMATS,
+    DEFAULT_BUFFER_SIZE,
+    GENERATED_IMAGE_DIR,
+    TMP_DIR,
+)
+from gen_vm_image.utils.io import exists, hashsum, makedirs
 from gen_vm_image.utils.io import size as get_size
 from gen_vm_image.utils.job import run
 from gen_vm_image.utils.net import download_file

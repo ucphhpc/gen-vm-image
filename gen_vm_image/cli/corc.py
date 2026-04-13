@@ -14,8 +14,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-from gen_vm_image.common.defaults import GENERATED_IMAGE_DIR
 from gen_vm_image.cli.cli import add_build_image_cli_arguments
+from gen_vm_image.common.defaults import GENERATED_IMAGE_DIR
 from gen_vm_image.image import generate_image
 
 

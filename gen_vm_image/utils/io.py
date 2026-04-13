@@ -15,8 +15,8 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import os
-import shutil
 import re
+import shutil
 
 from gen_vm_image.common.defaults import DEFAULT_BUFFER_SIZE
 

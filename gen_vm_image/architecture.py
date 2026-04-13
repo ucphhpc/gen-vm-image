@@ -15,23 +15,25 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import os
+
 import yaml
-from gen_vm_image.common.defaults import GENERATED_IMAGE_DIR, DEFAULT_BUFFER_SIZE
+
 from gen_vm_image.common.codes import (
-    PATH_CREATE_ERROR,
-    PATH_CREATE_ERROR_MSG,
-    PATH_NOT_FOUND_ERROR,
-    PATH_NOT_FOUND_ERROR_MSG,
-    PATH_LOAD_ERROR,
-    PATH_LOAD_ERROR_MSG,
     INVALID_ATTRIBUTE_TYPE_ERROR,
     INVALID_ATTRIBUTE_TYPE_ERROR_MSG,
     MISSING_ATTRIBUTE_ERROR,
     MISSING_ATTRIBUTE_ERROR_MSG,
+    PATH_CREATE_ERROR,
+    PATH_CREATE_ERROR_MSG,
+    PATH_LOAD_ERROR,
+    PATH_LOAD_ERROR_MSG,
+    PATH_NOT_FOUND_ERROR,
+    PATH_NOT_FOUND_ERROR_MSG,
     SUCCESS,
 )
-from gen_vm_image.utils.io import exists, load, makedirs
+from gen_vm_image.common.defaults import DEFAULT_BUFFER_SIZE, GENERATED_IMAGE_DIR
 from gen_vm_image.image import generate_image
+from gen_vm_image.utils.io import exists, load, makedirs
 
 
 def load_architecture(architecture_path):

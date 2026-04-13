@@ -14,10 +14,12 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-import unittest
 import random
-from gen_vm_image.utils.io import join, find, remove, exists
-from gen_vm_image.image import create_image, convert_image, resize_image
+import unittest
+
+from gen_vm_image.image import convert_image, create_image, resize_image
+from gen_vm_image.utils.io import exists, find, join, remove
+
 from .context import AsyncImageTestContext
 
 

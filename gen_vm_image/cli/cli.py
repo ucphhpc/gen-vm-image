@@ -17,20 +17,20 @@
 
 import argparse
 import asyncio
-import json
 import inspect
-import sys
+import json
 import os
+import sys
+
 from gen_vm_image._version import __version__
-from gen_vm_image.common.defaults import PACKAGE_NAME, GEN_VM_IMAGE_CLI_STRUCTURE
-from gen_vm_image.common.codes import (
-    SUCCESS,
-    JSON_DUMP_ERROR,
-    JSON_DUMP_ERROR_MSG,
-)
 from gen_vm_image.cli.common import error_print, to_str
 from gen_vm_image.cli.helpers import extract_arguments, strip_argument_group_prefix
-
+from gen_vm_image.common.codes import (
+    JSON_DUMP_ERROR,
+    JSON_DUMP_ERROR_MSG,
+    SUCCESS,
+)
+from gen_vm_image.common.defaults import GEN_VM_IMAGE_CLI_STRUCTURE, PACKAGE_NAME
 
 current_dir = os.path.realpath(os.path.dirname(__file__))
 parent_dir = os.path.dirname(current_dir)

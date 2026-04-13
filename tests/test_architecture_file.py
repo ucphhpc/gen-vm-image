@@ -15,9 +15,10 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import unittest
-from gen_vm_image.utils.io import join
+
 from gen_vm_image.architecture import load_architecture
 from gen_vm_image.common.codes import PATH_NOT_FOUND_ERROR
+from gen_vm_image.utils.io import join
 
 
 class TestImageArchitecture(unittest.TestCase):

@@ -14,14 +14,14 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-import unittest
 import os
 import random
-from gen_vm_image.common.codes import SUCCESS, CHECKSUM_ERROR
-from gen_vm_image.common.defaults import SINGLE
-from gen_vm_image.utils.io import makedirs, exists, remove, join
-from gen_vm_image.cli.cli import main
+import unittest
 
+from gen_vm_image.cli.cli import main
+from gen_vm_image.common.codes import CHECKSUM_ERROR, SUCCESS
+from gen_vm_image.common.defaults import SINGLE
+from gen_vm_image.utils.io import exists, join, makedirs, remove
 
 TEST_RES_DIR = os.path.realpath(join("tests", "res"))
 TEST_IMAGE_NAME = "test.qcow2"

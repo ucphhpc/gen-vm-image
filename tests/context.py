@@ -14,8 +14,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-from gen_vm_image.utils.io import join, remove, exists, makedirs
 from gen_vm_image.architecture import load_architecture
+from gen_vm_image.utils.io import exists, join, makedirs, remove
 
 
 class AsyncImageTestContext:

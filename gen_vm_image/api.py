@@ -1,4 +1,5 @@
 import argparse
+
 from gen_vm_image.cli.parsers.actions import PositionalArgumentsAction
 from gen_vm_image.cli.parsers.single import single_group
 

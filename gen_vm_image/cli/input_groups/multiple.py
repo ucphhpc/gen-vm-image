@@ -14,8 +14,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-from gen_vm_image.common.defaults import MULTIPLE
 from gen_vm_image.cli.parsers.multiple import multiple_group
+from gen_vm_image.common.defaults import MULTIPLE
 
 
 def multiple_groups(parser):

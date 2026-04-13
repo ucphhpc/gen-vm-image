@@ -17,7 +17,8 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import os
-from setuptools import setup, find_packages
+
+from setuptools import find_packages, setup
 
 cur_dir = os.path.realpath(os.path.dirname(__file__))
 
