@@ -31,6 +31,15 @@ clean: distclean venv-clean
 	rm -fr .pytest_cache
 	rm -fr tests/__pycache__
 
+.PHONY: format
+format: install-dev
+	isort --profile black .
+	black --line-length=88 --target-version=py312 .
+
+.PHONY: formatcheck
+formatcheck: 
+	flake8
+
 .PHONY: build
 build: init install-dep
 
