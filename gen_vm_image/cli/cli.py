@@ -116,9 +116,16 @@ def add_base_cli_operations(parser):
 def add_build_image_cli_arguments(
     commands, module_cli_prefix="gen_vm_image.cli.operations"
 ):
-    for command in GEN_VM_IMAGE_CLI_STRUCTURE:
-        command_parser = commands.add_parser(command)
-        add_cli_operations(command_parser, command)
+    for command, operations in GEN_VM_IMAGE_CLI_STRUCTURE.items():
+        command_parser = commands.add_parser(
+            command, help="{} virtual machine images".format(command)
+        )
+        sub_commands = command_parser.add_subparsers(
+            title="{} COMMAND".format(command.upper())
+        )
+        for operation in operations:
+            operation_parser = sub_commands.add_parser(operation)
+            add_cli_operations(operation_parser, operation)
 
 
 def main(args):

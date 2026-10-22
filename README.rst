@@ -42,41 +42,53 @@ or systemwide::
 Generating Virtual Machine Image(s)
 -----------------------------------
 
-The ``gen-vm-image`` tool provides two distinct methods for generating VMIs, namely the ``single`` and ``multiple`` commands for generating image(s).
-Either of these commands can be selected via the ``gen-vm-image`` CLI::
+The ``gen-vm-image`` tool provides a set of overall methods for managing VMIs, which currently includes the ``create`` option for generating image(s).
+The available commands can be shown via the general ``gen-vm-image`` CLI help::
 
     gen-vm-image --help
-    usage: gen-vm-image [-h] [--version] {single,multiple} ...
+    usage: gen-vm-image [-h] [--version] {create} ...
+
+    options:
+      -h, --help     show this help message and exit
+      --version, -V  Print the version of the program
+
+    COMMAND:
+      {create}
+        create       create virtual machine images
+
+
+Contained within the ``create`` option, you can select between the following options for generating VMI(s)::
+
+    gen-vm-image create --help
+    usage: gen-vm-image create [-h] {single,multiple} ...
 
     options:
       -h, --help         show this help message and exit
-      --version, -V      Print the version of the program
 
-    COMMAND:
+    CREATE COMMAND:
       {single,multiple}
 
 
 Single Image
 ============
-
 The ``single`` CLI command provides the most straigthforward method for quickly generating a single VMI.
 Information on the various options for the ``single`` command can also be displayed via the ``--help`` option.
 As indicated by the help output, ``single`` command only requires two positional arguments::
 
-    usage: gen-vm-image single
-                        [-h]
-                        [-i SINGLE_INPUT]
-                        [-if SINGLE_INPUT_FORMAT]
-                        [-ict SINGLE_INPUT_CHECKSUM_TYPE]
-                        [-ic SINGLE_INPUT_CHECKSUM]
-                        [-icbs SINGLE_INPUT_CHECKSUM_BUFFER_SIZE]
-                        [-icrb SINGLE_INPUT_CHECKSUM_READ_BYTES]
-                        [-od SINGLE_OUTPUT_DIRECTORY]
-                        [-of SINGLE_OUTPUT_FORMAT]
-                        [-V SINGLE_VERSION]
-                        [--verbose]
-                        name
-                        size
+    usage: gen-vm-image create single
+                                 [-h]
+                                 [-i SINGLE_INPUT]
+                                 [-if SINGLE_INPUT_FORMAT]
+                                 [-ict SINGLE_INPUT_CHECKSUM_TYPE]
+                                 [-ic SINGLE_INPUT_CHECKSUM]
+                                 [-icbs SINGLE_INPUT_CHECKSUM_BUFFER_SIZE]
+                                 [-icrb SINGLE_INPUT_CHECKSUM_READ_BYTES]
+                                 [-od SINGLE_OUTPUT_DIRECTORY]
+                                 [-of SINGLE_OUTPUT_FORMAT]
+                                 [-V SINGLE_VERSION]
+                                 [--verbose]
+                                 name
+                                 size
 
     options:
       -h, --help            show this help message and exit
@@ -111,7 +123,7 @@ Basic Single Image Disk Example
 
 To generate a simple 20 GB disk image that is not based on any existing image, the following basic command can be used::
 
-    gen-vm-image single basic-disk-image 20G
+    gen-vm-image create single basic-disk-image 20G
 
 If no optional ``-od/--output-directory`` is set, the disk image will be generated in the default ``generated-image`` directory in your current working directory.
 By default the ``gen-vm-image`` will generate the VMI with the `qcow2 <https://en.wikipedia.org/wiki/Qcow>`_ format. This can be changed via the ``-of/--output-format`` option.
@@ -121,7 +133,7 @@ Image Based on an Existing Image
 
 The following example will generate a 10 GB GenericCloud single disk image based on the Debian 12 distribution::
 
-    gen-vm-image single basic-image 10G -i https://cloud.debian.org/images/cloud/bookworm/latest/debian-12-generic-amd64.qcow2
+    gen-vm-image create single basic-image 10G -i https://cloud.debian.org/images/cloud/bookworm/latest/debian-12-generic-amd64.qcow2
 
 Verify Checksum of Downloaded Image
 -----------------------------------
@@ -132,7 +144,7 @@ When generating a VMI based on an existing image that is downloaded, it is recom
 For instance with the `Image Based on an Existing Image` example, the expected checksum of the downloaded image
 can be found at https://cloud.debian.org/images/cloud/bookworm/latest/SHA512SUMS::
 
-    gen-vm-image single basic-image 10G --input-checksum-type sha512 --input-checksum <expected_sha512_checksum_of_the_downloaded_image> -i https://cloud.debian.org/images/cloud/bookworm/latest/debian-12-generic-amd64.qcow2
+    gen-vm-image create single basic-image 10G --input-checksum-type sha512 --input-checksum <expected_sha512_checksum_of_the_downloaded_image> -i https://cloud.debian.org/images/cloud/bookworm/latest/debian-12-generic-amd64.qcow2
 
 
 Multiple Images
@@ -143,8 +155,8 @@ Additionally, when maintaining an infrastructure with many VMIs over time, it ca
 this VMI infrastructure and is able to (re)produce it at will. The ``gen-vm-image`` tool allows you to do so with the ``multiple`` command::
 The totality of the command can be seen below::
 
-    gen-vm-image multiple -h
-    usage: gen-vm-image multiple [-h] [-iod MULTIPLE_OUTPUT_DIRECTORY] [--overwrite] [--verbose] architecture_path
+    gen-vm-image create multiple -h
+    usage: gen-vm-image create multiple [-h] [-iod MULTIPLE_OUTPUT_DIRECTORY] [--overwrite] [--verbose] architecture_path
 
     options:
       -h, --help            show this help message and exit

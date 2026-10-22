@@ -20,7 +20,7 @@ import unittest
 
 from gen_vm_image.cli.cli import main
 from gen_vm_image.common.codes import CHECKSUM_ERROR, SUCCESS
-from gen_vm_image.common.defaults import SINGLE
+from gen_vm_image.common.defaults import CREATE, SINGLE
 from gen_vm_image.utils.io import exists, join, makedirs, remove
 
 TEST_RES_DIR = os.path.realpath(join("tests", "res"))
@@ -45,7 +45,7 @@ class TestCLISingleImage(unittest.TestCase):
     def test_cli_help(self):
         return_code = None
         try:
-            return_code = main([SINGLE, "--help"])
+            return_code = main([CREATE, SINGLE, "--help"])
         except SystemExit as e:
             return_code = e.code
         self.assertEqual(return_code, SUCCESS)
@@ -56,7 +56,7 @@ class TestCLISingleImage(unittest.TestCase):
             name = "test-cli-single-image-{}".format(self.seed)
             size = "5G"
             return_code = main(
-                [SINGLE, name, size, "--output-directory", self.images_dir]
+                [CREATE, SINGLE, name, size, "--output-directory", self.images_dir]
             )
         except SystemExit as e:
             return_code = e.code
@@ -72,6 +72,7 @@ class TestCLISingleImage(unittest.TestCase):
             output_format = "raw"
             return_code = main(
                 [
+                    CREATE,
                     SINGLE,
                     name,
                     size,
@@ -96,6 +97,7 @@ class TestCLISingleImage(unittest.TestCase):
             output_format = "qcow2"
             return_code = main(
                 [
+                    CREATE,
                     SINGLE,
                     name,
                     size,
@@ -120,6 +122,7 @@ class TestCLISingleImage(unittest.TestCase):
             version = "1.0"
             return_code = main(
                 [
+                    CREATE,
                     SINGLE,
                     name,
                     size,
@@ -143,6 +146,7 @@ class TestCLISingleImage(unittest.TestCase):
             size = "5G"
             return_code = main(
                 [
+                    CREATE,
                     SINGLE,
                     name,
                     size,
@@ -167,6 +171,7 @@ class TestCLISingleImage(unittest.TestCase):
             output_format = "raw"
             return_code = main(
                 [
+                    CREATE,
                     SINGLE,
                     name,
                     size,
@@ -193,6 +198,7 @@ class TestCLISingleImage(unittest.TestCase):
             image_url = "https://download.rockylinux.org/pub/rocky/9/images/x86_64/Rocky-9-GenericCloud-Base.latest.x86_64.qcow2"
             return_code = main(
                 [
+                    CREATE,
                     SINGLE,
                     name,
                     size,
@@ -217,6 +223,7 @@ class TestCLISingleImage(unittest.TestCase):
             size = "10G"
             return_code = main(
                 [
+                    CREATE,
                     SINGLE,
                     name,
                     size,
@@ -244,6 +251,7 @@ class TestCLISingleImage(unittest.TestCase):
             size = "10G"
             return_code = main(
                 [
+                    CREATE,
                     SINGLE,
                     name,
                     size,
@@ -272,6 +280,7 @@ class TestCLISingleImage(unittest.TestCase):
             read_bytes_of_file = "1000"
             return_code = main(
                 [
+                    CREATE,
                     SINGLE,
                     name,
                     size,

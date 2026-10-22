@@ -20,7 +20,7 @@ import unittest
 
 from gen_vm_image.cli.cli import main
 from gen_vm_image.common.codes import SUCCESS
-from gen_vm_image.common.defaults import MULTIPLE
+from gen_vm_image.common.defaults import CREATE, MULTIPLE
 from gen_vm_image.utils.io import exists, join, makedirs, remove
 
 BASE_IMAGES_DIRECTORY = os.path.realpath(join("tests", "tmp", "images"))
@@ -54,7 +54,7 @@ class TestCLIMultipleImage(unittest.TestCase):
     def test_cli_help(self):
         return_code = None
         try:
-            return_code = main([MULTIPLE, "--help"])
+            return_code = main([CREATE, MULTIPLE, "--help"])
         except SystemExit as e:
             return_code = e.code
         self.assertEqual(return_code, SUCCESS)
@@ -65,6 +65,7 @@ class TestCLIMultipleImage(unittest.TestCase):
             self.assertTrue(exists(BASIC_ARCHITECTURE_PATH))
             return_code = main(
                 [
+                    CREATE,
                     MULTIPLE,
                     BASIC_ARCHITECTURE_PATH,
                     "--output-directory",
@@ -85,6 +86,7 @@ class TestCLIMultipleImage(unittest.TestCase):
             self.assertTrue(exists(ADVANCED_ARCHITECTURE_PATH))
             return_code = main(
                 [
+                    CREATE,
                     MULTIPLE,
                     ADVANCED_ARCHITECTURE_PATH,
                     "--output-directory",
