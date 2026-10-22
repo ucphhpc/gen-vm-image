@@ -30,7 +30,11 @@ from gen_vm_image.common.codes import (
     JSON_DUMP_ERROR_MSG,
     SUCCESS,
 )
-from gen_vm_image.common.defaults import GEN_VM_IMAGE_CLI_STRUCTURE, PACKAGE_NAME
+from gen_vm_image.common.defaults import (
+    GEN_VM_IMAGE_CLI_STRUCTURE,
+    PACKAGE_NAME,
+    REMOVE,
+)
 
 current_dir = os.path.realpath(os.path.dirname(__file__))
 parent_dir = os.path.dirname(current_dir)
@@ -128,6 +132,11 @@ def add_build_image_cli_arguments(
             add_cli_operations(operation_parser, operation)
 
 
+def add_remove_cli_arguments(commands):
+    remove_parser = commands.add_parser(REMOVE, help="Remove a virtual machine image")
+    add_cli_operations(remove_parser, REMOVE)
+
+
 def main(args):
     parser = argparse.ArgumentParser(
         prog=PACKAGE_NAME, formatter_class=argparse.ArgumentDefaultsHelpFormatter
@@ -137,6 +146,7 @@ def main(args):
     # Add the build image CLI arguments
     commands = parser.add_subparsers(title="COMMAND")
     add_build_image_cli_arguments(commands)
+    add_remove_cli_arguments(commands)
 
     parsed_args = parser.parse_args(args)
     # Convert to a dictionary

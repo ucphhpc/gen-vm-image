@@ -38,3 +38,5 @@ JSON_DUMP_ERROR_MSG = "Failed to dump JSON: {}"
 DOWNLOAD_ERROR = 10
 GETSIZE_ERROR = 11
 GETSIZE_ERROR_MSG = "Failed to get the size of path {}"
+REMOVE_ERROR = 12
+REMOVE_ERROR_MSG = "Failed to remove image: {}"

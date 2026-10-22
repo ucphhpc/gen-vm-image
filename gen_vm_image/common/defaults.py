@@ -31,6 +31,7 @@ CONSITENCY_SUPPPORTED_FORMATS = ["qcow2", "qed", "parallels", "vhdx", "vdi"]
 CREATE = "create"
 SINGLE = "single"
 MULTIPLE = "multiple"
+REMOVE = "remove"
 
 CREATE_OPERATIONS = [SINGLE, MULTIPLE]
 

@@ -42,19 +42,20 @@ or systemwide::
 Generating Virtual Machine Image(s)
 -----------------------------------
 
-The ``gen-vm-image`` tool provides a set of overall methods for managing VMIs, which currently includes the ``create`` option for generating image(s).
+The ``gen-vm-image`` tool provides a set of overall methods for managing VMIs, which currently includes the ``create`` and ``remove`` options.
 The available commands can be shown via the general ``gen-vm-image`` CLI help::
 
     gen-vm-image --help
-    usage: gen-vm-image [-h] [--version] {create} ...
+    usage: gen-vm-image [-h] [--version] {create,remove} ...
 
     options:
-      -h, --help     show this help message and exit
-      --version, -V  Print the version of the program
+      -h, --help       show this help message and exit
+      --version, -V    Print the version of the program
 
     COMMAND:
-      {create}
-        create       create virtual machine images
+      {create,remove}
+        create         create virtual machine images
+        remove         Remove a virtual machine image
 
 
 Contained within the ``create`` option, you can select between the following options for generating VMI(s)::
@@ -187,3 +188,39 @@ The expected structure of said architecture file can be seen below::
             value: <string> # The checksum value that should be used to validate the input image.
 
 Practical examples of architecture files can be found in the ``examples`` directory.
+
+----------------------------------
+Removing Virtual Machine Images
+----------------------------------
+
+The ``gen-vm-image`` tool also provides the ``remove`` command for removing virtual machine images.
+The available options can be shown via the ``--help`` option::
+
+    gen-vm-image remove --help
+    usage: gen-vm-image remove [-h] [-sd REMOVE_SOURCE_DIRECTORY] [--verbose] path
+
+    options:
+      -h, --help            show this help message and exit
+
+    Remove a Virtual Machine Image:
+      path                  The path to the image that should be removed.
+      -sd, --source-directory REMOVE_SOURCE_DIRECTORY
+                            The source directory where the image is located. Used
+                            when the path is relative.
+      --verbose, -v         Print verbose output.
+
+
+Remove Image Example
+--------------------
+
+To remove an image from the default ``generated-images`` directory::
+
+    gen-vm-image remove my-image.qcow2
+
+To remove an image using an absolute path::
+
+    gen-vm-image remove /path/to/my-image.qcow2
+
+To remove an image from a custom directory::
+
+    gen-vm-image remove my-image.qcow2 --source-directory /custom/images

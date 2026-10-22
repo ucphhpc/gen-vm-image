@@ -33,6 +33,8 @@ from gen_vm_image.common.codes import (
     PATH_CREATE_ERROR_MSG,
     PATH_NOT_FOUND_ERROR,
     PATH_NOT_FOUND_ERROR_MSG,
+    REMOVE_ERROR,
+    REMOVE_ERROR_MSG,
     RESIZE_ERROR,
     RESIZE_ERROR_MSG,
     SUCCESS,
@@ -43,7 +45,7 @@ from gen_vm_image.common.defaults import (
     GENERATED_IMAGE_DIR,
     TMP_DIR,
 )
-from gen_vm_image.utils.io import exists, hashsum, makedirs
+from gen_vm_image.utils.io import exists, hashsum, makedirs, remove
 from gen_vm_image.utils.io import size as get_size
 from gen_vm_image.utils.job import run
 from gen_vm_image.utils.net import download_file
@@ -448,4 +450,37 @@ async def generate_image(
             response["msg"] = CHECK_ERROR_MSG.format(check_msg)
             response["verbose_outputs"] = verbose_outputs
             return CHECK_ERROR, response
+    return SUCCESS, response
+
+
+async def remove_image(path, source_directory=GENERATED_IMAGE_DIR, verbose=False):
+    response = {}
+    verbose_outputs = []
+
+    if not os.path.isabs(path):
+        full_path = os.path.join(source_directory, path)
+    else:
+        full_path = path
+
+    if verbose:
+        verbose_outputs.append("Resolved path: {}".format(full_path))
+
+    if not exists(full_path):
+        response["msg"] = "Could not remove: {}, since it does not exist".format(
+            full_path
+        )
+        response["verbose_outputs"] = verbose_outputs
+        return SUCCESS, response
+
+    removed = remove(full_path)
+    if not removed:
+        response["msg"] = REMOVE_ERROR_MSG.format(full_path)
+        response["verbose_outputs"] = verbose_outputs
+        return REMOVE_ERROR, response
+
+    if verbose:
+        verbose_outputs.append("Removed image: {}".format(full_path))
+
+    response["msg"] = "Successfully removed image: {}".format(full_path)
+    response["verbose_outputs"] = verbose_outputs
     return SUCCESS, response
